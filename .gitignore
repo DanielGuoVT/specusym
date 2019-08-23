@@ -1,0 +1,12 @@
+*.aux
+*.dvi
+*.log
+*.out
+*.swp
+*.bbl
+*.blg
+*.synctex.gz
+*.pdf
+*.ps
+*.xcp
+*.sw*

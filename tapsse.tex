@@ -274,7 +274,7 @@
 
 
 \begin{abstract}
-  CPU cache is a limited but crucial storage on modern processors whereas the 
+  CPU cache is a limited but crucial storage on modern processor whereas the 
   cache timing side-channel could indirectly leak data through the measurable 
   timing variance. Speculative execution, a reason of the variance and a vital 
   optimization in modern CPUs, can engender severe detriment on delibrate branch 
@@ -282,22 +282,22 @@
   %
   Though state-of-the-art static analysis qualitatively verifies the 
 	timing-leakage-free property under speculative execution, it is incapable 
-  of producing endorsements like inputs and speculated flows to diagnose 
+  of producing endorsements such as inputs and speculated flows to diagnose 
   leaks in depth. 
 	% 
 	In this work we propose a complementary approach, \textit{Speculative symbolic 
-  Execution}, to effectively detect cache timing leaks introduced by speculative 
+  Execution}, effectively detecting cache timing leaks that are introduced by speculative 
   execution. Generally, given a sensitive data related program 
   (leakage-free in non-speculative execution), our method systematically explores 
   the program state space. Meanwhile, it precisely models speculative behaviors 
   at conditional branches, and accumulates the side effects along subsequent 
-  execution. Based on the dynamic exploration information, we build leak conditions 
-  for memory visits under a specified cache model, and conduct a constraint-solving 
+  execution. Based on the dynamic exploration information, we set leak conditions 
+  for memory visits under a specified cache model, and then conduct a constraint-solving 
   based cache behavior analysis to produce leak witnesses.
   %
-  We implemented our method in a tool \SpecuSym atop KLEE, and evaluated 
+  We have implemented our method in a tool \SpecuSym based on KLEE, and evaluated 
   it on 14 open-source benchmarks. Experiments show that \SpecuSym successfully
-  identified leaks in 6 programs on four set-associative caches and eliminates 
+  identified leaks in 6 programs on four set-associative caches and eliminated 
   false positives in 2 programs reported by a recent work.
 \end{abstract}
 
@@ -323,12 +323,12 @@ expose the kernel memory data
 
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
-Generally, a timing side channel represents the intermediate carrier through 
-which private data could be disclosed to external observers by elaborate 
-measurements of the time on certain operations. One particularly dangerous 
-instance is the cache timing side-channel who leaks data from the variance 
-of the cache behaviors in program executions under different inputs. Latest 
-program repair~\cite{WuGSW18} mitigates cache timing leaks by enforcing 
+Generally, a timing side channel presents the intermediate carrier through 
+which private data could be disclosed to external observers by elaborate
+measurements of the time on certain operations. One particular instance is 
+the cache timing side-channel which leaks data from the variance of the 
+cache visiting latencies in software executions. State-of-the-art program 
+repair method~\cite{WuGSW18} mitigates cache timing leaks by enforcing 
 constant execution time for all secret relevant operations. However, this 
 strong mitigation may still be compromised by thread-level concurrency
 \cite{GuoWW18} or instruction-level parallelism like \textit{speculative 
@@ -2146,21 +2146,21 @@ elimination and concrete leak witness generation.
 
 \begin{filecontents*}{mydata.csv}
 a, No-opt, Simplify and Caching, Solving Reduction, All
-1, 193, 1.19, 1.66, 0.6 
-2, 720, 0.87, 1.21,65.3 
-3, 56, 0.64, 1.21, 0.1 
-4,55, 0.65, 1.32, 0.3 
-5,65, 0.75, 1.32,0.1 
-6,75, 0.85, 1.32,0.1 
-7,720, 0.95, 1.32,10.8 
-8,95, 1.45, 1.32,0.1 
-9,720, 1.45, 1.32,393.5 
-10,95, 1.45, 1.32,0.1 
-11,95, 1.45, 1.32,0.1 
-12,95, 1.45, 1.32,0.2 
-13,95, 1.45, 1.32,0.4 
-14,95, 1.45, 1.32,0.1 
-15,95, 1.45, 1.32,0.1 
+1, 3.56, 1.19, 1.66, 0.56 % hash
+2, 720, 0,0, 32.21 % aes
+3, 2.57, 0.87, 1.21, 0.04  % blowfish 
+4, 61.42, 0,0, 0.31 % chacha20
+5, 0.01, 0.65, 1.32, 0.00 % encoder
+6, 0.00, 0.75, 1.32, 0.00 % ocb
+7, 416.58, 0.85, 1.32, 10.71 % des
+8, 0.73, 0.95, 1.32, 0.01 % str2key
+9, 720, 0, 0, 52 % des
+10, 48.108, 1.45, 1.32, 0.13 % camellia
+11, 3.71, 1.45, 1.32, 0.03 % salsa
+12, 290.68, 1.45, 1.32, 0.21 %seed 
+13, 0.42, 1.45, 1.32, 0.37 % des
+14, 0.02, 1.45, 1.32, 0.00 % salsa
+15, 0.00, 1.45, 1.32, 0.00 % spectre
 \end{filecontents*}
 
 \begin{filecontents*}{cmp2.csv}
