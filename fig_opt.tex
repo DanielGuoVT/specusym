@@ -1,0 +1,32 @@
+\centering
+\subfigure[Benchmark analysis time under different optimizations.]{
+\begin{tikzpicture}
+\pgfplotsset{every axis legend/.append style={
+at={(0.8,0.83)}, anchor=south},every axis y label/.append style={at={(0.07,0.5)}}}
+\begin{axis}[%title=(a) Mean STD for ,xlabel=Benchmarks,
+    ylabel=Time (h),xtick =data, %xticklabels={hash,AES,blowfish,chacha20,encoder,ocb}, 
+		legend columns=2,legend style={font=\tiny},font=\footnotesize,width=8cm]
+\addplot table [x=a, y=No-opt,, col sep=comma] {mydata.csv};
+\addplot table [x=a, y=Simplify and Caching, col sep=comma] {mydata.csv};
+\addplot table [x=a, y=Solving Reduction, col sep=comma] {mydata.csv};
+\addplot table [x=a, y=All, col sep=comma] {mydata.csv};
+\legend{Base, S\&C, SR, All}
+\end{axis}
+\end{tikzpicture}}
+
+%\subfigure[Mean RMSE for different number of scenarios.]{
+%\begin{tikzpicture}
+%\pgfplotsset{every axis legend/.append style={
+%at={(0.5,1.03)},
+%anchor=south},
+%every axis y label/.append style={at={(0.07,0.5)}}}
+%\begin{axis}[xlabel=Num of scenarios,
+%    ylabel=Mean RMSE,xtick =data,legend columns=4,legend style={font=\tiny},font=\footnotesize,width=8cm]
+%\addplot table [x=a, y=sQS-rm-in,, col sep=comma] {mydata.csv};
+%\addplot table [x=a, y=sS-rm-in, col sep=comma] {mydata.csv};
+%\addplot table [x=a, y=RS-rm-in, col sep=comma] {mydata.csv};
+%\addplot table [x=a, y=RQ-rm-in, col sep=comma] {mydata.csv};
+%\legend{s$\overline{Q}$S-in, sS-in, RS-in, RQ-in, s$\overline{Q}$S-out, sS-out, RS-out, RQ-out}
+%\end{axis}
+%\end{tikzpicture}}
+\caption{Performance of different optimization strategies.}\label{fig:InsampleOutsample}
