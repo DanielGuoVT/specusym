@@ -1,4 +1,4 @@
-\documentclass[sigconf, review]{acmart}
+\documentclass[sigconf]{acmart}
 \settopmatter{printfolios=true,printccs=false,printacmref=false}
 \linespread{0.96}
 
@@ -43,6 +43,7 @@
 \usepackage{algpseudocode}    % for algorithmic
 \usepackage{amsmath}
 \usepackage{amssymb}
+%\usepackage{authblk}
 \usepackage{bbding}
 \usepackage{booktabs}
 \usepackage{calc}
@@ -260,24 +261,60 @@
 
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
-\ignore{
-  \author{xxx}
-  \affiliation{%
-    \institution{Baidu X-Lab}
-    \city{Sunnyvale}
-    \state{CA}
-    \postcode{95134}
-  }
+
+\author{Shengjian Guo}
+\affiliation{%
+  \institution{Baidu Security}
+  \city{Sunnyvale}
+  \state{CA}
+  \postcode{95134}
 }
 
+\author{Yueqi Chen}
+\affiliation{%
+  \institution{Penn State University}
+  \city{State College}
+  \state{PA}
+  \postcode{16801}
+}
 
+\author{Peng Li, Yueqiang Cheng, Huibo Wang}
+\affiliation{%
+  \institution{Baidu Security}
+  \city{Sunnyvale}
+  \state{CA}
+  \postcode{95134}
+}
+
+%\author{Huibo Wang}
+%\affiliation{%
+%  \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \postcode{95134}
+%}
+
+\author{Meng Wu}
+\affiliation{%
+  \institution{Ant Financial}
+  \city{Shanghai}
+  \state{China}
+  \postcode{20000}
+}
+
+\author{Zhiqiang Zuo}
+\affiliation{%
+  \institution{Nanjing University}
+  \city{Nanjing}
+  \state{China}
+  \postcode{211300}
+}
 
 \begin{abstract}
-  CPU cache is limited but crucial storage on modern processors whereas the cache 
-  timing side-channel may indirectly leak data through the physically measurable 
-  timing variances. Speculative execution, a reason for the variance and a vital 
-  optimization in modern CPUs, can engender severe detriment to deliberate branch 
-  mispredictions.
+  CPU cache is a limited but crucial storage component on modern processors whereas the 
+  cache timing side-channel may indirectly leak data through the physically measurable 
+  timing variances. Speculative execution, a vital CPU optimization and also a reason 
+  for such variance, can engender severe detriment to deliberate branch mispredictions.
   %
   Though static analysis is able to qualitatively verify the timing-leakage-free 
   property under speculative execution, it is incapable of producing endorsements 
