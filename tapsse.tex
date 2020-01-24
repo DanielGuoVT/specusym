@@ -1,10 +1,6 @@
 \documentclass[sigconf, review]{acmart}
 \settopmatter{printfolios=true,printccs=false,printacmref=false}
-%\acmConference[ESEC/FSE 2018]{The 26th ACM Joint European Software Engineering Conference and Symposium on the Foundations of Software Engineering}{4–9 November, 2018}{Lake Buena Vista, Florida, United States}
-
 \linespread{0.96}
-
-
 
 \setcopyright{none}
 \acmDOI{}
@@ -46,6 +42,7 @@
 \usepackage{algorithmicx}
 \usepackage{algpseudocode}    % for algorithmic
 \usepackage{amsmath}
+\usepackage{amssymb}
 \usepackage{bbding}
 \usepackage{booktabs}
 \usepackage{calc}
@@ -75,7 +72,6 @@
 \usetikzlibrary{matrix,arrows,positioning,shapes,backgrounds,fit}
 \pgfplotsset{compat=1.3}
 \usepackage{wasysym}
-\usepackage{amssymb}
 \usepackage{xcolor}
 
 \newcommand\ignore[1]{}
@@ -262,7 +258,7 @@
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
 
-\title[]{SpecuSym: Speculative Symbolic Execution for Cache Timing Leak Detection}
+\title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
 \ignore{
   \author{xxx}
@@ -277,20 +273,20 @@
 
 
 \begin{abstract}
-  CPU cache is limited but crucial storage on modern processor whereas the 
-  cache timing side-channel could indirectly leak data through the measurable 
-  timing variance. Speculative execution, a reason for the variance and a vital 
+  CPU cache is limited but crucial storage on modern processors whereas the cache 
+  timing side-channel may indirectly leak data through the physically measurable 
+  timing variances. Speculative execution, a reason for the variance and a vital 
   optimization in modern CPUs, can engender severe detriment to deliberate branch 
   mispredictions.
   %
-  Though static analysis can qualitatively verify the timing-leakage-free 
+  Though static analysis is able to qualitatively verify the timing-leakage-free 
   property under speculative execution, it is incapable of producing endorsements 
   including inputs and speculated flows to diagnose leaks in depth. 
   %
-  This work proposes a new approach, \textit{Speculative symbolic Execution}, 
-  for precisely validating cache timing leaks introduced by speculative execution. 
-  Generally, given a program with sensitive inputs (leakage-free in non-speculative 
-  execution), our method systematically explores the program state space. Meanwhile, 
+  This work proposes a new approach, \textit{Speculative symbolic Execution}, for 
+  precisely detecting cache timing leaks introduced by speculative execution. 
+  Generally, given a program (leakage-free in non-speculative execution) and its 
+  sensitive inputs , our method systematically explores the program state space. Meanwhile, 
   it models speculative behavior at conditional branches, and accumulates the cache 
   side effects along with subsequent execution. Based on the dynamic exploration and a 
   specified cache model, we construct leak conditions for memory accesses, and conduct 
@@ -1802,7 +1798,7 @@ trace, the leaky memory visit, and concrete inputs.
 
 We design the following research questions for the experiments: 
 \begin{compactitem}
-  \item Can \SpecuSym identify cache timing leaks introduced 
+\item Can \SpecuSym identify cache timing leaks introduced 
 by speculative execution?
 \item Can \SpecuSym complement the fast abstract interpretation 
 based method by providing more accurate results?
@@ -2145,170 +2141,153 @@ For the remaining cases, the length of execution
 trace is typically short which means the number of memory access to analyze is limited. 
 Thus, our optimization does not differ much from the base computation.
 
+
+
 \tikzset{align at top/.style={baseline=(current bounding box.north)}}
 \begin{figure}
-\centering
-%\captionsetup{margin=0.2cm}
-%\scalebox{1}
-{
-\begin{minipage}{0.49\linewidth}
-  \centering
-  \resizebox{1.0\linewidth}{!}
-  {
-  \begin{tikzpicture}
-    \begin{axis}[ 
-    %axis lines=left,
-    ylabel= Time (min), 
-%    xlabel= Input data size(KB), 
-    xtick= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
-    xticklabel style={rotate=45, anchor=north east, inner sep=2mm},
-    xticklabels = {hash,AES,blowfish,chacha20,encoder,ocb,DES,str2key,DES,Camellia,Salsa,Seed,DES,Salsa,Spectre},
-    ytick = {0, 200, 400, 600, 800}, 
-    yticklabels = {0, 200, 400, 600, 800}, 
-    xticklabel style = {font=\large}, 
-    yticklabel style = {font=\Large},
-    xlabel style = {font=\Large},
-    ylabel style = {font=\Large},
-    ymin = 0,
-    ymax = 800,
-    legend style = {font=\Large}, 
-    legend pos=north east, 
-    grid=both]
-   
 
-        
-      \addplot [line width=1pt, , color = blue, mark=triangle] plot coordinates {
-        (1, 3.56) % hash
-        (2, 720) % aes
-        (3, 2.57) % blowfish
-        (4, 61.42) % chacha20
-        (5, 0.01) % encoder
-        (6, 0.00) % ocb
-        (7, 416.58) % des
-        (8, 0.73) % str2key
-        (9, 720) % des
-        (10, 48.108) % camellia
-        (11, 3.71) % salsa
-        (12, 290.68) % seed
-        (13, 0.42) % des
-        (14, 0.02) % salsa
-        (15, 0.00) % spectre
-        
-    };
-    
-    
-    \label{plot:Native}
-     \addplot [line width=1pt, , color = red, mark=*] plot coordinates {
-        (1, 0.56)
-        (2, 32.21)
-        (3, 0.04)
-        (4, 0.31)
-        (5, 0.00)
-        (6, 0.00)
-        (7, 10.71)
-        (8, 0.01)
-        (9, 52)
-        (10, 0.13)
-        (11, 0.03)
-        (12, 0.21)
-        (13, 0.37)
-        (14, 0.00)
-        (15, 0.00)
-    };
-    \label{plot:LibOSSGX}
+\subfigure[(a) Benchmark analysis time]{
+	\label{fig:opta}
+	\begin{minipage}{0.485\linewidth}
+	\centering
+		\resizebox{1.0\linewidth}{!}
+	{
+		\begin{tikzpicture}
+		\begin{axis}[ 
+			%axis lines=left,
+			ylabel= Time (min), 
+			%    xlabel= Input data size(KB), 
+			xtick= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
+			xticklabel style={rotate=45, anchor=north east, inner sep=2mm},
+			xticklabels = {hash,AES,blowfish,chacha20,encoder,ocb,DES,str2key,DES,Camellia,Salsa,Seed,DES,Salsa,Spectre},
+			ytick = {0, 200, 400, 600, 800}, 
+			yticklabels = {0, 200, 400, 600, 800}, 
+			xticklabel style = {font=\large}, 
+			yticklabel style = {font=\Large},
+			xlabel style = {font=\Large},
+			ylabel style = {font=\Large},
+			ymin = 0,
+			ymax = 800,
+			legend style = {font=\Large}, 
+			legend pos=north east, 
+			grid=both]
 
-     \addlegendentry{Base}
-    \addlegendentry{Opt}
-   
-    
-    \end{axis}
-    \end{tikzpicture}
-    }
-        
-	\subcaption{(a) Benchmark analysis time}
-    \label{fig:opta}
-  \end{minipage}\hfill%
-  \begin{minipage}{0.49\linewidth}
-  \centering
-  \resizebox{1.0\linewidth}{!}{
-  \begin{tikzpicture}
-    \begin{axis}[ 
-    %axis lines=left,
-    ylabel= Size (\# of constructs), 
-    %xlabel= Input data size(KB), 
-    xtick= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
-    xticklabel style={rotate=45, anchor=north east, inner sep=2mm},
-    xticklabels = {hash,AES,blowfish,chacha20,encoder,ocb,DES,str2key,DES,Camellia,Salsa,Seed,DES,Salsa,Spectre},
-    ytick = {, 0, 1000, 2000, 3000, 4000}, 
-    yticklabels = {, 0, 1000, 2000, 3000, 4000}, 
-    xticklabel style = {font=\large}, 
-    yticklabel style = {font=\Large},
-    xlabel style = {font=\Large},
-    ylabel style = {font=\Large},
-    ymin = 0,
-    ymax = 4000,
-    %ymax = 1.15, 
-    legend style = {font=\Large}, 
-    legend pos=north east, 
-    grid=both]
-   
-    %\addlegendentry{\texttt{Lighttpd}}
-        
-      \addplot [line width=1pt, , color = blue, mark=triangle] plot coordinates {
-        (1, 1003)
-        (2, 2964)
-        (3, 0)
-        (4, 8)
-        (5, 16)
-        (6, 0)
-        (7, 17)
-        (8, 44)
-        (9, 3816)
-        (10, 2265)
-        (11, 0)
-        (12, 2382)
-        (13, 457)
-        (14, 0)
-        (15, 111)
-        
-    };
-    
-    \label{plot:Native}
-     \addplot [line width=1pt, , color = red, mark=*] plot coordinates {
-        (1, 949)
-        (2, 524)
-        (3, 0)
-        (4, 8)
-        (5, 16)
-        (6, 0)
-        (7, 17)
-        (8, 25)
-        (9, 2207)
-        (10, 1972)
-        (11, 0)
-        (12, 321)
-        (13, 273)
-        (14, 0)
-        (15, 111)
-        
-    };
-    \label{plot:LibOSSGX}
-
-    \addlegendentry{Base}
-    \addlegendentry{Opt}
- 
-    
-    \end{axis}
-    \end{tikzpicture}
-    }
-    \subcaption{(b) SMT constraint size}
-    \label{fig:optb}
-  \end{minipage}\hfill%
-
+			\addplot [line width=1pt, , color = blue, mark=triangle] plot coordinates {
+					(1, 3.56) % hash
+						(2, 720) % aes
+						(3, 2.57) % blowfish
+						(4, 61.42) % chacha20
+						(5, 0.01) % encoder
+						(6, 0.00) % ocb
+						(7, 416.58) % des
+						(8, 0.73) % str2key
+						(9, 720) % des
+						(10, 48.108) % camellia
+						(11, 3.71) % salsa
+						(12, 290.68) % seed
+						(13, 0.42) % des
+						(14, 0.02) % salsa
+						(15, 0.00) % spectre
+				};
+		\label{plot:Native}
+		\addplot [line width=1pt, , color = red, mark=*] plot coordinates {
+			(1, 0.56)
+				(2, 32.21)
+				(3, 0.04)
+				(4, 0.31)
+				(5, 0.00)
+				(6, 0.00)
+				(7, 10.71)
+				(8, 0.01)
+				(9, 52)
+				(10, 0.13)
+				(11, 0.03)
+				(12, 0.21)
+				(13, 0.37)
+				(14, 0.00)
+				(15, 0.00)
+		};
+		\label{plot:LibOSSGX}
+		\addlegendentry{Base}
+		\addlegendentry{Opt}
+		\end{axis}
+		\end{tikzpicture}
+	}
+	\end{minipage}\hfill%
 }
-  \caption{Breakdown of Optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}\label{fig:InsampleOutsample}
-     \label{fig:opt}
+\subfigure[(b) SMT constraint size]{
+	\label{fig:optb}
+	\begin{minipage}{0.485\linewidth}
+	\centering
+		\resizebox{1.0\linewidth}{!}{
+			\begin{tikzpicture}
+			\begin{axis}[ 
+				%axis lines=left,
+				ylabel= Size (\# of constructs), 
+				%xlabel= Input data size(KB), 
+				xtick= {1,2,3,4,5,6,7,8,9,10,11,12,13,14,15},
+				xticklabel style={rotate=45, anchor=north east, inner sep=2mm},
+				xticklabels = {hash,AES,blowfish,chacha20,encoder,ocb,DES,str2key,DES,Camellia,Salsa,Seed,DES,Salsa,Spectre},
+				ytick = {0, 1000, 2000, 3000, 4000}, 
+				yticklabels = {0, 1000, 2000, 3000, 4000}, 
+				xticklabel style = {font=\large}, 
+				yticklabel style = {font=\Large},
+				xlabel style = {font=\Large},
+				ylabel style = {font=\Large},
+				ymin = 0,
+				ymax = 4000,
+				%ymax = 1.15, 
+				legend style = {font=\Large}, 
+				legend pos=north east, 
+				grid=both]
+				\addplot[line width=1pt, , color = blue, mark=triangle] plot coordinates {
+				(1, 1003)
+					(2, 2964)
+					(3, 0)
+					(4, 8)
+					(5, 16)
+					(6, 0)
+					(7, 17)
+					(8, 44)
+					(9, 3816)
+					(10, 2265)
+					(11, 0)
+					(12, 2382)
+					(13, 457)
+					(14, 0)
+					(15, 111)
+				};
+				\label{plot:Native}
+				\addplot[line width=1pt, , color = red, mark=*] plot coordinates {
+					(1, 949)
+					(2, 524)
+					(3, 0)
+					(4, 8)
+					(5, 16)
+					(6, 0)
+					(7, 17)
+					(8, 25)
+					(9, 2207)
+					(10, 1972)
+					(11, 0)
+					(12, 321)
+					(13, 273)
+					(14, 0)
+					(15, 111)
+				};
+				\label{plot:LibOSSGX}
+			\addlegendentry{Base}
+			\addlegendentry{Opt}
+			\end{axis}
+			\end{tikzpicture}
+		}
+	\end{minipage}\hfill
+}
+\caption{Breakdown of Optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}
+\label{fig:InsampleOutsample}
+\label{fig:opt}
 \end{figure}
+
 
 \ignore{
 \begin{filecontents*}{mydata.csv}
