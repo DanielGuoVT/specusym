@@ -43,7 +43,11 @@
 \usepackage{algpseudocode}    % for algorithmic
 \usepackage{amsmath}
 \usepackage{amssymb}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
 %\usepackage{authblk}
+
 \usepackage{bbding}
 \usepackage{booktabs}
 \usepackage{calc}
@@ -246,6 +250,12 @@
 % End tikz shapes
 
 
+
+\newcommand{\baidu}{$^\ast$}
+\newcommand{\psu}{$^\dagger$}
+\newcommand{\ant}{$^\ddagger$}
+\newcommand{\nju}{$^\S$}
+
 \makeatletter
 \newcommand{\setalglineno}[1]{%
   \setcounter{ALG@line}{\numexpr#1-1}}
@@ -262,31 +272,7 @@
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
 
-\author{Shengjian Guo}
-\affiliation{%
-  \institution{Baidu Security}
-  \city{Sunnyvale}
-  \state{CA}
-  \postcode{95134}
-}
-
-\author{Yueqi Chen}
-\affiliation{%
-  \institution{Penn State University}
-  \city{State College}
-  \state{PA}
-  \postcode{16801}
-}
-
-\author{Peng Li, Yueqiang Cheng, Huibo Wang}
-\affiliation{%
-  \institution{Baidu Security}
-  \city{Sunnyvale}
-  \state{CA}
-  \postcode{95134}
-}
-
-%\author{Huibo Wang}
+%\author{Shengjian Guo}
 %\affiliation{%
 %  \institution{Baidu Security}
 %  \city{Sunnyvale}
@@ -294,20 +280,34 @@
 %  \postcode{95134}
 %}
 
-\author{Meng Wu}
-\affiliation{%
-  \institution{Ant Financial}
-  \city{Shanghai}
-  \state{China}
-  \postcode{20000}
-}
+\author{Shengjian Guo\baidu, Yueqi Chen\psu, Peng Li\baidu, Yueqiang Cheng\baidu, Huibo Wang\baidu,Meng Wu\ant,Zhiqiang Zuo\nju}
 
-\author{Zhiqiang Zuo}
 \affiliation{%
-  \institution{Nanjing University}
-  \city{Nanjing}
-  \state{China}
-  \postcode{211300}
+\begin{tabular}{cccc}
+  \institution{\baidu~Baidu Security} &
+  \institution{\psu~Penn State University} &
+  \institution{\ant~Ant Financial} &
+  \institution{\nju~Nanjing University}\\
+  \city{Sunnyvale}
+  \state{CA}
+  \postcode{94089}
+  \country{USA} &
+  \textnormal{State College}
+  \state{PA}
+  \country{USA} &
+	\textnormal{Shanghai}
+  \postcode{20000}
+  \country{China} &
+	\textnormal{Nanjing}
+  \state{Jiangsu}
+	\postcode{20000}
+  \country{China} &
+	\\
+  %\textnormal{\{sjguo, lipeng28, chengyueqiang, wanghuibo02\}@baidu.com} &
+  %\textnormal{yxc431@ist.psu.edu} &
+  %\textnormal{bode.wm@antfin.com} &
+	%\textnormal{zqzuo@nju.edu.cn}
+\end{tabular}
 }
 
 \begin{abstract}
