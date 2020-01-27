@@ -1,23 +1,22 @@
 \documentclass[sigconf]{acmart}
-\settopmatter{printfolios=true,printccs=false,printacmref=false}
+\settopmatter{printfolios=true,printccs=true,printacmref=true}
 \linespread{0.96}
 
 
-\copyrightyear{2020}
-\acmYear{2020}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setcopyright{acmcopyright}
-\acmConference[ICSE '20]{42nd International Conference on Software Engineering}{May 23--29, 2020}{Seoul, Republic of Korea}
-\acmBooktitle{42nd International Conference on Software Engineering (ICSE '20), May 23--29, 2020, Seoul, Republic of Korea}
-\acmPrice{15.00}
 \acmDOI{10.1145/3377811.3380428}
 \acmISBN{978-1-4503-7121-6/20/05}
+\acmYear{2020}
+\copyrightyear{2020}
+\acmPrice{15.00}
+\acmConference[ICSE '20]{42nd International Conference on Software Engineering}{May 23--29, 2020}{Seoul, Republic of Korea}
+\acmBooktitle{42nd International Conference on Software Engineering (ICSE '20), May 23--29, 2020, Seoul, Republic of Korea}
+%%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-% These commands are optional
-%\acmBooktitle{Transactions of the ACM Woodstock conference}
-%\editor{Jennifer B. Sartor}
-%\editor{Theo D'Hondt}
-%\editor{Wolfgang De Meuter}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -31,10 +30,11 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 
-\usepackage[utf8]{inputenc}
-\usepackage[T1]{fontenc}
 %\usepackage{authblk}
+%\usepackage[utf8]{inputenc}
+%\usepackage[T1]{fontenc}
 
+\usepackage{balance}
 \usepackage{bbding}
 \usepackage{booktabs}
 \usepackage{calc}
@@ -237,12 +237,10 @@
 % End tikz shapes
 
 
-
 \newcommand{\baidu}{$^\ast$}
 \newcommand{\psu}{$^\dagger$}
 \newcommand{\ant}{$^\ddagger$}
 \newcommand{\nju}{$^\S$}
-
 
 
 \makeatletter
@@ -251,7 +249,68 @@
 \makeatother
 
 
+\makeatletter
+\renewcommand\AB@affilsepx{, \protect\Affilfont}
+\makeatother
 
+
+\author{Shengjian Guo}
+\authornote{Both authors contributed equally to this research.}
+\affiliation{%
+  \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
+
+\author{Yueqi Chen}
+\authornotemark[1]
+\affiliation{%
+  \institution{Penn State University}
+%  \city{College Station}
+%  \state{PA}
+%  \country{USA} 
+}
+
+\author{Peng Li}
+\affiliation{%
+  \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
+
+\author{Yueqiang Cheng}
+\affiliation{%
+  \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
+
+\author{Huibo Wang}
+\affiliation{%
+  \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
+
+\author{Meng Wu}
+\affiliation{%
+  \institution{Ant Financial}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
+
+\author{Zhiqiang Zuo}
+\affiliation{%
+  \institution{Nanjing University}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA} 
+}
 
 \begin{document}
 
@@ -261,42 +320,36 @@
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
 
-%\author{Shengjian Guo}
-%\affiliation{%
-%  \institution{Baidu Security}
+%\author{Shengjian Guo\baidu, Yueqi Chen\psu, Peng Li\baidu, Yueqiang Cheng\baidu,Huibo Wang\baidu,Meng Wu\ant, Zhiqiang Zuo\nju}
+
+
+
+%\affiliation{
+%\begin{tabular}{cccc}
+%  \institution{\baidu~Baidu Security} &
+%  \institution{\psu~Penn State University} &
+%  \institution{\ant~Ant Financial} &
+%  \institution{\nju~Nanjing University}\\
 %  \city{Sunnyvale}
 %  \state{CA}
-%  \postcode{95134}
+%  \postcode{94089}
+%  \country{USA} &
+%  \textnormal{State College}
+%  \state{PA}
+%  \country{USA} &
+%	\textnormal{Shanghai}
+%  \postcode{20000}
+%  \country{China} &
+%	\textnormal{Nanjing}
+%  \state{Jiangsu}
+%	\postcode{20000}
+%  \country{China} & \\
+%  %\textnormal{\{sjguo, lipeng28, yqcheng,hbwang\}@baidu.com} &
+%  %\textnormal{yxc431@ist.psu.edu} &
+%  %\textnormal{bode.wm@antfin.com} &
+%	%\textnormal{zqzuo@nju.edu.cn}
+%\end{tabular}
 %}
-
-\author{Shengjian Guo\baidu, Yueqi Chen\psu, Peng Li\baidu, Yueqiang Cheng\baidu,Huibo Wang\baidu,Meng Wu\ant, Zhiqiang Zuo\nju}
-
-\affiliation{
-\begin{tabular}{cccc}
-  \institution{\baidu~Baidu Security} &
-  \institution{\psu~Penn State University} &
-  \institution{\ant~Ant Financial} &
-  \institution{\nju~Nanjing University}\\
-  \city{Sunnyvale}
-  \state{CA}
-  \postcode{94089}
-  \country{USA} &
-  \textnormal{State College}
-  \state{PA}
-  \country{USA} &
-	\textnormal{Shanghai}
-  \postcode{20000}
-  \country{China} &
-	\textnormal{Nanjing}
-  \state{Jiangsu}
-	\postcode{20000}
-  \country{China} & \\
-  %\textnormal{\{sjguo, lipeng28, yqcheng,hbwang\}@baidu.com} &
-  %\textnormal{yxc431@ist.psu.edu} &
-  %\textnormal{bode.wm@antfin.com} &
-	%\textnormal{zqzuo@nju.edu.cn}
-\end{tabular}
-}
 
 \begin{abstract}
   CPU cache is a limited but crucial storage component in modern processors, whereas the 
@@ -324,8 +377,27 @@
  % \HB{better to say we build a tool named \SpecuSym based on our method.}
 \end{abstract}
 
+\begin{CCSXML}
+<ccs2012>
+<concept>
+<concept_id>10002978.10002979.10002983</concept_id>
+<concept_desc>Security and privacy~Cryptanalysis and other attacks</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+<concept>
+<concept_id>10011007.10011074.10011099</concept_id>
+<concept_desc>Software and its engineering~Software verification and validation</concept_desc>
+<concept_significance>500</concept_significance>
+</concept>
+</ccs2012>
+\end{CCSXML}
+\ccsdesc[500]{Security and privacy~Cryptanalysis and other attacks}
+\ccsdesc[500]{Software and its engineering~Software verification and validation}
+
+\keywords{Speculative execution, cache, side-channel leak, symbolic execution} 
+
 \maketitle
-\renewcommand{\shortauthors}{Guo et al.}
+\renewcommand{\shortauthors}{S. Guo et al.}
 
 
 \section{Introduction}
