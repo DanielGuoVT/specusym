@@ -249,69 +249,6 @@
 \makeatother
 
 
-\makeatletter
-\renewcommand\AB@affilsepx{, \protect\Affilfont}
-\makeatother
-
-
-\author{Shengjian Guo}
-\authornote{Both authors contributed equally to this research.}
-\affiliation{%
-  \institution{Baidu Security}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
-\author{Yueqi Chen}
-\authornotemark[1]
-\affiliation{%
-  \institution{Penn State University}
-%  \city{College Station}
-%  \state{PA}
-%  \country{USA} 
-}
-
-\author{Peng Li}
-\affiliation{%
-  \institution{Baidu Security}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
-\author{Yueqiang Cheng}
-\affiliation{%
-  \institution{Baidu Security}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
-\author{Huibo Wang}
-\affiliation{%
-  \institution{Baidu Security}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
-\author{Meng Wu}
-\affiliation{%
-  \institution{Ant Financial}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
-\author{Zhiqiang Zuo}
-\affiliation{%
-  \institution{Nanjing University}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA} 
-}
-
 \begin{document}
 
 \setlength{\abovedisplayskip}{3pt}
@@ -320,9 +257,38 @@
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
 
+\author[1]{Shengjian Guo}
+\authornote{Both authors contributed equally to this research.}
+\affiliation[1]{%
+  \institution{Baidu Security}
+}
+\author[2]{Yueqi Chen}
+\authornotemark[1]
+\affiliation[2]{%
+  \institution{Penn State University}
+}
+\author[1]{Peng Li}
+\affiliation[1]{%
+  \institution{Baidu Security}
+}
+\author[1]{Yueqiang Cheng}
+\affiliation[1]{%
+  \institution{Baidu Security}
+}
+\author[1]{Huibo Wang}
+\affiliation[1]{%
+  \institution{Baidu Security}
+}
+\author[3]{Meng Wu}
+\affiliation[3]{%
+  \institution{Ant Financial}
+}
+\author[4]{Zhiqiang Zuo}
+\affiliation[4]{%
+  \institution{Nanjing University}
+}
+
 %\author{Shengjian Guo\baidu, Yueqi Chen\psu, Peng Li\baidu, Yueqiang Cheng\baidu,Huibo Wang\baidu,Meng Wu\ant, Zhiqiang Zuo\nju}
-
-
 
 %\affiliation{
 %\begin{tabular}{cccc}
@@ -352,10 +318,10 @@
 %}
 
 \begin{abstract}
-  CPU cache is a limited but crucial storage component in modern processors, whereas the 
-  cache timing side-channel may indirectly leak data through the physically measurable 
-  timing variances. Speculative execution, a vital CPU optimization and a reason for such 
-	variance, can engender severe detriment from deliberate branch mispredictions.
+  CPU cache is a limited but crucial storage component in modern processors, whereas 
+	the cache timing side-channel may indirectly leak data through the measurable timing 
+	variances. Speculative execution, a vital CPU optimization and a reason for such 
+	variances, can engender severe detriment from deliberate branch mispredictions.
   %
   Though static analysis is able to qualitatively verify the timing-leakage-free property 
 	under speculative execution, it is incapable of producing endorsements including inputs 
@@ -394,7 +360,7 @@
 \ccsdesc[500]{Security and privacy~Cryptanalysis and other attacks}
 \ccsdesc[500]{Software and its engineering~Software verification and validation}
 
-\keywords{Speculative execution, cache, side-channel leak, symbolic execution} 
+\keywords{Speculative execution, cache, timing, side-channel leak, symbolic execution} 
 
 \maketitle
 \renewcommand{\shortauthors}{S. Guo et al.}
