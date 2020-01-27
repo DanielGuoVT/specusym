@@ -11,3 +11,4 @@
 *.xcp
 *.sw*
 *.fls
+*.fdb_latexmk
