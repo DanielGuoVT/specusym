@@ -236,13 +236,6 @@
 }
 % End tikz shapes
 
-
-\newcommand{\baidu}{$^\ast$}
-\newcommand{\psu}{$^\dagger$}
-\newcommand{\ant}{$^\ddagger$}
-\newcommand{\nju}{$^\S$}
-
-
 \makeatletter
 \newcommand{\setalglineno}[1]{%
   \setcounter{ALG@line}{\numexpr#1-1}}
@@ -256,40 +249,62 @@
 
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
-
-\author[1]{Shengjian Guo}
+\author{Shengjian Guo}
 \authornote{Both authors contributed equally to this research.}
-\affiliation[1]{%
+\affiliation{%
   \institution{Baidu Security}
+%  \city{Sunnyvale}
+%  \state{CA}
+%  \country{USA}
 }
-\author[2]{Yueqi Chen}
+\author{Yueqi Chen}
 \authornotemark[1]
-\affiliation[2]{%
+\affiliation{%
   \institution{Penn State University}
+%	\city{State College}
+%	\state{PA}
+%  \country{USA}
 }
-\author[1]{Peng Li}
-\affiliation[1]{%
+\author{Peng Li}
+\authornote{Corresponding authors.}
+\affiliation{%
   \institution{Baidu Security}
+%	\city{Sunnyvale}
+%	\state{CA}
+%  \country{USA}
 }
-\author[1]{Yueqiang Cheng}
-\affiliation[1]{%
+\author{Yueqiang Cheng}
+\authornotemark[2]
+\affiliation{%
   \institution{Baidu Security}
+%	\city{Sunnyvale}
+%	\state{CA}
+%  \country{USA}
 }
-\author[1]{Huibo Wang}
-\affiliation[1]{%
+\author{Huibo Wang}
+\affiliation{%
   \institution{Baidu Security}
+%	\city{Sunnyvale}
+%	\state{CA}
+%  \country{USA}
 }
-\author[3]{Meng Wu}
-\affiliation[3]{%
+\author{Meng Wu}
+\affiliation{%
   \institution{Ant Financial}
+%	\city{Shanghai}
+% \state{CA}
+% \country{China}
 }
-\author[4]{Zhiqiang Zuo}
-\affiliation[4]{%
+\author{Zhiqiang Zuo}
+\affiliation{%
   \institution{Nanjing University}
+%	\city{Nanjing}
+%	\state{Jiangsu}
+%  \country{China}
 }
 
 
-%\author{Shengjian Guo\baidu, Yueqi Chen\psu, Peng Li\baidu, Yueqiang Cheng\baidu,Huibo Wang\baidu,Meng Wu\ant, Zhiqiang Zuo\nju}
+%\author{Shengjian Guo, Yueqi Chen, Peng Li, Yueqiang Cheng, Huibo Wang, Meng Wu, Zhiqiang Zuo}
 
 %\affiliation{
 %\begin{tabular}{cccc}
@@ -320,7 +335,7 @@
 
 \begin{abstract}
   CPU cache is a limited but crucial storage component in processors, whereas the 
-	cache timing side-channel may inadvertently leak information by the measurable 
+	cache timing side-channel may inadvertently leak information through the measurable 
 	timing variances. Speculative execution, a microarchitectural	optimization and 
 	a source of such variances, can cause severe detriment on deliberate branch 
 	mispredictions.
@@ -334,11 +349,12 @@
 	Given a program (leakage-free in non-speculative execution), SSE systematically
 	explores the state space, models speculative behavior at conditional branches, 
 	and accumulates the	cache side effects along subsequent explorations. 
-	Then based on a specified cache model, it constructs leak predicates for memory 
-	visits and conducts a constraint-solving based cache behavior analysis to generate 
-	leak witnesses.
+	%
+	During the dynamic execution, SSE constructs leak predicates for memory visits 
+	based on a specified cache model and conducts a constraint-solving based cache 
+	behavior analysis to generate leak witnesses.
   %
-  We have realized SSE in a tool \SpecuSym atop KLEE and evaluated it against 
+  We have realized SSE in a tool named \SpecuSym atop KLEE and evaluated it against 
 	14 open-source benchmarks. Experiments show that \SpecuSym successfully	detected 
 	leaks in 6 programs upon 4 different cache settings and identified false positives 
 	in 2 programs reported by a recent work.
@@ -361,7 +377,7 @@
 \ccsdesc[500]{Security and privacy~Cryptanalysis and other attacks}
 \ccsdesc[500]{Software and its engineering~Software verification and validation}
 
-\keywords{Speculative execution, cache, side-channel leak, symbolic execution} 
+\keywords{Speculative execution, cache, timing, side-channel leak, symbolic execution} 
 
 \maketitle
 \renewcommand{\shortauthors}{S. Guo et al.}
@@ -369,6 +385,16 @@
 
 \section{Introduction}
 \label{sec:intro}
+
+\begin{figure}[htb!]
+  \vspace{1ex}
+  \centering
+  \scalebox{0.95}{\input{fig_flow.tex}}
+  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
+  \label{fig:overall_flow}
+\end{figure}
+
+
 % First, introduce cache timing side-channel attacks
 Computer cache is a limited but crucial storage area on processor chips. 
 It primarily relieves the speed gap between the rapid processors and the 
@@ -408,6 +434,7 @@ vulnerabilities through the cache timing side channel
 in terms of the disorganized memory accesses.
 
 
+
 % Fourth, reivew the program analysis for SE
 Program analysis for speculative execution is by no means a new approach. 
 Literally, existing efforts mainly focused on safe and efficient execution
@@ -422,13 +449,6 @@ over-approximation inherently incurs false positives, thus a more precise
 method is indispensable.
 
 
-\begin{figure}
-  \vspace{1ex}
-  \centering
-  \scalebox{0.95}{\input{fig_flow.tex}}
-  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
-  \label{fig:overall_flow}
-\end{figure}
 
 
 % Fifth, introduce our method 
