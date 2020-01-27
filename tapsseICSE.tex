@@ -318,29 +318,30 @@
 %}
 
 \begin{abstract}
-  CPU cache is a limited but crucial storage component in modern processors, whereas 
-	the cache timing side-channel may indirectly leak data through the measurable timing 
-	variances. Speculative execution, a vital CPU optimization and a reason for such 
-	variances, can engender severe detriment from deliberate branch mispredictions.
+  CPU cache is a limited but crucial storage component in modern processors, 
+	whereas the cache timing side-channel may indirectly leak data through the 
+	measurable timing variances. Speculative execution, a vital microarchitectural
+	optimization and a reason for such variances, can engender severe detriment 
+	from deliberate branch mispredictions.
   %
-  Though static analysis is able to qualitatively verify the timing-leakage-free property 
-	under speculative execution, it is incapable of producing endorsements including inputs 
-	and speculated flows to diagnose leaks in depth. 
+  Though static analysis could qualitatively verify the timing-leakage-free 
+	property under speculative execution, it is incapable of producing endorsements 
+	including inputs and speculated flows to diagnose leaks in depth. 
   %
-  This work proposes a new approach, \textit{Speculative symbolic Execution}, for precisely 
-	detecting cache timing leaks introduced by speculative execution. Generally, given a 
-	program (leakage-free in non-speculative execution) and its sensitive inputs , our method 
-	systematically explores the program state space. Meanwhile, it models speculative behavior 
-	at conditional branches, and accumulates the cache side effects along subsequent executions. 
-	Based on the dynamic exploration and a specified cache model, we construct leak conditions 
-	for memory accesses, and conduct a constraint-solving based cache behavior analysis to 
-	generate leak witnesses.
+  This work proposes a new approach, \textit{Speculative symbolic Execution} (SSE), 
+	for precisely detecting cache timing leaks introduced by speculative execution. 
+	Given a program (leakage-free in non-speculative execution) and its sensitive 
+	input, SSE systematically explores the program state space. Meanwhile, it models 
+	speculative behavior at conditional branches, and accumulates the	cache side 
+	effects along subsequent explorations. Based on the dynamic information and a 
+	specified cache model, SSE constructs leak predicates for memory accesses	and 
+	conducts a constraint-solving based cache behavior analysis to generate leak 
+	witnesses.
   %
-  We have implemented our method in a tool named \SpecuSym atop KLEE, and evaluated it against 
-	14 open-source benchmarks. Experiments show that \SpecuSym successfully identified leaks in 
-	6 programs on four different caches and eliminated false positives in 2 programs reported by 
-	recent work.
- % \HB{better to say we build a tool named \SpecuSym based on our method.}
+  We built a tool named \SpecuSym atop KLEE following SSE, and evaluated it against 
+	14 open-source benchmarks. Experiments show that \SpecuSym successfully	detected 
+	leaks in 6 programs on 4 different cache settings and identified false positives 
+	in 2 programs reported by a recent work.
 \end{abstract}
 
 \begin{CCSXML}
