@@ -72,7 +72,7 @@
 %\newtheorem{definition}{Definition}
 
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{
-				\node[shape=circle,draw,inner sep=.4pt] (char) {\scriptsize{#1}};}}
+				\node[shape=circle,draw,inner sep=1pt] (char) {\scriptsize{#1}};}}
 
 \newcommand{\Command}{Operation }
 \newcommand{\Commands}{Operations }
@@ -344,20 +344,22 @@
 	property under speculative execution, it is incapable of producing endorsements 
 	like inputs and speculated flows to diagnose leaks in depth. 
   %
-  This work proposes a new method, \textit{Speculative symbolic Execution} (SSE), 
-	for precisely detecting cache timing leaks introduced by speculative execution. 
-	Given a program (leakage-free in non-speculative execution), SSE systematically
-	explores the state space, models speculative behavior at conditional branches, 
-	and accumulates the	cache side effects along subsequent explorations. 
+  This work proposes a new method, \textit{Speculative symbolic Execution} 
+	(\texttt{SSE}), for precisely detecting cache timing leaks introduced by 
+	speculative execution. Given a program (leakage-free in non-speculative 
+	execution), \texttt{SSE} systematically explores the state space, models 
+	speculative behavior at conditional branches, and accumulates the	cache 
+	side effects along subsequent explorations. 
 	%
-	During the dynamic execution, SSE constructs leak predicates for memory visits 
-	based on the specified cache model and conducts a constraint-solving based cache 
-	behavior analysis to generate leak witnesses.
+	During the dynamic execution, \texttt{SSE} constructs leak predicates for 
+	memory visits based on a specified cache model and conducts constraint-solving 
+	based cache behavior analysis to generate leak witnesses.
   %
-  We have implemented SSE in a tool named \SpecuSym atop KLEE and evaluated it against 
-	14 open-source benchmarks. Experiments show that \SpecuSym successfully	detected 
-	leaks in 6 programs upon 4 different cache settings and identified false positives 
-	in 2 programs reported by a recent work.
+  We have implemented \texttt{SSE} in a tool named \SpecuSym atop KLEE and 
+	evaluated it against 14 open-source benchmarks. Experiments show that 
+	\SpecuSym successfully detected leaks in 6 programs upon 4 different cache 
+	settings and identified false positives in 2 programs reported by a recent 
+	work.
 \end{abstract}
 
 \begin{CCSXML}
@@ -435,7 +437,7 @@ property under speculative execution. However, such abstract interpretation base
 method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} question 
 --- it is incapable of generating input and the speculative flows to diagnose leaks 
 in depth. Moreover, the over-approximation nature inherently leads to false positives, 
-which demands a more precise method.
+which desires a more precise method.
 
 
 \begin{figure}
@@ -448,18 +450,17 @@ which demands a more precise method.
 
 
 % Fifth, introduce our method 
-To this end, we propose a new method \textit{speculative symbolic execution}, 
-for the validation of cache timing leaks introduced by speculative execution. 
-Figure~\ref{fig:overall_flow} shows the overall flow of our method. Given a 
-program $\prog$ which is leakage-free under non-speculative execution, the 
-sensitive inputs represented in symbol, and insensitive inputs, our method
-leverages symbolic execution to explores $\prog$'s state space. 
-In addition, it models speculative execution at conditional branches during 
-execution (cf. \circled{1}) and accumulates cache side effects along with 
-subsequent executions (cf. \circled{2}). Based on the memory access history 
-and the cache model, it conducts a constraint-solving based cache behavior 
-analysis (cf. \circled{3}) upon memory accesses, and output the precise 
-leak witnesses (cf. \circled{4}). 
+To this end, we propose a new method, named \textit{speculative symbolic execution}
+(\texttt{SSE}), for detecting cache timing leaks introduced by speculative execution. 
+Figure~\ref{fig:overall_flow} shows the overall flow of \texttt{SSE}. Given a program 
+$\prog$ which is timing-leakage-free under non-speculative execution, the sensitive 
+input presented in symbol, and the insensitive input, \texttt{SSE} leverages symbolic 
+execution to systematically explores $\prog$'s state space. Meanwhile, it models 
+speculative execution at conditional branches (cf. \circled{1}) and accumulates cache 
+side effects along with subsequent executions (cf. \circled{2}). Based on a specified 
+cache model, \texttt{SSE} constructs leak predicates for memory visits and conducts 
+constraint-solving based cache behavior analysis (cf. \circled{3}) to finally generate 
+the leak witnesses (cf. \circled{4}). 
 
 
 \ignore{
