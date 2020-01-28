@@ -334,11 +334,11 @@
 %}
 
 \begin{abstract}
-  CPU cache is a limited but crucial storage component in processors, whereas the 
-	cache timing side-channel may inadvertently leak information through the measurable 
-	timing variances. Speculative execution, a microarchitectural	optimization and 
-	a source of such variances, can cause severe detriment on deliberate branch 
-	mispredictions.
+  CPU cache is a limited but crucial storage component in modern processors, 
+	whereas	the	cache timing side-channel may inadvertently leak information 
+	through the measurable timing variances. Speculative execution, a 
+	microarchitectural optimization and a source of such variances, can cause 
+	severe detriment on deliberate branch mispredictions.
   %
   Despite static analysis could qualitatively verify the timing-leakage-free 
 	property under speculative execution, it is incapable of producing endorsements 
@@ -389,38 +389,37 @@
 \begin{figure}[htb!]
   \vspace{1ex}
   \centering
-  \scalebox{0.95}{\input{fig_flow.tex}}
+  \scalebox{1.0}{\input{fig_flow.tex}}
   \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
   \label{fig:overall_flow}
 \end{figure}
 
 
 % First, introduce cache timing side-channel attacks
-Computer cache is a limited but crucial storage area on processor chips. 
-It primarily relieves the speed gap between the rapid processors and the 
-slow main memory, by buffering recently used data for faster reuse. Cache 
+CPU cache is a limited but crucial storage area on modern processor chips. 
+It primarily relieves the speed disparity between the rapid processors and 
+the slow main memory, by buffering recently used data for faster reuse. Cache 
 timing side-channel attacks~\cite{Kocher96,DhemKLMQW98} leverage the 
-distinguishable cache physical symptoms, i.e., the cache access latency 
-in software program executions, to penetrate the confidentiality of the 
-victim system. On exploiting the vulnerable software implementations, 
-adversaries can extract the application secrets
+distinguishable cache physical symptoms, i.e., the cache visiting latency 
+in various program executions, to penetrate the confidentiality of the victim 
+system. On exploiting the vulnerable software implementations, adversaries 
+are able to extract the application secrets
 \cite{OsvikST06,TromerOS10,GullaschBK11,CGM16}, infer the neural network 
 structure~\cite{YanFT18,HuLDLXJDLSX18,HongDKLRKDD18,DudduSRB18}, or even 
-dump the kernel memory data
+dump out the kernel data
 \cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}.
 
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
-Generally, a timing side channel presents the intermediate carrier through 
+A timing side channel generally serves as the intermediate carrier through 
 which private data could be disclosed to external observers by elaborate
 measurements of the time on certain operations. One particular instance is 
-the cache timing side-channel that leaks data from the variance of the 
-cache visiting latency in software executions. State-of-the-art program 
-repair method~\cite{WuGSW18} mitigates cache timing leaks by enforcing 
-constant execution time for all secret relevant operations. However, this 
-strong mitigation may still be compromised by thread-level concurrency
-\cite{GuoWW18} or instruction-level parallelism like \textit{speculative 
-execution}~\cite{kimuraKT1996}.
+the cache timing side-channel which leaks data from the variance of the 
+cache visiting latency. State-of-the-art program repair method~\cite{WuGSW18} 
+mitigates cache timing leaks by enforcing constant execution time for all 
+secret relevant operations. However, this strong mitigation may still be 
+compromised by thread-level concurrency~\cite{GuoWW18} or instruction-level 
+parallelism like \textit{speculative execution}~\cite{kimuraKT1996}.
 
 
 % Third, briefly explain SE and its hazard
