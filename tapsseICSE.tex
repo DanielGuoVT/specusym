@@ -351,10 +351,10 @@
 	and accumulates the	cache side effects along subsequent explorations. 
 	%
 	During the dynamic execution, SSE constructs leak predicates for memory visits 
-	based on a specified cache model and conducts a constraint-solving based cache 
+	based on the specified cache model and conducts a constraint-solving based cache 
 	behavior analysis to generate leak witnesses.
   %
-  We have realized SSE in a tool named \SpecuSym atop KLEE and evaluated it against 
+  We have implemented SSE in a tool named \SpecuSym atop KLEE and evaluated it against 
 	14 open-source benchmarks. Experiments show that \SpecuSym successfully	detected 
 	leaks in 6 programs upon 4 different cache settings and identified false positives 
 	in 2 programs reported by a recent work.
@@ -386,13 +386,6 @@
 \section{Introduction}
 \label{sec:intro}
 
-\begin{figure}[htb!]
-  \vspace{1ex}
-  \centering
-  \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
-  \label{fig:overall_flow}
-\end{figure}
 
 
 % First, introduce cache timing side-channel attacks
@@ -406,48 +399,52 @@ system. On exploiting the vulnerable software implementations, adversaries
 are able to extract the application secrets
 \cite{OsvikST06,TromerOS10,GullaschBK11,CGM16}, infer the neural network 
 structure~\cite{YanFT18,HuLDLXJDLSX18,HongDKLRKDD18,DudduSRB18}, or even 
-dump out the kernel data
+dump the kernel data
 \cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}.
 
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
-A timing side channel generally serves as the intermediate carrier through 
-which private data could be disclosed to external observers by elaborate
-measurements of the time on certain operations. One particular instance is 
-the cache timing side-channel which leaks data from the variance of the 
+A timing side channel generally serves as the intermediate carrier through
+which private data could be inadvertently disclosed to observers who can 
+elaborately measure the timing of certain operations. One particular instance 
+is the cache timing side-channel which leaks data by the variance of the 
 cache visiting latency. State-of-the-art program repair method~\cite{WuGSW18} 
 mitigates cache timing leaks by enforcing constant execution time for all 
 secret relevant operations. However, this strong mitigation may still be 
-compromised by thread-level concurrency~\cite{GuoWW18} or instruction-level 
-parallelism like \textit{speculative execution}~\cite{kimuraKT1996}.
+compromised by the thread-level concurrency~\cite{GuoWW18} or the 
+instruction-level parallelism like \textit{speculative execution}~\cite{kimuraKT1996}.
 
 
 % Third, briefly explain SE and its hazard
-\textit{Speculative execution}~\cite{kimuraKT1996} is a vital optimization 
-of modern processors. Essentially, it increases the CPU instruction pipeline 
-throughput by beforehand scheduling instructions under predicted branches, 
-which prevents from stalling the pipeline. Despite its importance, the side 
-effects from prediction errors to cache state may engender severe 
-vulnerabilities through the cache timing side channel
-\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19} 
-in terms of the disorganized memory accesses.
-
+\textit{Speculative execution}~\cite{kimuraKT1996} is a vital microarchitectural
+optimization in modern processors. Essentially, it increases the CPU instruction 
+pipeline throughput by beforehand scheduling instructions under predicted branches, 
+which prevents control hazards from stalling the pipeline. Despite its importance, 
+the cache side effects caused by prediction errors could engender severe detriment 
+through the cache timing side channel
+\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
 
 
 % Fourth, reivew the program analysis for SE
-Program analysis for speculative execution is by no means a new approach. 
-Literally, existing efforts mainly focused on safe and efficient execution
-\cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst case execution time 
-\cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05} 
-and etc, while Wu et.al~\cite{WuW19} recently proposed static verification 
-of timing-leakage-free property under speculative execution. However, such 
-abstract interpretation based method~\cite{WuW19} qualitatively answers 
-the \textit{yes} or \textit{no} question --- it is incapable of generating 
-input and the exact execution flow to endorse the leaks in depth. Moreover, 
-over-approximation inherently incurs false positives, thus a more precise 
-method is indispensable.
+Program analysis for speculative execution is by no means a new approach. Literally, 
+existing efforts mainly focused on safe and efficient execution
+\cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst case execution time estimation
+\cite{LiMR03,LiMR05}, and concurrency bug prediction~\cite{ChenWYS09,LiELS05}, while
+Wu et.al~\cite{WuW19} recently proposed static verification of timing-leakage-free 
+property under speculative execution. However, such abstract interpretation based 
+method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} question 
+--- it is incapable of generating input and the speculative flows to diagnose leaks 
+in depth. Moreover, the over-approximation nature inherently leads to false positives, 
+which demands a more precise method.
 
 
+\begin{figure}
+  \vspace{1ex}
+  \centering
+  \scalebox{1.0}{\input{fig_flow.tex}}
+  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
+  \label{fig:overall_flow}
+\end{figure}
 
 
 % Fifth, introduce our method 
