@@ -342,7 +342,7 @@
 	constraint-solving based cache behavior analysis to generate leak witnesses.
   %
   We have implemented \texttt{SSE} in a tool named \SpecuSym atop KLEE and 
-	evaluated it against 14 open-source benchmarks. Experimental results show 
+	evaluated it against 15 open-source benchmarks. Experimental results show 
 	that \SpecuSym successfully detected leaks in 6 programs upon 4 different 
 	cache settings and identified false positives in 2 programs reported by a 
 	recent work.
@@ -428,7 +428,6 @@ which desires a more precise method.
 
 
 \begin{figure}
-  \vspace{1ex}
   \centering
   \scalebox{1.0}{\input{fig_flow.tex}}
   \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
@@ -460,8 +459,8 @@ execution flow.
 
 
 % Sixth, point out the challenges 
-Our \texttt{SSE} method has three major challenges. The first challenge comes 
-from the modeling of speculative behaviors. Classic symbolic executors
+Our new method has three major challenges. The first challenge comes from the 
+modeling of speculative behaviors. Classic symbolic executors
 \cite{CadarDE08,PasareanuR10} 
 neither support speculative execution nor are cache-aware since they primarily 
 concentrates on the functional correctness rather than reasoning the implicit 
@@ -478,19 +477,18 @@ possibilities not only introduces tremendous constraint solving overhead but als
 counts many redundant cases. 
 
 
-The first challenge motivates us to design a new modeling algorithm which 
-satisfies both feasibility and high-fidelity in symbolic execution. In 
-essence, it utilizes the stateful exploration to mimic the speculative 
-behaviors and isolates memory changes in speculative states from regular 
-symbolic states. 
+To overcome the first challenge, we design a new modeling algorithm in symbolic 
+execution which satisfies both feasibility and high-fidelity. In essence, it 
+utilizes the stateful exploration to mimic the speculative behaviors and isolates 
+memory changes in auxiliary states from the regular states. 
 %
-To tackle the second challenge, we developed a lazy modeling strategy which 
-tracks memory accesses and lazily reasons about cache effects rather than  
-maintaining a complete cache state set. 
+To tackle the second challenge, we develop a lazy modeling strategy which tracks 
+memory accesses and lazily reasons about cache effects rather than maintaining a 
+complete set of cache states on-the-fly. 
 %
-To address the last challenge, we filter the branches that are unlikely to 
-cause harmful speculative execution. Also, we develop several optimization 
-to shrink the constraint size for solving cost reduction.
+To address the last challenge, we filter the branches that are unlikely to cause 
+harmful speculative execution. Also, we develop several optimization to shrink 
+the constraint size for solving cost reduction.
 
 
 
@@ -510,34 +508,33 @@ execution detectable now.
 }
 
 
+We have implemented our new method in a prototype named \SpecuSym atop KLEE
+\cite{CadarDE08} and LLVM~\cite{LattnerA04} and performed the evaluation on  
+15 open-source programs which have 8,791 lines of C code in total. Results 
+show that \SpecuSym successfully detects from 22 to 130 leaks in 6 programs 
+under 4 set-associative caches and identifies false positives in 2 programs 
+reported by recent work.
 
-We have implemented \textit{Speculative Symbolic Execution} in a prototype 
-named \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04}. The 
-evaluation of \SpecuSym has been performed on 15 open-source programs which 
-have 8,791 lines of C code in total. Experiments manifest \SpecuSym detects
-from 22 to 130 leaks in 6 programs under four different set-associative caches.
 
 To summarize, we have made the following contributions:
 \begin{compactitem}
   \item 
-    We propose a new approach, \emph{Speculative Symbolic Execution}, for 
-    modeling speculative execution and analyzing the affected cache behaviors 
-    in symbolic execution.
+    A new approach \emph{Speculative Symbolic Execution} for modeling speculative 
+		execution and analyzing the affected cache behaviors in symbolic execution.
   \item 
-    We address the aforementioned challenges and implement our new method, 
-    in a software tool \SpecuSym, to detect cache timing leaks under 
-    speculative execution. 
+		Implementation of \SpecuSym which addresses the aforementioned challenges
+		and supports cache timing leak detection under speculative execution. 
   \item 
-    We evaluate \SpecuSym on 15 open-source benchmarks to demonstrate its 
-    effectiveness through discovering from 22 to 130 leak witnesses under four 
-    different caches.
+    Evaluation of \SpecuSym on 15 open-source benchmarks to demonstrate its 
+    effectiveness through discovering from 22 to 130 leaks upon 4 different 
+		caches.
 \end{compactitem}
 
 
 The remainder of this paper is organized as follows. Section~\ref{sec:mtv} 
 motivates our work and section~\ref{sec:prelim} reviews the background 
-knowledge. Section~\ref{sec:specuSE} states our major contributions and
-optimizations. Next, we present our experiments in Section~\ref{sec:evaluation} 
+knowledge. Section~\ref{sec:specuSE} states the major contributions and
+optimization. Then we conduct experiments in Section~\ref{sec:evaluation} 
 and discuss the related work in Section~\ref{sec:related}. Finally, we 
 conclude our work in Section~\ref{sec:conclusion}.
 
