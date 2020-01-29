@@ -428,10 +428,11 @@ through the cache timing side channel
 
 
 % Fourth, reivew the program analysis for SE
-Program analysis for speculative execution is by no means a new approach. Literally, 
+Program analysis for speculative execution is by no means a new research. Literally, 
 existing efforts mainly focused on safe and efficient execution
 \cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst case execution time estimation
-\cite{LiMR03,LiMR05}, and concurrency bug prediction~\cite{ChenWYS09,LiELS05}, while
+\cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05}, and Spectre
+vulnerability reasoning~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}, while
 Wu et.al~\cite{WuW19} recently proposed static verification of timing-leakage-free 
 property under speculative execution. However, such abstract interpretation based 
 method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} question 
@@ -473,29 +474,22 @@ execution flow.
 
 
 % Sixth, point out the challenges 
-Our method has three major challenges. The first challenge is from
-the modeling of speculative behaviors. Classic symbolic executors
-\cite{CadarDE08,PasareanuR10} neither support speculative execution nor are 
-cache-aware since they primarily focus on the functional correctness rather 
-than reasoning the implicit program properties. 
+Our \texttt{SSE} method has three major challenges. The first challenge comes 
+from the modeling of speculative behaviors. Classic symbolic executors
+\cite{CadarDE08,PasareanuR10} 
+neither support speculative execution nor are cache-aware since they primarily 
+concentrates on the functional correctness rather than reasoning the implicit 
+program properties. 
 %
-The second challenge comes from the cache state maintenance. Due to the 
-symbolic nature, one symbolic memory address may correspond to multiple 
-concrete addresses. Updating the cache after each memory access can lead 
-to an explosive number of cache states. 
+The second challenge derives from the cache state maintenance. Due to the symbolic 
+nature, a symbolic memory address may correspond to multiple concrete addresses. 
+Updating the cache status after each memory operation unquestionably leads to an 
+explosive number of different cache states. 
 %
-The last challenge stems from the analysis cost. Processors may trigger 
-multiple branch mis-predictions along a program path. Indiscriminately 
-covering all possibilities not only introduces tremendous constraint 
-solving overhead but also counts many redundant cases. 
-
-
-\ignore{
-  Not only results in tremendous constraint solving overhead but 
-  also redundantly counts many unnecessary cases.
-  We assume always mis-predict to soundly analyze the affected cache behavior, 
-  whereas this assumption introduces tremendous cost.
-}
+The last challenge stems from the analysis cost. Processors may trigger multiple 
+branch mis-predictions during a program execution. Indiscriminately covering all 
+possibilities not only introduces tremendous constraint solving overhead but also 
+counts many redundant cases. 
 
 
 The first challenge motivates us to design a new modeling algorithm which 
