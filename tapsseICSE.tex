@@ -713,38 +713,36 @@ More importantly, though the CPU performs a rollback to discard the value update
 to \texttt{v1}, \texttt{v1} remains in $\mathcal{C}$ even after the remedy. 
 
 
-Going until line 9, array \texttt{S} and variable \texttt{x} map from line 
-\#1 to line \#255 and \texttt{v1} still occupies the \#256 line. At this 
-point, there is no empty line available for \texttt{v2}. Following the LRU 
-policy declared in section~\ref{sec:leak_example}, executing the \textit{store}
-instruction (line 9) would evict the oldest item \texttt{S[0]} from cache 
-$\mathbb{C}$ and map \texttt{v2} to the vacated line \#1, as shown by the red dotted
-arrow in Figure~\ref{fig:2b}.
+Going until line 9, array \texttt{S} and variable \texttt{x} map from lines \#1 
+to \#255 and \texttt{v1} still occupies line \#256. At this point, there is no 
+empty line available for \texttt{v2}. Following the LRU policy declared in section
+\ref{sec:leak_example}, executing the \textit{store} instruction at line 9 would 
+evict the oldest item \texttt{S[0]} from cache $\mathcal{C}$ and map \texttt{v2} 
+to the vacated line \#1, as shown by the dotted arrow in Figure~\ref{fig:2b}.
 
 
-Next, the program execution continues to line 10, reaching the last memory 
-\textit{load} of \texttt{S[x]}. The sensitive input \texttt{x} determines which 
-array cell would be accessed. And we examine the cache behavior of this 
-memory \textit{load} w.r.t two cases \texttt{x=0} and \texttt{x!=0}.
+After that, the program execution continues to line 10, reaching the last memory 
+\textit{load} of \texttt{S[x]}. Sensitive input \texttt{x} now determines which 
+array cell would be visited. And we examine the cache behavior of this \textit{load} 
+in terms of two cases \texttt{x=0} and \texttt{x$\neq$0}.
 
 
 \begin{itemize*}
-  \item \texttt{x=0}: $\prog$ reads the array cell \texttt{S[0]}. Recall that
-    \texttt{x} is still in cache $\mathbb{C}$ but \texttt{S[0]} is no longer in 
-		$\mathbb{C}$ due to the replacement by \texttt{v2}. So this memory \textit{load} 
-		causes a conflicting cache miss.
-  \item \texttt{x!=0}: Since the whole array \texttt{S} except \texttt{S[0]}
-    is in $\mathbb{C}$, the \textit{load} on \texttt{S[x]} must get a cache hit no 
-    matter what value \texttt{x} is.
+  \item \texttt{x=0}: $\prog$ reads array cell \texttt{S[0]}. Recall that \texttt{x} 
+	is still in cache $\mathcal{C}$, but \texttt{S[0]} is no longer in $\mathcal{C}$ 
+	due to the replacement by \texttt{v2}. So this memory \textit{load}	causes a 
+	conflicting cache miss.
+  \item \texttt{x$\neq$0}: Since the whole array \texttt{S} except \texttt{S[0]}
+    is in $\mathcal{C}$, the \textit{load} of \texttt{S[x]} must get a cache hit 
+		no matter what value \texttt{x} is.
 \end{itemize*}
 
 
-Only if \texttt{x=0} there is one more cache miss on path $p_2$. This is an 
-unique leak that enables attackers to learn the 
-value of \texttt{x} due to a measurable timing variance. 
-Note that the cold miss on speculatively writing \texttt{v1} 
-also causes an internal latency. However, it is un-observable to the external 
-users and we ignore it safely for analysis purpose.
+Only if \texttt{x=0} there appears one more cache miss on path $p_2$. It is a 
+unique situation that enables attackers to learn the value of \texttt{x} due to 
+a measurable longer execution time. Note that the cold miss from speculatively 
+writing \texttt{v1} also causes an internal latency. However, it is un-observable 
+to the external users, and we ignore it safely for analysis purposes.
 
 
 \subsection{What \SpecuSym Should Provide}
