@@ -249,6 +249,7 @@
 
 \title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
+
 \author{Shengjian Guo}
 \authornote{Both authors contributed equally to this research.}
 \affiliation{%
@@ -278,7 +279,7 @@
 
 \author{Meng Wu}
 \affiliation{%
-  \institution{Ant Financial}
+  \institution{Ant Financial Services Group}
 }
 \email{bode.wm@antfin.com}
 
@@ -414,8 +415,8 @@ through the cache timing side channel
 
 
 % Fourth, reivew the program analysis for SE
-Program analysis for speculative execution is by no means a new research. Literally, 
-existing efforts mainly focused on safe and efficient execution
+Program analysis for speculative execution is by no means a new research domain. 
+Literally, existing efforts mainly focused on safe and efficient execution
 \cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst case execution time estimation
 \cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05}, and Spectre
 vulnerability reasoning~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}, while
@@ -426,13 +427,6 @@ method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} questi
 in depth. Moreover, the over-approximation nature inevitably leads to false positives, 
 which desires a more precise method.
 
-
-\begin{figure}
-  \centering
-  \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
-  \label{fig:overall_flow}
-\end{figure}
 
 
 % Fifth, introduce our method 
@@ -531,6 +525,16 @@ To summarize, we have made the following contributions:
 \end{compactitem}
 
 
+
+\begin{figure}
+  \centering
+  \scalebox{1.0}{\input{fig_flow.tex}}
+  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
+  \label{fig:overall_flow}
+\end{figure}
+
+
+
 The remainder of this paper is organized as follows. Section~\ref{sec:mtv} 
 motivates our work and section~\ref{sec:prelim} reviews the background 
 knowledge. Section~\ref{sec:specuSE} states the major contributions and
@@ -554,38 +558,38 @@ facility leak diagnosis.
 \label{sec:leak_example}
 
 Figure~\ref{fig:fig2-a} shows a program snippet ${\prog}$ whose execution 
-time remains stationary in non-speculative execution but varies w.r.t the 
-sensitive input when running under speculative execution.
+time remains stationary in non-speculative execution but varies in terms
+of the sensitive input when running under speculative execution.
 
 
-Listed at line 2, ${\prog}$ has 4 local variables \texttt{S}, \texttt{x}, 
-\texttt{v1}, and \texttt{v2}. 
-Operating these variables leads to memory accesses. E.g., the implicit 
-memory read of \texttt{x} (line 6) and the explicit \emph{store} to 
-\texttt{v1} (line 7). The remaining variable \texttt{i} (line 3) is a 
-register variable which does not incur memory access. Also, variable 
-\texttt{x} is a sensitive input and any form of revealing its value 
-turns to be a leak. 
+Listed at line 2, ${\prog}$ has 4 local variables as \texttt{S}, \texttt{x}, 
+\texttt{v1}, and \texttt{v2}. Operating these variables leads to memory 
+access. E.g., the implicit memory read of \texttt{x} (line 6) and the 
+explicit \emph{store} to \texttt{v1} (line 7). The remaining variable 
+\texttt{i} (line 3) is a register variable that incurs no memory access. 
+Also, variable \texttt{x} is the sensitive input, and any form of revealing 
+its value turns to be a leak. 
 
 
-To analyze $\prog$, we use a fully associative cache $\mathbb{C}$, as shown in 
-Figure~\ref{fig:fig2-b}. It is an extreme case of the N-way associative cache 
-where a memory address in $\prog$ may map to any cache line in $\mathbb{C}$,
-subjecting to the line availability and the replacement policy. Here we assume 
-$\mathbb{C}$ uses the \emph{Least Recently Used} (LRU) policy which always
-evicts the least used line once the cache is fully occupied.
+We leverage a fully associative cache $\mathcal{C}$ for the analysis purpose 
+of $\prog$, as shown in Figure~\ref{fig:2b}. It is an extreme case of the 
+N-way associative cache where the memory address of a variable in $\prog$ may 
+map to any cache line of $\mathcal{C}$, subjecting to the line availability 
+and the replacement policy. Here we assume $\mathcal{C}$ adopts the \emph{Least
+Recently Used} (LRU) policy, which always evicts the least used line once 
+$\mathcal{C}$ has been entirely occupied.
 
 
-Cache $\mathbb{C}$ consists of 256 cache lines and each line contains exact one byte. 
-Local variables are inserted to $\mathbb{C}$ according to their sizes as well as 
-the execution order. 
-E.g., in Figure~\ref{fig:fig2-b} array \texttt{S} maps from 
-cache lines \#1 to \#254 because of the array traverse in the \emph{while} loop 
-(lines 4-5) and each array item successively occupies a full line. Then variable 
-\texttt{x} maps to the 255$^{\mathit{th}}$ line. Next, \texttt{v1} would use the 
-last available line (line \#256) if \texttt{x} is greater than 128 and the execution 
-flow proceeds into the \textit{if} branch. Otherwise, the execution takes the 
-\textit{else} branch and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
+Cache $\mathcal{C}$ consists of 256 cache lines, and each line has exactly 
+1-byte size. Local variables are mapped to $\mathcal{C}$ according to the 
+program execution order and their sizes. E.g., in Figure~\ref{fig:2b} array 
+\texttt{S} maps from cache lines \#1 to \#254 because of the array traverse 
+in the \emph{while} loop (lines 4-5), and each 1-byte array item successively 
+occupies a full cache line. Then variable \texttt{x} associates with line 
+\#255. Next, \texttt{v1} fills the last available line (line \#256) if 
+\texttt{x}$>$\texttt{128} satisfies; thus, the execution proceeds into the 
+\textit{if} flow. Otherwise, the execution takes the \textit{else} branch 
+and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 
 
 \begin{figure}%[htb]
@@ -611,7 +615,7 @@ flow proceeds into the \textit{if} branch. Otherwise, the execution takes the
 }
 }
 \subfigure[The 256*1 cache $\mathbb{C}$]{
-\label{fig:fig2-b}
+\label{fig:2b}
 \begin{minipage}{0.3\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
 		\draw[|<-, line width=0.4pt](-0.25, 3.2) -- (-0.25, 1.8);
@@ -641,7 +645,7 @@ flow proceeds into the \textit{if} branch. Otherwise, the execution takes the
   	\node[left=5pt, right] at (0.45, 3.4) {1 Byte};
 
 		\node[left=5pt, right] at (2.0, 1.55) {v2};
-    \draw [-stealth,densely dotted,thick,red](2.0, 1.75)--(1.3, 3.05);
+    \draw [-stealth,dotted,thick,red](2.0, 1.75)--(1.3, 3.05);
     \draw [-stealth,thick,blue](2.0, 1.35)--(1.3, 0.15);
 		\node[left=5pt, right,red] at (1.5, 2.9) {Speculative};
 		\node[left=5pt, right,blue] at (1.8, 0.4) {Non-};
@@ -651,7 +655,7 @@ flow proceeds into the \textit{if} branch. Otherwise, the execution takes the
 \end{minipage}
 }
 \vspace{-3ex}
-\caption{A program with leak under speculative execution.}
+\caption{Program $\mathcal{P}$ and its cache mapping.}
 \label{fig:motiv}
 \end{figure}
 
@@ -660,64 +664,62 @@ flow proceeds into the \textit{if} branch. Otherwise, the execution takes the
 \label{sec:normal_exec}
 
 Running $\prog$ without speculative execution won't leak any information 
-about \texttt{x}, and we analyze why this claim holds in this section. 
-
-There are two program paths in $\prog$ in terms of the \textit{if-else} 
-branch. Let's name the path containing the \textit{if} branch as $p_1$ 
-and the other one as $p_2$. 
-The only difference between $p_1$ and $p_2$ 
-is the memory \emph{store} operation which writes \texttt{v1} on $p_1$ 
-but \texttt{v2} on $p_2$. As analyzed in section~\ref{sec:leak_example}, 
-\texttt{v1} would map to the last line of $\mathbb{C}$. Similarly, without 
-speculative execution \texttt{v2} also maps to the same line, as annotated 
-by the solid arrow in Figure~\ref{fig:fig2-b}. This is because normally 
-either $p_1$ or $p_2$ could be taken. Consequently, either the \textit{store} 
-to \texttt{v1} or the \textit{store} to \texttt{v2} may happen. In both 
-cases, line \#256 is untouched until the \textit{store} operates. 
-Thereby, \texttt{v1} or \texttt{v2} takes that available line.
+about \texttt{x}. This section analyzes the cache behavior in details. 
 
 
-Relying on this fact, we observe similar cache behavior on both $p_1$ and 
-$p_2$ under non-speculative execution. 
-%
-The first 254 \emph{load} operations 
-of array \texttt{S}, the next implicit memory read of \texttt{x}, and the 
-succeeded \textit{store} to \texttt{v1} on $p_1$ or \texttt{v2} on $p_2$ 
-all cause cold misses since the cache is initially empty. However, the last 
-memory \emph{load} on \texttt{S[x]} (line 10) must be a cache hit on both 
-paths because \texttt{S} and \texttt{x} have already been inserted in the cache 
-$\mathbb{C}$. In other words, $\prog$'s cache behavior is independent of 
-the sensitive input \texttt{x} hence $\prog$ has no cache timing leaks 
-under non-speculative execution.
+There are two program paths in $\prog$ because of the \textit{if-else} 
+branch. Let's name the one containing the \textit{if} branch as $p_1$ 
+and the other one as $p_2$. The only difference between $p_1$ and $p_2$
+is the \emph{store} operation, which writes \texttt{v1} on $p_1$ but 
+\texttt{v2} on $p_2$. As analyzed in section~\ref{sec:leak_example}, 
+\texttt{v1} would map to the last line of cache $\mathcal{C}$. Similarly, 
+without speculative execution, \texttt{v2} also maps to the same line, as 
+annotated by the solid arrow in Figure~\ref{fig:2b}. This overlapping 
+situation is because usually either $p_1$ or $p_2$ could be taken; 
+hence either the \textit{store} to \texttt{v1} or the \textit{store} 
+to \texttt{v2} may happen. In both cases, line \#256 is empty before 
+the \textit{store} operations. Thereby, \texttt{v1} or \texttt{v2} 
+uses this available line.
+
+
+In view of this fact, we can observe similar cache behaviors on both $p_1$ 
+and $p_2$ under non-speculative execution. The first 254 \emph{load} 
+operations on array \texttt{S}, the next implicit memory read of \texttt{x},
+and the succedent \textit{store} to \texttt{v1} on $p_1$ or to \texttt{v2} 
+on $p_2$ all cause cold misses since cache $\mathcal{C}$ is initially empty. 
+Likewise, the last memory \emph{load} on \texttt{S[x]} (line 10) must be a 
+cache hit on both paths because \texttt{S} and \texttt{x} have already been 
+in cache $\mathcal{C}$. In other words, $\prog$'s cache behavior is 
+independent of the sensitive input \texttt{x}. As a result, $\prog$ has no 
+cache timing leaks under non-speculative execution.
 
 
 \subsection{New Leak under Speculative Execution}
 \label{sec:specu_leak}
 
-Recall that in section~\ref{sec:normal_exec} only one \textit{store} operation 
-could occur in non-speculative execution. However, the situation changes and 
-new timing leak appears when running $\prog$ with speculative execution.  
+In section~\ref{sec:normal_exec}, only one \textit{store} operation can happen 
+in non-speculative execution. However, the situation changes, and a new timing 
+leak appears when taking speculative execution into account.  
 
 
-Under speculative execution, the instructions guarded by a branch \emph{br} 
-can be scheduled before the execution really proceeds into \emph{br} in case
-the processor predicts that \emph{br} is likely to be taken. For example, suppose 
-we first run $\prog$ with \texttt{x}$\in$[128,255] several times and flush the 
-cache after each run. Afterward, we run $\prog$ again but setting \texttt{x} 
-to 127. Still, the \textit{store} instruction under the \emph{if} branch (line 
-7) would be executed before $\prog$ steers into the \emph{else} branch due to 
-the branch mis-prediction. More importantly, though the CPU performs a rollback 
-to discard the update to \texttt{v1}, the cache side effect from writing 
-\texttt{v1} remains in $\mathbb{C}$ even after the remedy. 
+Under speculative execution, the instructions guarded by a branch \emph{br} can 
+be scheduled before the execution proceeds into \emph{br} in case CPU predicts 
+that \emph{br} is likely to be taken. For example, suppose we first run $\prog$ 
+with \texttt{x}$\in$[128,255] several times and flush the cache after each run. 
+Afterward, we rerun $\prog$ but setting \texttt{x} to 127. Still, the 
+\textit{store} instruction under the \emph{if} branch (line 7) would be executed 
+before $\prog$ steers into the \emph{else} branch due to the branch misprediction. 
+More importantly, though the CPU performs a rollback to discard the value update 
+to \texttt{v1}, \texttt{v1} remains in $\mathcal{C}$ even after the remedy. 
 
 
 Going until line 9, array \texttt{S} and variable \texttt{x} map from line 
 \#1 to line \#255 and \texttt{v1} still occupies the \#256 line. At this 
-point there is no empty line available for \texttt{v2}. Following the LRU 
+point, there is no empty line available for \texttt{v2}. Following the LRU 
 policy declared in section~\ref{sec:leak_example}, executing the \textit{store}
 instruction (line 9) would evict the oldest item \texttt{S[0]} from cache 
 $\mathbb{C}$ and map \texttt{v2} to the vacated line \#1, as shown by the red dotted
-arrow in Figure~\ref{fig:fig2-b}.
+arrow in Figure~\ref{fig:2b}.
 
 
 Next, the program execution continues to line 10, reaching the last memory 
@@ -1025,7 +1027,7 @@ effects of the executed instructions hence avoiding functional errors.
 
 
 This rollback mechanism, unfortunately, withdraws no affected cache state, which 
-raises security risks. As shown in Figure~\ref{fig:fig2-b}, variable \texttt{v2} 
+raises security risks. As shown in Figure~\ref{fig:2b}, variable \texttt{v2} 
 may map to cache line \#256 due to speculative execution of the \textit{else} 
 branch. Moreover, this affect is not eliminated when control flow is redirected
 to the \textit{if} branch because of the misprediction. As a result, sensitive
