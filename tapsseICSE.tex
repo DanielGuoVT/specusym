@@ -253,55 +253,41 @@
 \authornote{Both authors contributed equally to this research.}
 \affiliation{%
   \institution{Baidu Security}
-%  \city{Sunnyvale}
-%  \state{CA}
-%  \country{USA}
 }
+\email{sjguo@baidu.com}
+
 \author{Yueqi Chen}
 \authornotemark[1]
 \affiliation{%
   \institution{Penn State University}
-%	\city{State College}
-%	\state{PA}
-%  \country{USA}
 }
-\author{Peng Li}
-\authornote{Corresponding authors.}
+\email{yxc431@ist.psu.edu}
+
+\author{Peng Li, Yueqiang Cheng}
+\authornote{Corresponding author.}
 \affiliation{%
   \institution{Baidu Security}
-%	\city{Sunnyvale}
-%	\state{CA}
-%  \country{USA}
 }
-\author{Yueqiang Cheng}
-\authornotemark[2]
-\affiliation{%
-  \institution{Baidu Security}
-%	\city{Sunnyvale}
-%	\state{CA}
-%  \country{USA}
-}
+\email{{lipeng28,chengyueqiang}@baidu.com}
+
 \author{Huibo Wang}
 \affiliation{%
   \institution{Baidu Security}
-%	\city{Sunnyvale}
-%	\state{CA}
-%  \country{USA}
 }
+\email{wanghuibo01@baidu.com}
+
 \author{Meng Wu}
 \affiliation{%
   \institution{Ant Financial}
-%	\city{Shanghai}
-% \state{CA}
-% \country{China}
 }
+\email{bode.wm@antfin.com}
+
 \author{Zhiqiang Zuo}
 \affiliation{%
-  \institution{Nanjing University}
-%	\city{Nanjing}
-%	\state{Jiangsu}
-%  \country{China}
+  \institution{State Key Lab. for Novel Software Technology, Nanjing University}
 }
+%\email{zqzuo@nju.edu.cn}
+
 
 
 %\author{Shengjian Guo, Yueqi Chen, Peng Li, Yueqiang Cheng, Huibo Wang, Meng Wu, Zhiqiang Zuo}
@@ -336,30 +322,30 @@
 \begin{abstract}
   CPU cache is a limited but crucial storage component in modern processors, 
 	whereas	the	cache timing side-channel may inadvertently leak information 
-	through the measurable timing variances. Speculative execution, a 
-	microarchitectural optimization and a source of such variances, can cause 
+	through the physically measurable timing variances. Speculative execution, 
+	a microarchitectural optimization and a source of such variances, can cause 
 	severe detriment on deliberate branch mispredictions.
   %
   Despite static analysis could qualitatively verify the timing-leakage-free 
 	property under speculative execution, it is incapable of producing endorsements 
-	like inputs and speculated flows to diagnose leaks in depth. 
+	including inputs and speculated flows to diagnose leaks in depth. 
   %
   This work proposes a new method, \textit{Speculative symbolic Execution} 
 	(\texttt{SSE}), for precisely detecting cache timing leaks introduced by 
 	speculative execution. Given a program (leakage-free in non-speculative 
-	execution), \texttt{SSE} systematically explores the state space, models 
-	speculative behavior at conditional branches, and accumulates the	cache 
-	side effects along subsequent explorations. 
+	execution), \texttt{SSE} systematically explores the program state space, 
+	models speculative behavior at conditional branches, and accumulates the	
+	cache side effects along with subsequent explorations. 
 	%
 	During the dynamic execution, \texttt{SSE} constructs leak predicates for 
-	memory visits based on a specified cache model and conducts constraint-solving 
-	based cache behavior analysis to generate leak witnesses.
+	memory visits based on the specified cache model and conducts a 
+	constraint-solving based cache behavior analysis to generate leak witnesses.
   %
   We have implemented \texttt{SSE} in a tool named \SpecuSym atop KLEE and 
-	evaluated it against 14 open-source benchmarks. Experiments show that 
-	\SpecuSym successfully detected leaks in 6 programs upon 4 different cache 
-	settings and identified false positives in 2 programs reported by a recent 
-	work.
+	evaluated it against 14 open-source benchmarks. Experimental results show 
+	that \SpecuSym successfully detected leaks in 6 programs upon 4 different 
+	cache settings and identified false positives in 2 programs reported by a 
+	recent work.
 \end{abstract}
 
 \begin{CCSXML}
