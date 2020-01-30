@@ -982,6 +982,7 @@ as public input plays a minor role in modeling cache timing leaks~\cite{WangBLWZ
 we set insensitive input $t$ to a fixed value to reduce the reasoning cost of formula
 (\ref{lb:specu_leak}). 
 
+
 \ignore{
 Also, we assume $\prog$ has the same set of instructions on each program path and 
 speculative execution only changes the cache state. 
@@ -992,42 +993,42 @@ speculative execution only changes the cache state.
 \subsection{Speculative Execution}
 \label{sec:specu}
 
-The instruction pipeline~\cite{RamamoorthyL77} in processor allows overlapped 
-executions of proper instructions where each instruction execution has a series 
-of stages. This instruction-level parallelism benefits hardware utilization since 
-an instruction can start its stage prior to the time its preceding instructions 
-have finished all their stages. However, a pipe-lined processor may get stalled 
-once the program control flow needs to divert but the destination remains unknown 
-(e.g., at a conditional branch). Accordingly, the pipeline has to await until 
-the flow decision is computed.
+
+The CPU instruction pipeline~\cite{RamamoorthyL77} allows overlapped executions 
+of proper instructions where each instruction execution consists of a series of 
+micro-stages. This instruction-level parallelism benefits hardware utilization 
+since instruction can start its stage before the time its prior instructions have 
+completed all their stages. However, a pipelined processor may get stalled once the 
+program control flow needs to divert, but the destination remains unknown (e.g., at 
+a conditional branch). Accordingly, the pipeline has to wait until the flow decision 
+gets computed.
 
 
-To alleviate the cost of this control hazard, modern processors leverage 
-\textit{branch prediction}~\cite{Mittal19} and \textit{speculative execution}
-\cite{kimuraKT1996} to reduce the delay that could incur w.r.t conditional branch 
+To alleviate the cost of this control hazard, processors leverage 
+\textit{speculative execution}~\cite{kimuraKT1996} and \textit{branch prediction}
+\cite{Mittal19} to reduce the delay that could incur on conditional branch 
 instructions. Generally, they predict the execution flow upon the history of 
 recently executed branches, and schedule instructions under predicted branches
-ahead of jumping into these branches. 
-Specifically, on approaching a control hazard the processors first predict which 
-branch to be taken. Then, they execute the selected branch and maintain the 
-temporary path state in a dedicated buffer. Finally, they commit the buffered 
-state to continue the program flow if the prediction is correct. Otherwise, upon 
-an incorrect prediction, they have to discard the temporary state to revert the 
-effects of the executed instructions hence avoiding functional errors. 
+ahead of jumping into these branches. Specifically, on approaching a control 
+hazard, the processors first predicts a branch to take. Then, they execute the 
+instructions under the selected branch and maintain the temporary path state 
+in a dedicated buffer. Finally, they commit the buffered state to continue the 
+program flow if they achieved a correct prediction. Otherwise, upon an incorrect 
+prediction, they have to discard the temporary state to revert the effects of the 
+executed instructions hence avoiding functional errors. 
 
 
 This rollback mechanism, unfortunately, withdraws no affected cache state, which 
-raises security risks. As shown in Figure~\ref{fig:2b}, variable \texttt{v2} 
-may map to cache line \#256 due to speculative execution of the \textit{else} 
-branch. Moreover, this affect is not eliminated when control flow is redirected
-to the \textit{if} branch because of the misprediction. As a result, sensitive
-data \texttt{x} leaks over the altered cache state. 
-Abstracting away the hardware details, we can precisely model the behavior of 
-speculative execution in symbolic execution as a three-step process and evaluate
-its side effects to the cache state with a constraint-solving based approach. 
+raises security risks. As shown in Section~\ref{sec:specu_leak}, variable \texttt{v1} 
+maps to cache line \#256 due to the misprediction of the \textit{if} branch. And, 
+this cache effect remains unchanged even control flow directs to the \textit{else} 
+branch. As a result, sensitive data \texttt{x} leaks due to the interfered cache 
+state. Abstracting away the hardware details, we can model the speculative behavior 
+in symbolic execution as a three-step analysis and evaluate its cache side effects 
+with a constraint-solving based approach. 
 
 
-\textbf{Misprediction Modeling.}
+\subsubsection{Misprediction Modeling.}
 As aforementioned, on reaching a control hazard the processors predict the hazard
 result to select a branch. Despite the experience-based hardware realization, we 
 can model this behavior by auxiliary symbolic state. To be specific, before 
@@ -1056,7 +1057,7 @@ executions at these points do exist and our method complies with the fact.
 }
 
 
-\textbf{Speculative State Execution.}
+\subsubsection{Speculative State Execution.}
 Each duplicated state in \textit{misprediction modeling} has the same 
 memory snapshot to its parent symbolic state. For clarity, we use 
 \textit{speculative} state to name the new state. A \textit{speculative} 
@@ -1074,7 +1075,7 @@ state. A \textit{speculative} state inherits this data from its parent
 and keeps updating the cache during its execution.
 
 
-\textbf{Rollback and Cache Merging.}
+\subsubsection{Rollback and Cache Merging.}
 Once a \textit{speculative} state reaches the threshold, it has to 
 stop and quit the state queue. Right before its termination, it 
 notifies the awaiting parent state the finish of the current speculative execution, 
