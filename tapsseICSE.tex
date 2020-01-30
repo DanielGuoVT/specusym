@@ -772,7 +772,7 @@ identified memory visit sites. E.g., the memory \textit{store} instructions to
 \section{Preliminaries}
 \label{sec:prelim}
 
-In this section, we review the preliminary knowledge of symbolic execution, cache timing leak, 
+This section reviews the preliminary knowledge of symbolic execution, cache timing leak, 
 and speculative execution.
 
 
@@ -822,16 +822,16 @@ and speculative execution.
 
 
 
-Symbolic execution, a systematic program testing and analysis technique, was 
-first introduced in the 1970s~\cite{King76,Clarke76}. In this work we assume 
-that a program $\prog$ consists of a finite set of instructions 
-and $\prog$ defines the execution semantics in the program paths. Let 
-\textit{inst} be an instruction then an event $e$:=$(l_b\succ inst\succ l_a)$ 
-represents the interpretation of \textit{inst} where $l_b$ and $l_a$ denote the 
-program locations before and after $inst$, respectively. A program execution 
-explores a program path by interpreting a sequence of events. 
-Close to~\cite{GuoKWYG15,GuoWW18}, we abstract $e$ into three categories in
-terms of the type of the \textit{inst} that $e$ contains.
+Symbolic execution, as a systematic program testing and analysis technique, 
+was first introduced in the 1970s~\cite{King76,Clarke76}. In this work, we 
+assume that a program $\prog$ consists of a finite set of instructions, and 
+$\prog$ defines execution semantics in program paths. Let \textit{inst} be 
+an instruction, then interpreting an event $e$:=$(l_b\succ inst\succ l_a)$ 
+in symbolic execution stands for the execution of \textit{inst} where $l_b$ 
+and $l_a$ denote the locations before and after $inst$, respectively. A 
+program execution explores a sequence of events along the program path. 
+Close to~\cite{GuoKWYG15,GuoWW18}, we abstract a symbolic event $e$ into 
+three categories in terms of the type of \textit{inst} that $e$ contains.
 
 
 \begin{itemize*}
@@ -844,28 +844,25 @@ terms of the type of the \textit{inst} that $e$ contains.
   \item $\chi$-event, which corresponds to a memory \textit{read} instruction 
     of the form $\textit{var}=\textit{load~addr}$, or a memory \textit{write} 
     instruction like $\textit{store~addr, expr}$ where \textit{addr} is the 
-    memory address and \textit{expr} is a symbolic expression.
+    memory address, and \textit{expr} is a symbolic expression.
 
   \item $\varphi$-event, which represents other types of instructions in the 
-    form $\textit{var}:=\textit{expr}$. Here \textit{var} is a variable and 
+    form $\textit{var}:=\textit{expr}$. Here \textit{var} is a variable, and 
     \textit{expr} is a symbolic expression computed from preceding operations 
-    like arithmetic calculation, bit manipulation, and etc.
+    like arithmetic calculation, bit manipulation, etc.
 \end{itemize*}
 
 
-Despite symbolic executors always support a rich set of instructions, we use 
-the above types of events to abstract away the internal implementation details 
-like memory allocation, function return, and etc., to focus on the high-level 
-flow of symbolic execution. 
-%More details on addressing the low-level
-%technical problems can be found in~\cite{CadarDE08,PasareanuR10,CiorteaZBCC09}.
-We present the baseline symbolic execution of a sensitive input related 
-program in Algorithm~\ref{alg:baseline}. Unlike prior works~\cite{GuoKWYG15,GuoWW18}, 
-both global and local memory accesses are grouped into one uniform form. The 
-data input, $\mathit{in}:=\{\lambda,t\}$, determines a program execution consisting 
-of ordered events $\{e_1,\ldots,e_n\}$ where $\mathit{\lambda}$ is the sensitive 
-input, e.g., privacy data or cipher keys, and $\mathit{t}$ is the insensitive 
-input.
+Although symbolic executors always support a rich set of instructions, we use 
+the above event types to abstract away the internal implementation details 
+like memory allocation, function return, etc., to center on the high-level 
+flow of symbolic execution. Algorithm~\ref{alg:baseline} presents the baseline 
+symbolic execution of a program with sensitive input. Unlike prior works
+\cite{GuoKWYG15,GuoWW18}, both global and local memory accesses are uniformly
+handled. The data input, $\mathit{in}:=\{\lambda,t\}$, determines a program 
+execution path consisting of ordered events $\{e_1,\ldots,e_n\}$ where 
+$\mathit{\lambda}$ is the sensitive input, e.g., privacy data or cipher keys, 
+and $\mathit{t}$ is the insensitive input.
 
 
 The \textsc{Stack} is a global container for storing symbolic states during 
