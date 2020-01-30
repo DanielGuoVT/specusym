@@ -942,12 +942,12 @@ same, no matter what the sensitive inputs are, which is,
   T(F_{\prog}(\lambda',t))}~~~~
 \end{multline} 
 %
-Symbols $\lambda$ and $\lambda'$ denote any two sensitive values and $t$ is 
-still the public input. Nevertheless, since in practice attackers may gain 
-information by observing several memory addresses or cache lines, we restrict 
-the leak granularity to the memory event regarding our threat model. 
-Specifically, let $\mathit{e}$ be a memory event in $\prog$ and the time of 
-executing $\mathit{e}$ with and without speculative execution be 
+Symbols $\lambda$ and $\lambda'$ denote any two sensitive inputs, and $t$ is still 
+the public input. Nevertheless, since in practice, attackers may gain information 
+by observing several memory visits or cache lines, we restrict the leak granularity 
+at the memory operation level regarding our threat model. Specifically, let $\mathit{e}$ 
+be a memory event on executing $\prog$ and the time of interpreting $\mathit{e}$ with 
+and without speculative execution be 
 $\mathit{T_{s}(\prog_e(in))}$ and $\mathit{T(\prog_e(in))}$, we assume:
 %
 \begin{multline} 
@@ -956,9 +956,8 @@ $\mathit{T_{s}(\prog_e(in))}$ and $\mathit{T(\prog_e(in))}$, we assume:
   T(\prog_e(\lambda',t))}~~~~
 \end{multline} 
 %
-
-Then the new cache timing leak of $\prog$ under speculative execution can be 
-checked by the following formula 
+Then the existence of a new cache timing leak under speculative execution can be 
+checked by the following formula: 
 %
 \begin{multline}
 \label{lb:specu_leak}
@@ -973,24 +972,20 @@ checked by the following formula
 \end{multline}
 %
 where a leak appears if (1) two different sensitive inputs can cause significant 
-timing differences on executing $\mathit{e}$ under speculative execution; or (2) 
-two sensitive inputs cause significant timing difference on executing $\mathit{e}$ 
-with and without speculative execution. In other words, $\prog$ has a leak due to 
-speculative execution if such pair of $\lambda$ and $\lambda'$ exists. Moreover, 
+timing differences in executing $\mathit{e}$ under speculative execution, or (2) 
+two sensitive inputs can cause significant timing difference in executing $\mathit{e}$ 
+with and without speculative execution. In other words, $\prog$ leaks due to 
+speculative execution if any pair of $\lambda$ and $\lambda'$ exists. Furthermore, 
 we transform formula (\ref{lb:specu_leak}) into a dedicated leak constraint and 
 simplify the constraint to a more concise form in section~\ref{sec:specuSE}. Also, 
-as public input plays a minor role in modeling cache timing leaks
-\cite{WangBLWZW19}, we set $t$ to a fixed value to reduce the reasoning cost 
-of formula (\ref{lb:specu_leak}). 
+as public input plays a minor role in modeling cache timing leaks~\cite{WangBLWZW19}, 
+we set insensitive input $t$ to a fixed value to reduce the reasoning cost of formula
+(\ref{lb:specu_leak}). 
 
 \ignore{
 Also, we assume $\prog$ has the same set of instructions on each program path and 
 speculative execution only changes the cache state. 
 }
-
-
-%For simplicity 
-%we use $T_s(\lambda,t)$ instead of $T_s(F_P(\lambda,t))$ in following sections.
 
 
 
