@@ -1020,8 +1020,8 @@ executed instructions hence avoiding functional errors.
 
 This rollback mechanism, unfortunately, withdraws no affected cache state, which 
 raises security risks. As shown in Section~\ref{sec:specu_leak}, variable \texttt{v1} 
-maps to cache line \#256 due to the misprediction of the \textit{if} branch. And, 
-this cache effect remains unchanged even control flow directs to the \textit{else} 
+maps to cache line \#256 due to the misprediction of the \textit{if} branch; and, 
+this cache effect remains unchanged, even control flow directs to the \textit{else} 
 branch. As a result, sensitive data \texttt{x} leaks due to the interfered cache 
 state. Abstracting away the hardware details, we can model the speculative behavior 
 in symbolic execution as a three-step analysis and evaluate its cache side effects 
@@ -1029,16 +1029,15 @@ with a constraint-solving based approach.
 
 
 \subsubsection{Misprediction Modeling.}
-As aforementioned, on reaching a control hazard the processors predict the hazard
-result to select a branch. Despite the experience-based hardware realization, we 
-can model this behavior by auxiliary symbolic state. To be specific, before 
-diverging the control flow into the \textit{if} branch, our symbolic executor 
+As aforementioned, on reaching a control hazard, the processors make a prediction to
+select a branch for execution. Despite the experience-based hardware realization
+in CPUs, we can model this behavior by an auxiliary symbolic state. To be specific, 
+before diverging the control flow into the \textit{else} branch, our symbolic executor 
 would decide to duplicate a new state from the current symbolic state and schedule
-it immediately into the \textit{else} direction, which represents the speculative 
-execution of the \textit{else} branch. 
+it immediately into the \textit{if} flow, which models the branch prediction of the 
+\textit{if} branch. Similarly, we can model the misprediction of the \textit{else} 
+branch on demand.
 
-%Similarly, we can perform the 
-%symmetrical simulation for the \textit{if} branch on demand.
 
 \ignore{
 Note that we only model speculative execution at branches where both \textit{if} 
@@ -1050,6 +1049,7 @@ advance. In contrast, if the condition is determined to be \textit{true} or
 \ref{fig:fig2-a}, then the branch decision is deterministic.
 }
 
+
 \ignore{
 However, different program inputs might go through various program paths to reach 
 a same branch point but trigger divergent decisions. Thus, in practice speculative 
@@ -1058,21 +1058,18 @@ executions at these points do exist and our method complies with the fact.
 
 
 \subsubsection{Speculative State Execution.}
-Each duplicated state in \textit{misprediction modeling} has the same 
-memory snapshot to its parent symbolic state. For clarity, we use 
-\textit{speculative} state to name the new state. A \textit{speculative} 
-state will be prioritized to the head of the state queue in the symbolic 
-executor, and executes uninterruptedly until it meets a predefined threshold, 
-such as the maximum instruction number in the Reorder Buffer (ROB), the 
-pipeline stage number, the branch depth, and etc. Owing to the 
-\textit{copy-on-write} schema in modern symbolic executors
-\cite{CadarDE08,CiorteaZBCC09}, the \textit{speculative} state runs 
-independently from their parent symbolic state. The memory updates in a 
-\textit{speculative} state won't taint its parent state who waits at the 
-state-forking point for the \textit{speculative} state returns. For the 
-sake of cache analysis, we model the runtime cache state in each symbolic 
-state. A \textit{speculative} state inherits this data from its parent 
-and keeps updating the cache during its execution.
+Each duplicated state in \textit{misprediction modeling} has the same snapshot to 
+its parent state. For clarity, we use \textit{speculative} state to alias the new 
+state. A \textit{speculative} state would be prioritized to the front of the state 
+container in symbolic executor, and uninterruptedly executes until it meets a 
+predefined threshold, like the size of the Reorder Buffer (ROB), the pipeline stage 
+number, the branch depth, etc. Also, a \textit{speculative} state runs independently 
+from its parent state, owing to the \textit{copy-on-write} schema in modern symbolic 
+executors~\cite{CadarDE08,CiorteaZBCC09}. The memory updates in a \textit{speculative} 
+state won't taint its parent state who waits at the state-forking point for the 
+\textit{speculative} state returns. For the sake of cache analysis, we also maintain 
+the cache data in each symbolic state. A \textit{speculative} state inherits such data 
+from the parent state and keeps updating the cache during its execution.
 
 
 \subsubsection{Rollback and Cache Merging.}
