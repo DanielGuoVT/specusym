@@ -1,6 +1,6 @@
 \documentclass[sigconf]{acmart}
 \settopmatter{printfolios=true,printccs=true,printacmref=true}
-\linespread{0.96}
+\linespread{0.98}
 
 
 
@@ -750,23 +750,23 @@ to the external users, and we ignore it safely for analysis purposes.
 
 The example shows that, though a program is carefully crafted to avoid cache 
 timing leaks, running it under speculative execution may still exhibit new 
-leaks. Since speculative execution is critical to modern processors, a 
-systematic analysis for exposing the leaks would be of great importance. 
-Specifically, we focus on two abilities for our \emph{Speculative Symbolic 
-Execution} tool \SpecuSym.
+leaks. Since speculative execution is one of the fundamental optimizations 
+in modern processors, a systematic analysis that exposes the subtle leaks 
+would be of utmost importance. Specifically, we focus on two abilities in 
+our new method.
 
 
-First, \SpecuSym should be able to systematically explore possible program 
-executions under speculative execution to find program paths and a minimum 
-set of speculative flows that can cause potential timing leaks. E.g., both 
-$\mathit{p_1}$ and $\mathit{p_2}$ and the corresponding speculations on 
-the \textit{else} and \textit{if} branches, respectively.
+First, \SpecuSym should be able to systematically explore the program state 
+space to identify execution paths and speculative flows that may cause leaks. 
+E.g., $\mathit{p_2}$ and the speculative execution of the \textit{if} branch. 
+Note that speculation of the \textit{else} branch won't cause a similar 
+leak along with $\mathit{p_1}$.
 
 
-Second, \SpecuSym should be able to pinpoint the leaky sites by cache analysis. 
-It also requires to generate concrete inputs that witness new cache behavior 
-at the identified memory visits. E.g., the memory \textit{store} events to 
-\texttt{v2} and \texttt{v1} and the value \textit{zero} of \texttt{x}.
+Second, \SpecuSym should be able to pinpoint the leak sites by a precise cache 
+analysis and generate concrete inputs that witness new cache behavior at the 
+identified memory visit sites. E.g., the memory \textit{store} instructions to 
+\texttt{v2} and the value \textit{zero} of \texttt{x}.
 
 
 \section{Preliminaries}
