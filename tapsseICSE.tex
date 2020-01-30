@@ -875,67 +875,66 @@ $\psi$ event. And $\Omega$ is the symbolic memory which maintains the mappings
 from the program variables to their memory values at $\mathit{s}$.
 
 
-Initially, the state container \textsc{Stack} is empty, and we start the
-recursive procedure \SymExec with the initial state $\mathit{s_{ini}}$ 
-on input $\mathit{in}$. During the recursion, \SymExec may split a branch 
-(lines 4-8), perform a memory operation (lines 9-10), conduct an internal 
-computation (lines 11-12), or terminate a state (line 14), depending on 
-the type of the event to execute.
+Initially, the state container \textsc{Stack} is empty, and we start the main 
+procedure \SymExec with the initial state $\mathit{s_{ini}}$ on input $\mathit{in}$.
+During the recursive execution, \SymExec may split a branch (lines 4-8), perform 
+a memory operation (lines 9-10), conduct an internal computation (lines 11-12), 
+or terminate a state (line 14), depending on the type of the event to execute.
 
 
-Note that at the entry of each recursion, \SymExec takes a new symbolic 
-state as the input, which is obtained from invoking a secondary procedure 
+Note that at the entry of each recursion, \SymExec takes a new symbolic state 
+as the input, which is obtained from invoking a secondary procedure 
 \textit{SubsequentState}. This procedure accepts the current state 
-\textit{s} as the input and outputs a new state $s'$ by symbolically 
-executing the \textit{inst} of \textit{s.e}. For brevity, we omit the 
-details of the instruction interpretation, which can be found in
-\cite{CadarDE08,PasareanuR10}.
+\textit{s} as the input and outputs a new state $s'$ by symbolically executing 
+the \textit{inst} in \textit{s.e}. For brevity, we omit the details of the 
+instruction interpretation, which can be found in~\cite{CadarDE08,PasareanuR10}.
 
 
 
 \subsection{Cache Timing Leak}
 \label{sec:leak}
 
-Memory operations are prone to timing leaks because of the outstanding 
-visiting latency between the cache and the main memory. For example, 
-reading data from the cache may cost 1-3 processor cycles, whereas 
-loading data from memory could consume hundreds of cycles. In this 
-section, we first establish the threat model and then formalize the 
-leak definition based on the threat model.
+Memory operations are prone to timing leaks because of the outstanding accessing 
+latency between the cache and the main memory. For example, reading data from the 
+cache may cost 1-3 processor cycles, whereas loading data from memory could spend 
+hundreds of cycles. In this section, we first establish the threat model and then 
+formalize the leak definition based on the threat model.
 
 
 \subsubsection{The Threat Model}
-As shown in Figure~\ref{fig:motiv}, the sensitive data involved in memory accesses 
-is leaked from the traffic of a memory write. To reason this kind of leaks in our 
-analysis method, we assume the attackers can perform strong external threats. 
+\label{sec:threat}
+
+As exhibited in Section~\ref{sec:specu_leak}, sensitive data involved in memory 
+access may get leaked from the timing traffic of a memory write. To capture such 
+kind of subtle leak in our analysis, we assume the attackers can perform strong 
+external threats. 
+
 
 First, we assume the attackers share the same processor with the victim process. 
-Hence they are able to learn the shared cache states by probe methods. Second, they 
-are allowed to request the execution of the victim process. Third, they can 
-observe the latency of the interested memory visits in the victim process. 
-%
-Our threat model is close to those used in practical attacks like
+Hence they can learn the shared cache states by probe methods. Second, they are 
+allowed to request the execution of the victim process. Third, they can observe 
+the latency of the interested memory visits in the victim process. Our threat 
+model is close to those used in practical attacks like
 \cite{OsvikST06,YaromF14,DisselkoenKPT17}, where the attackers can deduce the 
-cache line states by measuring the timing information of either the victim 
-or the attacker process. Moreover, this model also appears in leak detection approaches 
-like~\cite{WangWLZW17,DoychevK17,WichelmannMES18,BrotzmanLZTK2018}. Thereby, we 
-believe it is a reasonable model for analysis purpose.
+cache block states by measuring the timing traffic of either the victim or the 
+attacker process. Moreover, this model also appears in leak detection techniques 
+like~\cite{WangWLZW17,DoychevK17,WichelmannMES18,BrotzmanLZTK2018}. Therefore, 
+we believe it is a reasonable model for analysis purposes.
 %without strong acquisition of system priviledges.
 
 
 \subsubsection{The Leak Definition}
 
-Formally, we can abstract a sensitive data related program $\prog$ to be a 
-function $\mathit{F_{\prog}(in)\Rightarrow out}$ who processes the data input 
-$\mathit{in}:=\{\lambda,t\}$ (as defined in section~\ref{sec:se}) and computes 
-the output $\mathit{out}$, e.g., assuming $\prog$ is an encryption process,  
-$\lambda$ is the private key, $t$ is the content for encryption, and $out$ is 
-the ciphertext, respectively. Let $T(F_{\prog}(in))$ denotes the execution time 
-of $\prog$ with input $\mathit{in}$ under non-speculative execution. Different
-inputs may explore many different execution paths. However, since we are only interested 
-in leaks introduced by speculative execution, we assume the time of those 
-non-speculative program execution remains similar or the same no matter what 
-the sensitive inputs are, which is, 
+Formally, we abstract a sensitive data related program $\prog$ to be a function 
+$\mathit{F_{\prog}(in)\Rightarrow out}$. $\mathit{F_{\prog}}$ processes the data 
+input $\mathit{in}:=\{\lambda,t\}$ (cf. section~\ref{sec:se}) and returns the 
+output $\mathit{out}$. E.g., assuming $\prog$ is an encryption process, $\lambda$ 
+is the private key, and $t$ is the content to encrypt; then, $out$ is the ciphertext. 
+Let $T(F_{\prog}(in))$ denotes the execution time of $\prog$ with input $\mathit{in}$ 
+under non-speculative execution. Different inputs may explore various program paths. 
+However, since we aim at timing leaks introduced by speculative execution, here we 
+assume the time of those non-speculative program executions remain similar or the 
+same, no matter what the sensitive inputs are, which is, 
 %
 \begin{multline} 
   \label{lb:no_leak_event}
@@ -943,7 +942,6 @@ the sensitive inputs are, which is,
   T(F_{\prog}(\lambda',t))}~~~~
 \end{multline} 
 %
-
 Symbols $\lambda$ and $\lambda'$ denote any two sensitive values and $t$ is 
 still the public input. Nevertheless, since in practice attackers may gain 
 information by observing several memory addresses or cache lines, we restrict 
