@@ -854,8 +854,8 @@ three categories in terms of the type of \textit{inst} that $e$ contains.
 
 
 Although symbolic executors always support a rich set of instructions, we use 
-the above event types to abstract away the internal implementation details 
-like memory allocation, function return, etc., to center on the high-level 
+the above event types to abstract away the internal implementation details like 
+memory allocation, function return, and et.al., to center on the high-level 
 flow of symbolic execution. Algorithm~\ref{alg:baseline} presents the baseline 
 symbolic execution of a program with sensitive input. Unlike prior works
 \cite{GuoKWYG15,GuoWW18}, both global and local memory accesses are uniformly
@@ -866,40 +866,42 @@ and $\mathit{t}$ is the insensitive input.
 
 
 The \textsc{Stack} is a global container for storing symbolic states during 
-dynamic path exploration. A symbolic state $\mathit{s}$ exhibits the frontier 
-of a program execution. We define $\mathit{s}$ as a tuple $\langle \pcon, 
-\mathit{e}, \mathit{brs}, \Omega \rangle$ where $\pcon$ is the path condition 
-that leads to $\mathit{s}$, $\mathit{e}$ is the event to execute at $\mathit{s}$, 
-$\mathit{brs}$ contains the set of branch predicates if $\mathit{e}$ is a $\psi$ 
-event, and $\Omega$ is the symbolic memory of $\mathit{s}$ which maintains the
-mappings from the program variables to their runtime values at $\mathit{s}$.
+dynamic exploration. A symbolic state $\mathit{s}$ exhibits the frontier of 
+a path execution. We define $\mathit{s}$ as a tuple $\langle \pcon, \mathit{e},
+\mathit{brs}, \Omega \rangle$. $\pcon$ denotes the path condition that leads 
+to $\mathit{s}$ where $\mathit{e}$ is the event to execute at $\mathit{s}$. 
+$\mathit{brs}$ contains the set of branch predicates if $\mathit{e}$ is a 
+$\psi$ event. And $\Omega$ is the symbolic memory which maintains the mappings 
+from the program variables to their memory values at $\mathit{s}$.
 
 
-
-Initially, the global container \textsc{Stack} is empty, and we start the
+Initially, the state container \textsc{Stack} is empty, and we start the
 recursive procedure \SymExec with the initial state $\mathit{s_{ini}}$ 
-on input $\mathit{in}$ which steers the execution to a random path. During 
-the exploration, the procedure may perform a branch splitting (lines 4-8), 
-a memory operation (lines 9-10), an internal computation (lines 11-12) or 
-a state termination (line 14), depending on the event type.
+on input $\mathit{in}$. During the recursion, \SymExec may split a branch 
+(lines 4-8), perform a memory operation (lines 9-10), conduct an internal 
+computation (lines 11-12), or terminate a state (line 14), depending on 
+the type of the event to execute.
+
 
 Note that at the entry of each recursion, \SymExec takes a new symbolic 
 state as the input, which is obtained from invoking a secondary procedure 
 \textit{SubsequentState}. This procedure accepts the current state 
-\textit{s} as the argument and outputs the new state $s'$ from symbolically 
-executing the \textit{inst} of \textit{e} at \textit{s}. For brevity here 
-we omit the details of the instruction interpretation.
+\textit{s} as the input and outputs a new state $s'$ by symbolically 
+executing the \textit{inst} of \textit{s.e}. For brevity, we omit the 
+details of the instruction interpretation, which can be found in
+\cite{CadarDE08,PasareanuR10}.
 
 
 
 \subsection{Cache Timing Leak}
 \label{sec:leak}
 
-Memory operations are prone to timing leaks because of the outstanding visiting
-latency between the cache and the main memory. For example, loading data from cache 
-may cost 1-3 processor cycles whereas reading data from memory could consume hundreds 
-of processor cycles. In this section, we first establish the threat model in our work, 
-and then define the leak we are interested at based on the threat model.
+Memory operations are prone to timing leaks because of the outstanding 
+visiting latency between the cache and the main memory. For example, 
+reading data from the cache may cost 1-3 processor cycles, whereas 
+loading data from memory could consume hundreds of cycles. In this 
+section, we first establish the threat model and then formalize the 
+leak definition based on the threat model.
 
 
 \subsubsection{The Threat Model}
