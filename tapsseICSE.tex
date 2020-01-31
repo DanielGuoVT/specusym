@@ -1191,8 +1191,8 @@ current state \textit{s} (line 22) with a negated branch direction (line 23).
 This assumption is from the observation that the memory visiting latency 
 at a branch may create a time window for speculative execution to load data 
 into cache before the CPU rollback. Otherwise, despite a branch misprediction, 
-CPU may cost only several cycles on rollback, which is too quick to let 
-speculation affect the cache.
+CPU may spend several cycles on speculative execution, which is too quick to 
+let speculation affect the cache.
 
 
 %Similarly, we also fork another state for 
@@ -1850,9 +1850,9 @@ We design the following research questions for the experiments:
 \begin{compactitem}
 \item Can \SpecuSym identify cache timing leaks introduced 
 by speculative execution?
-\item Can \SpecuSym complement the fast abstract interpretation 
+\item Can \SpecuSym complement the abstract interpretation 
 based method by providing more accurate results?
-\item Can the optimizations effectively boost the overall performance?
+\item Can the optimizations boost the overall performance?
 \end{compactitem}
 
 %\textbf{(1)} 
