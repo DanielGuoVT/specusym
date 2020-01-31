@@ -1197,39 +1197,32 @@ only several cycles on speculative execution before its rollback, which is too
 transient to let speculation affect the cache.
 
 
-%Similarly, we also fork another state for 
-%modeling the symmetrical misprediction. 
-
-After state duplication, the new state ${s'}$ becomes a \textit{speculative state}, 
-since it is about to mimic the speculative execution of the mispredicted branch 
-before resuming $s$. We let \SpecuSym execute $s'$ 
-(line 24) and evaluate the effects of the memory visits in $s'$ on the cache 
-(line 15). Details of the evaluation presents in Section
-\ref{sec:modeling}. Once the recursive exploration of $s'$ finishes, we use 
-the accumulated cache state in $s'$ to update that of $s$ (line 25) and 
-terminate $s'$ (line 26). The termination ends the lifetime of state $s'$. 
-It also assures that the execution in $s'$ only attributes to the cache 
-state changes but never affects the memory state of its parent state.
-
-%\HB{: hard to understand this sentence: "is only attributes, but never affects"}
+After state duplication, new state ${s'}$ becomes a \textit{speculative} state, 
+since it is about to mimic the speculation of the mispredicted branch. We let 
+\SpecuSym explore $s'$ (line 24) and assess the effects of the memory accesses 
+in $s'$ on the cache (line 15). Details of the assessment present in Section
+\ref{sec:modeling}. Once the execution of $s'$ finishes, we use the accumulated 
+cache data in $s'$ to update that of $s$ (line 25) and terminate $s'$ (line 26) 
+to end its lifecycle. Such design ensures that the speculation of $s'$ only 
+contributes to the cache state changes but never affects the memory $\Omega$ of 
+its parent symbolic state.
 
 
-Next, when $\mathit{SpeculativeExplore}$ returns, we resume the normal 
-execution on $s$ (line 10), with an updated cache state. In this way, 
-we construct a speculative scenario and retain the latest cache. Our 
-approach leverages the stateful feature of symbolic execution. It not only 
-models the speculative behavior but also seamlessly stitches the cache
-state with controllable flexibility. 
+Next, after $\mathit{SpeculativeExplore}$ returns, we resume the normal symbolic
+execution of $s$ (line 10), who now has an updated cache. In this way, we   have 
+constructed a speculative scenario and retain the latest cache changes. Our
+modeling method leverages the stateful nature of symbolic execution. It not only 
+models the speculative behavior but also precisely transfers the cache information 
+between symbolic states with controllable flexibility. 
 
 
-Figure~\ref{fig:specu_modeling} shows the speculative modeling of 
-the example $\prog$ from Figure~\ref{fig:motiv}. Figure~\ref{fig:fig3-a} 
-gives the control flow graph of $\prog$ on which we annotate the memory 
-access related variables. For example, {S[0]} means the first array read in the 
-$\mathit{while}$ loop and \texttt{v1} means the memory \emph{write} in 
-the $\mathit{if}$ branch. The blue arrow line denotes the flow of the 
-symbolic state $s$ which takes the $\mathit{if}$ branch in regular 
-symbolic execution. 
+Figure~\ref{fig:specu_modeling} shows the speculative modeling of program $\prog$ 
+exampled in Figure~\ref{fig:motiv}. Figure~\ref{fig:fig3-a} displays the control 
+flow graph of $\prog$ on which we annotate the memory access related variables. 
+For example, {S[0]} means the first array read in the $\mathit{while}$ loop, and 
+\texttt{v2} means the memory \emph{write} in the $\mathit{else}$ branch. The solid 
+arrowed line denotes the execution flow of state $s$ which takes the $\mathit{if}$ 
+branch in regular symbolic execution. 
 
 
 Then, in Figure~\ref{fig:fig3-a}, on reaching the branch we duplicate a 
