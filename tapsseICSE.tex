@@ -383,48 +383,57 @@ the slow main memory, by buffering recently used data for faster reuse. Cache
 timing side-channel attacks~\cite{Kocher96,DhemKLMQW98} leverage the 
 distinguishable cache physical symptoms, i.e., the cache visiting latency 
 in various program executions, to penetrate the confidentiality of the victims. 
-On exploiting the vulnerable software implementations, adversaries are able to 
-extract the application secrets
+On exploiting the vulnerable software implementations, adversaries can extract 
+the application secrets
 \cite{OsvikST06,TromerOS10,GullaschBK11,CGM16}, infer the neural network 
-structure~\cite{YanFT18,HuLDLXJDLSX18,HongDKLRKDD18,DudduSRB18}, or even 
-dump the kernel data
-\cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}, etc.
+structure~\cite{YanFT18,HuLDLXJDLSX18,HongDKLRKDD18,DudduSRB18}, or even dump 
+the kernel data
+\cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}.
 
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
-A timing side channel generally serves as the intermediate carrier through
-which private data could be inadvertently disclosed to observers who can 
+A timing side-channel generally serves as the intermediate carrier through
+which private data could inadvertently disclose to observers who can 
 elaborately measure the timing of certain operations. One particular instance 
-is the cache timing side-channel which leaks data by the variance of the 
+is the cache timing side-channel, which leaks data by the variance of the 
 cache visiting latency. State-of-the-art program repair method~\cite{WuGSW18} 
 mitigates cache timing leaks by enforcing constant execution time for all 
-secret relevant operations. However, this strong mitigation may still be 
+secret relevant operations. However, this strong mitigation may still get 
 compromised by the thread-level concurrency~\cite{GuoWW18} or the 
 instruction-level parallelism like \textit{speculative execution}~\cite{kimuraKT1996}.
 
 
 % Third, briefly explain SE and its hazard
 \textit{Speculative execution}~\cite{kimuraKT1996} is a vital microarchitectural
-optimization in modern processors. Essentially, it increases the CPU instruction 
+optimization in modern processors. It primarily increases the CPU instruction 
 pipeline throughput by beforehand scheduling instructions under predicted branches, 
 which prevents control hazards from stalling the pipeline. Despite its importance, 
 the cache side effects caused by prediction errors could engender severe detriment 
-through the cache timing side channel
+through the cache timing side-channel
 \cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
 
 
 % Fourth, reivew the program analysis for SE
 Program analysis for speculative execution is by no means a new research domain. 
-Literally, existing efforts mainly focused on safe and efficient execution
-\cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst case execution time estimation
-\cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05}, and Spectre
-vulnerability reasoning~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}, while
-Wu et.al~\cite{WuW19} recently proposed static verification of timing-leakage-free 
-property under speculative execution. However, such abstract interpretation based 
+Previous efforts mainly researched safe and efficient execution
+\cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst-case execution time estimation
+\cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05}, and 
+Spectre vulnerability detection~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}, 
+while Wu et al.~\cite{WuW19} recently proposed static verification of timing-leakage-free 
+property under speculative execution. However, such an abstract interpretation based 
 method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} question 
---- it is incapable of generating input and the speculative flows to diagnose leaks 
-in depth. Moreover, the over-approximation nature inevitably leads to false positives, 
+--- it is incapable of generating input and speculative flows to diagnose leaks in 
+depth. Moreover, the over-approximation nature inevitably leads to false positives, 
 which desires a more precise method.
+
+
+
+\begin{figure}
+  \centering
+  \scalebox{1.0}{\input{fig_flow.tex}}
+  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
+  \label{fig:overall_flow}
+\end{figure}
 
 
 
@@ -432,9 +441,9 @@ which desires a more precise method.
 To this end, we propose a new method \textit{speculative symbolic execution}
 (\textsc{SpecuSym}), for detecting cache timing leaks caused by speculative execution. 
 Figure~\ref{fig:overall_flow} displays the overall flow of \textsc{SpecuSym}. Given
-a program $\prog$ which is timing-leakage-free in non-speculative execution, the 
+a program $\prog$, which is timing-leakage-free in non-speculative execution, the 
 sensitive input presented in symbol, and the insensitive input, \textsc{SpecuSym} 
-leverages symbolic execution to systematically explores $\prog$'s state space. Meanwhile, 
+leverages symbolic execution to explore $\prog$'s state space systematically. Meanwhile, 
 it models speculative execution at conditional branches (cf. \circled{1}) and accumulates 
 cache side effects along with subsequent executions (cf. \circled{2}). Based on a cache 
 model, \textsc{SpecuSym} constructs leak predicates for memory visits and conducts a
@@ -452,11 +461,11 @@ execution flow.
 
 
 % Sixth, point out the challenges 
-Our new method has three major challenges. The first challenge comes from the 
-modeling of speculative behaviors. Classic symbolic executors
+Our new method has three significant challenges. The first challenge comes from 
+the modeling of speculative behaviors. Classic symbolic executors
 \cite{CadarDE08,PasareanuR10} 
 neither support speculative execution nor are cache-aware since they primarily 
-concentrates on the functional correctness rather than reasoning the implicit 
+concentrate on the functional correctness rather than reasoning the implicit 
 program properties. 
 %
 The second challenge derives from the cache state maintenance. Due to the symbolic 
@@ -465,55 +474,54 @@ Updating the cache status after each memory operation unquestionably leads to an
 explosive number of different cache states. 
 %
 The last challenge stems from the analysis cost. Processors may trigger multiple 
-branch mis-predictions during a program execution. Indiscriminately covering all 
-possibilities not only introduces tremendous constraint solving overhead but also 
+branch mispredictions during a program execution. Indiscriminately covering all 
+possibilities introduces not only tremendous constraint solving overhead but also 
 counts many redundant cases. 
 
 
 To overcome the first challenge, we design a new modeling algorithm in symbolic 
 execution which satisfies both feasibility and high-fidelity. In essence, it 
 utilizes the stateful exploration to mimic the speculative behaviors and isolates 
-memory changes in auxiliary states from the regular states. 
+memory changes in auxiliary states from the standard symbolic states. 
 %
-To tackle the second challenge, we develop a lazy modeling strategy which tracks 
+To tackle the second challenge, we develop a lazy modeling strategy that tracks 
 memory accesses and lazily reasons about cache effects rather than maintaining a 
 complete set of cache states on-the-fly. 
 %
 To address the last challenge, we filter the branches that are unlikely to cause 
-harmful speculative execution. Also, we develop several optimization to shrink 
+harmful speculative execution. Also, we develop several optimizations to shrink 
 the constraint size for solving cost reduction.
 
 
 
 \ignore{
-Also, We develop a merging schema between the mimicked states and regular 
-symbolic states to accumulate the cache side effects.
+Also, We develop a merging schema between the mimicked states and regular symbolic 
+states to accumulate the cache side effects.
 
-In general, we decompose the precise but lengthy constraint 
-into smaller chunks without losing correctness, as well as utilizing 
-executor kernel characteristics for faster computation.
+In general, we decompose the precise but lengthy constraint into smaller chunks 
+without losing correctness, as well as utilizing executor kernel characteristics 
+for faster computation.
 
-However, the side effects caused by speculative execution are normally 
-undetectable under standard symbolic execution. To overcome this problem,
-we introduce the $\mathit{speculative~modeling}$ into symbolic execution. 
-Thus, cache side effects are visible and cache timing leaks from speculative 
-execution detectable now. 
+However, the side effects caused by speculative execution are normally undetectable 
+under standard symbolic execution. To overcome this problem, we introduce the 
+$\mathit{speculative~modeling}$ into symbolic execution. Thus, cache side effects 
+are visible and cache timing leaks from speculative execution detectable now. 
 }
 
 
 We have implemented \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04} 
-and performed the evaluation on 15 benchmarks which have 8,791 lines of C code in 
-total. Results show that \SpecuSym successfully detects from 22 to 130 leaks 
-in 6 programs under 4 set-associative caches and identifies false positives in 2 
-programs reported by recent work. To summarize, we have made the following contributions:
+and evaluated it on 15 benchmarks, which have 8,791 lines of C code in total. Results 
+show that \SpecuSym successfully detects from 22 to 130 leaks in 6 programs under 4 
+set-associative caches and identifies false positives in 2 programs reported by recent 
+work. To summarize, we have made the following contributions:
 
 \begin{compactitem}
   \item 
     A new approach \emph{Speculative Symbolic Execution} for modeling speculative 
 		execution and analyzing the affected cache behaviors in symbolic execution.
   \item 
-		Implementation of \SpecuSym which addresses the aforementioned challenges
-		and supports cache timing leak detection under speculative execution. 
+		Implementation of \textsc{SpecuSym}, which addresses the challenges mentioned
+		above and supports cache timing leak detection under speculative execution. 
   \item 
     Evaluation of \SpecuSym on 15 open-source benchmarks to demonstrate its 
     effectiveness through discovering from 22 to 130 leaks upon 4 different 
@@ -522,17 +530,9 @@ programs reported by recent work. To summarize, we have made the following contr
 
 
 
-\begin{figure}
-  \centering
-  \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
-  \label{fig:overall_flow}
-\end{figure}
-
-
 
 The remainder of this paper is organized as follows. Section~\ref{sec:mtv} 
-motivates our work and Section~\ref{sec:prelim} reviews the background 
+motivates our work, and Section~\ref{sec:prelim} reviews the background 
 knowledge. Section~\ref{sec:specuSE} states the major contributions and
 optimization. Then we conduct experiments in Section~\ref{sec:evaluation} 
 and discuss the related work in Section~\ref{sec:related}. Finally, we 
@@ -777,6 +777,45 @@ and speculative execution.
 \label{sec:se}
 
 
+
+
+Symbolic execution, as a systematic program testing and analysis technique, 
+was first introduced in the 1970s~\cite{King76,Clarke76}. In this work, we 
+assume that a program $\prog$ consists of a finite set of instructions, and 
+$\prog$ defines execution semantics in program paths. Let \textit{inst} be 
+an instruction, then interpreting an event $e$:=$(l_b\succ inst\succ l_a)$ 
+in symbolic execution stands for the execution of \textit{inst} where $l_b$ 
+and $l_a$ denote the locations before and after $inst$, respectively. A 
+program execution explores a sequence of events along the program path. 
+Close to~\cite{GuoKWYG15,GuoWW18}, we abstract a symbolic event $e$ into 
+three categories in terms of the type of \textit{inst} that $e$ contains.
+
+
+\begin{itemize*}
+  \item $\psi$-event, which presents a branch decision. It models the 
+    \textit{then} branch by \textcode{assume$(c)$} and the \textit{else} 
+    branch by \textcode{assume$(\neg c)$}, respectively. Term $\textit{c}$ 
+    is the representative of a conditional predicate expressed in symbolic 
+    expression. 
+
+  \item $\chi$-event, which corresponds to a memory \textit{read} instruction 
+    of the form $\textit{var}=\textit{load~addr}$, or a memory \textit{write} 
+    instruction like $\textit{store~addr, expr}$ where \textit{addr} is the 
+    memory address, and \textit{expr} is a symbolic expression.
+
+  \item $\varphi$-event, which represents other types of instructions in the 
+    form $\textit{var}:=\textit{expr}$. Here \textit{var} is a variable, and 
+    \textit{expr} is a symbolic expression computed from preceding operations 
+    like arithmetic calculation, bit manipulation, etc.
+\end{itemize*}
+
+
+Although symbolic executors always support a rich set of instructions, we use 
+the above event types to abstract away the internal implementation details like 
+memory allocation, function return, and et.al., to center on the high-level 
+flow of symbolic execution.
+
+
 \begin{algorithm}[hpt]
 \caption{Baseline Symbolic Execution.}
 \label{alg:baseline}
@@ -817,42 +856,7 @@ and speculative execution.
 \end{algorithm}
 
 
-
-Symbolic execution, as a systematic program testing and analysis technique, 
-was first introduced in the 1970s~\cite{King76,Clarke76}. In this work, we 
-assume that a program $\prog$ consists of a finite set of instructions, and 
-$\prog$ defines execution semantics in program paths. Let \textit{inst} be 
-an instruction, then interpreting an event $e$:=$(l_b\succ inst\succ l_a)$ 
-in symbolic execution stands for the execution of \textit{inst} where $l_b$ 
-and $l_a$ denote the locations before and after $inst$, respectively. A 
-program execution explores a sequence of events along the program path. 
-Close to~\cite{GuoKWYG15,GuoWW18}, we abstract a symbolic event $e$ into 
-three categories in terms of the type of \textit{inst} that $e$ contains.
-
-
-\begin{itemize*}
-  \item $\psi$-event, which presents a branch decision. It models the 
-    \textit{then} branch by \textcode{assume$(c)$} and the \textit{else} 
-    branch by \textcode{assume$(\neg c)$}, respectively. Term $\textit{c}$ 
-    is the representative of a conditional predicate expressed in symbolic 
-    expression. 
-
-  \item $\chi$-event, which corresponds to a memory \textit{read} instruction 
-    of the form $\textit{var}=\textit{load~addr}$, or a memory \textit{write} 
-    instruction like $\textit{store~addr, expr}$ where \textit{addr} is the 
-    memory address, and \textit{expr} is a symbolic expression.
-
-  \item $\varphi$-event, which represents other types of instructions in the 
-    form $\textit{var}:=\textit{expr}$. Here \textit{var} is a variable, and 
-    \textit{expr} is a symbolic expression computed from preceding operations 
-    like arithmetic calculation, bit manipulation, etc.
-\end{itemize*}
-
-
-Although symbolic executors always support a rich set of instructions, we use 
-the above event types to abstract away the internal implementation details like 
-memory allocation, function return, and et.al., to center on the high-level 
-flow of symbolic execution. Algorithm~\ref{alg:baseline} presents the baseline 
+Algorithm~\ref{alg:baseline} presents the baseline 
 symbolic execution of a program with sensitive input. Unlike prior works
 \cite{GuoKWYG15,GuoWW18}, both global and local memory accesses are uniformly
 handled. The data input, $\mathit{in}:=\{\lambda,t\}$, determines a program 
