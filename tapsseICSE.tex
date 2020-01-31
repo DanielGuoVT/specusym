@@ -1178,32 +1178,33 @@ and returns immediately (line 4). Note that a state becomes a
 \textit{speculative state} if it is duplicated from a normal symbolic state 
 (line 22) by invoking \textit{SpeculativeExplore} at a branch event (line 9). 
 
+
 %At the high level, subroutine $\mathit{SpeculativeExplore}$ models 
 %branch mispredictions with extra symbolic states, and updates the
 %cache on exploring these auxiliary states.
 
+
 Lines 19-28 in Algorithm~\ref{alg:specusym} present the modeling procedure 
-\textit{SpeculativeExplore}. Usually, at a conditional branch (line 8), we 
-call \textit{SpeculativeExplore} (line 9) to start the speculative probe. 
-That is, if the branch predicate relies on memory visit (line 21), e.g.,
-using a variable for the first time, we duplicate a new state $s'$ from 
-current state \textit{s} (line 22) with a negated branch direction (line 23). 
-This assumption is from the observation that the memory visiting latency 
-at a branch may create a time window for speculative execution to load data 
-into cache before the CPU rollback. Otherwise, despite a branch misprediction, 
-CPU may spend several cycles on speculative execution, which is too quick to 
-let speculation affect the cache.
+\textit{SpeculativeExplore}. Generally, at a conditional branch (line 8), 
+we call \textit{SpeculativeExplore} (line 9) to start the speculative probe. 
+That is, if the branch predicate closely relates to memory visit (line 21), 
+e.g., using a variable for the first time, we duplicate a new state $s'$ 
+from current state \textit{s} (line 22) with a negated branch direction 
+(line 23). This assumption bases on the observation that the memory visiting 
+latency at a branch may form a time window for speculative execution to load 
+data into the cache. Otherwise, despite a branch misprediction, CPU may spend 
+only several cycles on speculative execution before its rollback, which is too 
+transient to let speculation affect the cache.
 
 
 %Similarly, we also fork another state for 
 %modeling the symmetrical misprediction. 
 
-
-The new state ${s'}$ becomes a \textit{speculative state} afterwards, since 
-it is about to mimic the speculative execution of the mis-predicted branch 
-before resuming $s$. After state duplication, we let \SpecuSym execute $s'$ 
+After state duplication, the new state ${s'}$ becomes a \textit{speculative state}, 
+since it is about to mimic the speculative execution of the mispredicted branch 
+before resuming $s$. We let \SpecuSym execute $s'$ 
 (line 24) and evaluate the effects of the memory visits in $s'$ on the cache 
-(line 15). Details of the evaluation will be presented in Section
+(line 15). Details of the evaluation presents in Section
 \ref{sec:modeling}. Once the recursive exploration of $s'$ finishes, we use 
 the accumulated cache state in $s'$ to update that of $s$ (line 25) and 
 terminate $s'$ (line 26). The termination ends the lifetime of state $s'$. 
@@ -1215,7 +1216,7 @@ state changes but never affects the memory state of its parent state.
 
 Next, when $\mathit{SpeculativeExplore}$ returns, we resume the normal 
 execution on $s$ (line 10), with an updated cache state. In this way, 
-we construct the speculative scenario and retain the latest cache. Our 
+we construct a speculative scenario and retain the latest cache. Our 
 approach leverages the stateful feature of symbolic execution. It not only 
 models the speculative behavior but also seamlessly stitches the cache
 state with controllable flexibility. 
