@@ -323,8 +323,8 @@
 \begin{abstract}
   CPU cache is a limited but crucial storage component in modern processors, 
 	whereas	the	cache timing side-channel may inadvertently leak information 
-	through the physically measurable timing variances. Speculative execution, 
-	a microarchitectural optimization and a source of such variances, can cause 
+	through the physically measurable timing variance. Speculative execution, 
+	a vital processor optimization, and a source of such variance, can cause 
 	severe detriment on deliberate branch mispredictions.
   %
   Despite static analysis could qualitatively verify the timing-leakage-free 
@@ -332,21 +332,20 @@
 	including inputs and speculated flows to diagnose leaks in depth. 
   %
   This work proposes a new method, \textit{Speculative symbolic Execution} 
-	(\texttt{SSE}), for precisely detecting cache timing leaks introduced by 
+	(\textsc{SpecuSym}), for precisely detecting cache timing leaks introduced by 
 	speculative execution. Given a program (leakage-free in non-speculative 
-	execution), \texttt{SSE} systematically explores the program state space, 
+	execution), \textsc{SpecuSym} systematically explores the program state space, 
 	models speculative behavior at conditional branches, and accumulates the	
 	cache side effects along with subsequent explorations. 
 	%
-	During the dynamic execution, \texttt{SSE} constructs leak predicates for 
+	During the dynamic execution, \textsc{SpecuSym} constructs leak predicates for 
 	memory visits based on the specified cache model and conducts a 
 	constraint-solving based cache behavior analysis to generate leak witnesses.
   %
-  We have implemented \texttt{SSE} in a tool named \SpecuSym atop KLEE and 
-	evaluated it against 15 open-source benchmarks. Experimental results show 
-	that \SpecuSym successfully detected leaks in 6 programs upon 4 different 
-	cache settings and identified false positives in 2 programs reported by a 
-	recent work.
+  We have implemented \textsc{SpecuSym} atop KLEE and evaluated it against 15 
+	open-source benchmarks. Experimental results show that \SpecuSym successfully 
+	detected leaks in 6 programs upon 4 different cache settings and identified 
+	false positives in 2 programs reported by	recent work.
 \end{abstract}
 
 \begin{CCSXML}
@@ -383,13 +382,13 @@ It primarily relieves the speed disparity between the rapid processors and
 the slow main memory, by buffering recently used data for faster reuse. Cache 
 timing side-channel attacks~\cite{Kocher96,DhemKLMQW98} leverage the 
 distinguishable cache physical symptoms, i.e., the cache visiting latency 
-in various program executions, to penetrate the confidentiality of the victim 
-system. On exploiting the vulnerable software implementations, adversaries 
-are able to extract the application secrets
+in various program executions, to penetrate the confidentiality of the victims. 
+On exploiting the vulnerable software implementations, adversaries are able to 
+extract the application secrets
 \cite{OsvikST06,TromerOS10,GullaschBK11,CGM16}, infer the neural network 
 structure~\cite{YanFT18,HuLDLXJDLSX18,HongDKLRKDD18,DudduSRB18}, or even 
 dump the kernel data
-\cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}.
+\cite{HundWH13,LippSGPHFHMKGYH18,KocherGGHHLMPSY19,WeisseVMGKPSSWY18}, etc.
 
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
@@ -430,17 +429,17 @@ which desires a more precise method.
 
 
 % Fifth, introduce our method 
-To this end, we propose a new method, named \textit{speculative symbolic execution}
-(\texttt{SSE}), for detecting cache timing leaks introduced by speculative execution. 
-Figure~\ref{fig:overall_flow} shows the overall flow of \texttt{SSE}. Given a program 
-$\prog$ which is timing-leakage-free under non-speculative execution, the sensitive 
-input presented in symbol, and the insensitive input, \texttt{SSE} leverages symbolic 
-execution to systematically explores $\prog$'s state space. Meanwhile, it models 
-speculative execution at conditional branches (cf. \circled{1}) and accumulates cache 
-side effects along with subsequent executions (cf. \circled{2}). Based on a specified 
-cache model, \texttt{SSE} constructs leak predicates for memory visits and conducts 
-constraint-solving based cache behavior analysis (cf. \circled{3}) to finally generate 
-the leak witnesses (cf. \circled{4}). 
+To this end, we propose a new method \textit{speculative symbolic execution}
+(\textsc{SpecuSym}), for detecting cache timing leaks caused by speculative execution. 
+Figure~\ref{fig:overall_flow} displays the overall flow of \textsc{SpecuSym}. Given
+a program $\prog$ which is timing-leakage-free in non-speculative execution, the 
+sensitive input presented in symbol, and the insensitive input, \textsc{SpecuSym} 
+leverages symbolic execution to systematically explores $\prog$'s state space. Meanwhile, 
+it models speculative execution at conditional branches (cf. \circled{1}) and accumulates 
+cache side effects along with subsequent executions (cf. \circled{2}). Based on a cache 
+model, \textsc{SpecuSym} constructs leak predicates for memory visits and conducts a
+constraint-solving based cache behavior analysis (cf. \circled{3}) to generate the leak 
+witnesses (cf. \circled{4}). 
 
 
 \ignore{
@@ -502,15 +501,12 @@ execution detectable now.
 }
 
 
-We have implemented our new method in a prototype named \SpecuSym atop KLEE
-\cite{CadarDE08} and LLVM~\cite{LattnerA04} and performed the evaluation on  
-15 open-source programs which have 8,791 lines of C code in total. Results 
-show that \SpecuSym successfully detects from 22 to 130 leaks in 6 programs 
-under 4 set-associative caches and identifies false positives in 2 programs 
-reported by recent work.
+We have implemented \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04} 
+and performed the evaluation on 15 benchmarks which have 8,791 lines of C code in 
+total. Results show that \SpecuSym successfully detects from 22 to 130 leaks 
+in 6 programs under 4 set-associative caches and identifies false positives in 2 
+programs reported by recent work. To summarize, we have made the following contributions:
 
-
-To summarize, we have made the following contributions:
 \begin{compactitem}
   \item 
     A new approach \emph{Speculative Symbolic Execution} for modeling speculative 
@@ -536,7 +532,7 @@ To summarize, we have made the following contributions:
 
 
 The remainder of this paper is organized as follows. Section~\ref{sec:mtv} 
-motivates our work and section~\ref{sec:prelim} reviews the background 
+motivates our work and Section~\ref{sec:prelim} reviews the background 
 knowledge. Section~\ref{sec:specuSE} states the major contributions and
 optimization. Then we conduct experiments in Section~\ref{sec:evaluation} 
 and discuss the related work in Section~\ref{sec:related}. Finally, we 
@@ -671,7 +667,7 @@ There are two program paths in $\prog$ because of the \textit{if-else}
 branch. Let's name the one containing the \textit{if} branch as $p_1$ 
 and the other one as $p_2$. The only difference between $p_1$ and $p_2$
 is the \emph{store} operation, which writes \texttt{v1} on $p_1$ but 
-\texttt{v2} on $p_2$. As analyzed in section~\ref{sec:leak_example}, 
+\texttt{v2} on $p_2$. As analyzed in Section~\ref{sec:leak_example}, 
 \texttt{v1} would map to the last line of cache $\mathcal{C}$. Similarly, 
 without speculative execution, \texttt{v2} also maps to the same line, as 
 annotated by the solid arrow in Figure~\ref{fig:2b}. This overlapping 
@@ -697,7 +693,7 @@ cache timing leaks under non-speculative execution.
 \subsection{New Leak under Speculative Execution}
 \label{sec:specu_leak}
 
-In section~\ref{sec:normal_exec}, only one \textit{store} operation can happen 
+In Section~\ref{sec:normal_exec}, only one \textit{store} operation can happen 
 in non-speculative execution. However, the situation changes, and a new timing 
 leak appears when taking speculative execution into account.  
 
@@ -715,7 +711,7 @@ to \texttt{v1}, \texttt{v1} remains in $\mathcal{C}$ even after the remedy.
 
 Going until line 9, array \texttt{S} and variable \texttt{x} map from lines \#1 
 to \#255 and \texttt{v1} still occupies line \#256. At this point, there is no 
-empty line available for \texttt{v2}. Following the LRU policy declared in section
+empty line available for \texttt{v2}. Following the LRU policy declared in Sction
 \ref{sec:leak_example}, executing the \textit{store} instruction at line 9 would 
 evict the oldest item \texttt{S[0]} from cache $\mathcal{C}$ and map \texttt{v2} 
 to the vacated line \#1, as shown by the dotted arrow in Figure~\ref{fig:2b}.
@@ -927,7 +923,7 @@ we believe it is a reasonable model for analysis purposes.
 
 Formally, we abstract a sensitive data related program $\prog$ to be a function 
 $\mathit{F_{\prog}(in)\Rightarrow out}$. $\mathit{F_{\prog}}$ processes the data 
-input $\mathit{in}:=\{\lambda,t\}$ (cf. section~\ref{sec:se}) and returns the 
+input $\mathit{in}:=\{\lambda,t\}$ (cf. Section~\ref{sec:se}) and returns the 
 output $\mathit{out}$. E.g., assuming $\prog$ is an encryption process, $\lambda$ 
 is the private key, and $t$ is the content to encrypt; then, $out$ is the ciphertext. 
 Let $T(F_{\prog}(in))$ denotes the execution time of $\prog$ with input $\mathit{in}$ 
@@ -977,7 +973,7 @@ two sensitive inputs can cause significant timing difference in executing $\math
 with and without speculative execution. In other words, $\prog$ leaks due to 
 speculative execution if any pair of $\lambda$ and $\lambda'$ exists. Furthermore, 
 we transform formula (\ref{lb:specu_leak}) into a dedicated leak constraint and 
-simplify the constraint to a more concise form in section~\ref{sec:specuSE}. Also, 
+simplify the constraint to a more concise form in Section~\ref{sec:specuSE}. Also, 
 as public input plays a minor role in modeling cache timing leaks~\cite{WangBLWZW19}, 
 we set insensitive input $t$ to a fixed value to reduce the reasoning cost of formula
 (\ref{lb:specu_leak}). 
@@ -1059,36 +1055,35 @@ executions at these points do exist and our method complies with the fact.
 
 \subsubsection{Speculative State Execution.}
 Each duplicated state in \textit{misprediction modeling} has the same snapshot to 
-its parent state. For clarity, we use \textit{speculative} state to alias the new 
-state. A \textit{speculative} state would be prioritized to the front of the state 
-container in symbolic executor, and uninterruptedly executes until it meets a 
+its parent state. For clarity, we use \textit{speculative} state to alias this newly
+forked state. A \textit{speculative} state would be prioritized to the front of the 
+state container in symbolic executor, and uninterruptedly executes until it meets a 
 predefined threshold, like the size of the Reorder Buffer (ROB), the pipeline stage 
 number, the branch depth, etc. Also, a \textit{speculative} state runs independently 
-from its parent state, owing to the \textit{copy-on-write} schema in modern symbolic 
-executors~\cite{CadarDE08,CiorteaZBCC09}. The memory updates in a \textit{speculative} 
-state won't taint its parent state who waits at the state-forking point for the 
-\textit{speculative} state returns. For the sake of cache analysis, we also maintain 
-the cache data in each symbolic state. A \textit{speculative} state inherits such data 
-from the parent state and keeps updating the cache during its execution.
+from its parent state; thus, any memory updates in the \textit{speculative} state 
+won't taint its parent state who is waiting for the \textit{speculative} state returns. 
+For the sake of cache analysis, we also maintain the cache data in each symbolic state. 
+A \textit{speculative} state inherits such data from the parent state and keeps updating 
+the cache during its execution.
 
 
 \subsubsection{Rollback and Cache Merging.}
-Once a \textit{speculative} state reaches the threshold, it has to 
-stop and quit the state queue. Right before its termination, it 
-notifies the awaiting parent state the finish of the current speculative execution, 
-as well as transfers the cache status back to the parent. On 
-receiving the notification, the parent symbolic state merges the 
-speculated cache into its own cache to form the latest cache state. After 
-that, the parent aborts waiting and resumes the normal execution.
-This step models the processor rollback mechanism in high fidelity
-and retains the changed cache state from speculative execution. 
-Terminating the \textit{speculative} state eliminates any further 
-affects and the latest cache status has already been absorbed 
-into the parent state. This approach is natural to symbolic execution, 
-while the existing simulation~\cite{OleksenkoTSF19} method requires 
-sophisticated instrumentations and specific instructions to enforce 
-CPU behaviors. More technical details will be presented in section
-\ref{sec:spec_modeling}.
+Once the \textit{speculative} state reaches the threshold, it has to stop and exit the 
+state stack. Right before the termination, it notifies the awaiting parent state the 
+finish of the speculation and transfers the latest cache data back to its parent. Upon 
+accepting the notification, the parent symbolic state merges the received cache information
+into its cache data, to form the latest cache state. After that, the parent state aborts 
+waiting and resumes the regular execution. This step models the processor rollback in 
+high fidelity and retains the cache status changes from speculation. Since the cache 
+changes have already merged into the parent state, terminating the \textit{speculative} 
+state causes no further affects.  
+
+
+Our approach is natural to symbolic execution, while state-of-the-art simulation 
+method~\cite{OleksenkoTSF19} requires sophisticated instrumentations and special 
+instructions to enforce CPU behaviors. More modeling details would appear in 
+Section~\ref{sec:spec_modeling}.
+
 
 \ignore{
 Our modeling approach is sound and elegant. Focusing on the worst 
@@ -1203,7 +1198,7 @@ The new state ${s'}$ becomes a \textit{speculative state} afterwards, since
 it is about to mimic the speculative execution of the mis-predicted branch 
 before resuming $s$. After state duplication, we let \SpecuSym execute $s'$ 
 (line 24) and evaluate the effects of the memory visits in $s'$ on the cache 
-(line 15). Details of the evaluation will be presented in section
+(line 15). Details of the evaluation will be presented in Section
 \ref{sec:modeling}. Once the recursive exploration of $s'$ finishes, we use 
 the accumulated cache state in $s'$ to update that of $s$ (line 25) and 
 terminate $s'$ (line 26). The termination ends the lifetime of state $s'$. 
@@ -1246,9 +1241,9 @@ Subsequently, the memory \emph{store} to \texttt{v1} in state $s$ has to
 replace \texttt{S[0]} following the LRU policy, as shown in Figure
 \ref{fig:fig3-b}. Also, the last memory \emph{load} to \texttt{S[x]} might 
 result in a cache miss or a cache hit, depending on the value of \texttt{x}, 
-which is consistent with the situation in section~\ref{sec:specu_leak}. 
+which is consistent with the situation in Section~\ref{sec:specu_leak}. 
 Hence, our proposed method succeeds in modeling speculative execution 
-and conforms to the three-step process designed in section~\ref{sec:specu}. 
+and conforms to the three-step process designed in Section~\ref{sec:specu}. 
 Note that Figure~\ref{fig:fig3-a} only shows the modeling of the \emph{else} 
 branch while \SpecuSym considers both branches and misses no potential cases. 
 
@@ -1278,8 +1273,8 @@ exposure, e.g., only 1 mapping reveals leak in the motivating example.
 Instead, \SpecuSym models all possible branch mispredictions along with  an execution 
 path to maintain a \textit{stitched} trace of memory events as the alternative 
 of the cache state. Then it builds the leak constraint by analyzing the trace, 
-and lazily searches for solutions. We detail this trace-based analysis in section
-\ref{sec:modeling} and section~\ref{sec:analysis}. 
+and lazily searches for solutions. We detail this trace-based analysis in Section
+\ref{sec:modeling} and Section~\ref{sec:analysis}. 
 
 
 \begin{figure}%[htb]
@@ -1375,7 +1370,7 @@ and lazily searches for solutions. We detail this trace-based analysis in sectio
 
 This section explains how \SpecuSym models the cache state. Since each explored 
 path in symbolic execution represents a unique program run, we thereby extend 
-the definition of a symbolic state $s$ (cf. section~\ref{sec:se}) to be a new 
+the definition of a symbolic state $s$ (cf. Section~\ref{sec:se}) to be a new 
 tuple $\langle \pcon, \mathit{e}, \mathit{brs}, \Omega, \varpi \rangle$. The 
 newly introduced symbol $\varpi$ denotes the cache state on exploring $s$.
 Based on this design, we establish notions as following:
