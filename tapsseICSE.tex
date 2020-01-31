@@ -997,14 +997,14 @@ speculative execution only changes the cache state.
 The CPU instruction pipeline~\cite{RamamoorthyL77} allows overlapped executions 
 of proper instructions where each instruction execution consists of a series of 
 micro-stages. This instruction-level parallelism benefits hardware utilization 
-since instruction can start its stage before the time its prior instructions have 
-completed all their stages. However, a pipelined processor may get stalled once the 
-program control flow needs to divert, but the destination remains unknown (e.g., at 
-a conditional branch). Accordingly, the pipeline has to wait until the flow decision 
-gets computed.
+since instruction can start its stage before the time its prior instructions 
+have completed all their stages. However, a pipelined processor may get stalled 
+once the program control flow needs to divert, but the destination remains 
+unknown (e.g., at a conditional branch). Accordingly, the pipeline has to wait 
+until the flow decision gets computed.
 
 
-To alleviate the cost of this control hazard, processors leverage 
+To alleviate the cost of such control hazard, processors leverage 
 \textit{speculative execution}~\cite{kimuraKT1996} and \textit{branch prediction}
 \cite{Mittal19} to reduce the delay that could incur on conditional branch 
 instructions. Generally, they predict the execution flow upon the history of 
@@ -1100,12 +1100,12 @@ cause leaks.
 \section{Speculative Symbolic Execution}
 \label{sec:specuSE}
 
-In this section we present the core algorithm of \SpecuSym, and explain 
-the technical contributions listed in Figure~\ref{fig:overall_flow}. 
-Algorithm~\ref{alg:specusym} shows the main algorithm of \SpecuSym, 
-where the major changes from the baseline algorithm are at the state 
-checkpoint (lines 3-5), the branch point (line 9), and the memory 
-access point (lines 14-15). We highlight these changes in blue. 
+In this section, we present the core algorithm of \textsc{SpecuSym} and explain 
+the technical contributions portrayed in Figure~\ref{fig:overall_flow}. Algorithm
+\ref{alg:specusym} shows the main algorithm of \textsc{SpecuSym}, where the major 
+changes from the baseline algorithm are at the state checkpoint (lines 3-5), the 
+branch point (line 9), and the memory access point (lines 14-15). We highlight 
+these changes in blue. 
 
 
 \begin{algorithm}[t]
@@ -1142,7 +1142,7 @@ $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
 \Begin{
   \If{$\mathit{c}$ relies on a memory visit}{
     $\mathit{s' \leftarrow }$ duplicate state $\mathit{s}$;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\textcolor{dkgreen}{// Fork speculative state}\;
-    $\mathit{s' \leftarrow redirect~s'~to~the~\neg c~control~flow}$;~~\textcolor{dkgreen}{// Redirect execution flow}\;
+    $\mathit{s' \leftarrow redirect~s'~to~the~\neg c~control~flow}$;~~\textcolor{dkgreen}{// Negate branch direction}\;
     \textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s'}$));\;
     $\mathit{s}.\varpi \leftarrow \mathit{s'}.\varpi$;\;%\mathit{s}.\Xi \diamond 	
     Terminate $\mathit{s'}$;\;
@@ -1170,33 +1170,34 @@ $\mathit{AnalyzeCache}$(SymbolicState $s$)\;
 %speculative execution by introducing auxiliary symbolic states and 
 %orchestrating them in proper orders.
 
-On entering the \SpecuSym procedure, our new algorithm first checks 
-if the current state $s$ is a \textit{speculative~state}, and whether 
-$s$ has reached the predefined threshold (line 3). If both conditions
-are met, \SpecuSym stops the recursive symbolic execution on $s$ and 
-returns immediately (line 4). A state becomes a \textit{speculative 
-state} if it is duplicated from a regular symbolic state (line 22) by
-invoking \textit{SpeculativeExplore} at a branch event (line 9). 
+On entering the \SpecuSym procedure in Algorithm~\ref{alg:specusym}, our new 
+algorithm first checks if current state $s$ is a \textit{speculative state}
+and whether $s$ has reached the predefined threshold (line 3). If both 
+conditions are met, \SpecuSym stops the recursive symbolic execution on $s$ 
+and returns immediately (line 4). Note that a state becomes a 
+\textit{speculative state} if it is duplicated from a normal symbolic state 
+(line 22) by invoking \textit{SpeculativeExplore} at a branch event (line 9). 
 
 %At the high level, subroutine $\mathit{SpeculativeExplore}$ models 
 %branch mispredictions with extra symbolic states, and updates the
 %cache on exploring these auxiliary states.
 
 Lines 19-28 in Algorithm~\ref{alg:specusym} present the modeling procedure 
-\textit{SpeculativeExplore}. Generally, at a conditional branch (line 8), 
-we call \textit{SpeculativeExplore} (line 8) to start the speculative probe. 
-That is, if the branch predicate relies on a memory access (line 21), e.g.,
-using a static variable for the first time, we then duplicate a new state 
-$s'$ from state \textit{s} (line 22) with a negated execution flow (line 23). 
-This assumption is based on the observation that the memory visiting latency 
-at a branch point may create a time window for speculative execution to load 
-data into cache before the rollback. Otherwise, despite a branch misprediction, 
-the CPU only spends several cycles on restoring before speculative execution 
-takes effect on cache.
+\textit{SpeculativeExplore}. Usually, at a conditional branch (line 8), we 
+call \textit{SpeculativeExplore} (line 9) to start the speculative probe. 
+That is, if the branch predicate relies on memory visit (line 21), e.g.,
+using a variable for the first time, we duplicate a new state $s'$ from 
+current state \textit{s} (line 22) with a negated branch direction (line 23). 
+This assumption is from the observation that the memory visiting latency 
+at a branch may create a time window for speculative execution to load data 
+into cache before the CPU rollback. Otherwise, despite a branch misprediction, 
+CPU may cost only several cycles on rollback, which is too quick to let 
+speculation affect the cache.
 
 
 %Similarly, we also fork another state for 
 %modeling the symmetrical misprediction. 
+
 
 The new state ${s'}$ becomes a \textit{speculative state} afterwards, since 
 it is about to mimic the speculative execution of the mis-predicted branch 
