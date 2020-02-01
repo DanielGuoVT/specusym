@@ -610,7 +610,7 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 	\end{minipage}
 }
 }
-\subfigure[The 256*1 cache $\mathbb{C}$]{
+\subfigure[The 256-byte cache $\mathcal{C}$]{
 \label{fig:2b}
 \begin{minipage}{0.3\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
@@ -638,7 +638,7 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 
 		\draw[|<-, line width=0.4pt](0, 3.4) -- (0.2, 3.4);
 		\draw[->|, line width=0.4pt](1.2, 3.4) -- (1.4, 3.4);
-  	\node[left=5pt, right] at (0.45, 3.4) {1 Byte};
+  	\node[left=5pt, right] at (0.45, 3.4) {1 byte};
 
 		\node[left=5pt, right] at (2.0, 1.55) {v2};
     \draw [-stealth,dotted,thick,red](2.0, 1.75)--(1.3, 3.05);
@@ -1024,7 +1024,7 @@ maps to cache line \#256 due to the misprediction of the \textit{if} branch; and
 this cache effect remains unchanged, even control flow directs to the \textit{else} 
 branch. As a result, sensitive data \texttt{x} leaks due to the interfered cache 
 state. Abstracting away the hardware details, we can model the speculative behavior 
-in symbolic execution as a three-step analysis and evaluate its cache side effects 
+in symbolic execution as a three-phase analysis and evaluate its cache side effects 
 with a constraint-solving based approach. 
 
 
@@ -1219,9 +1219,9 @@ between symbolic states with controllable flexibility.
 Figure~\ref{fig:specu_modeling} shows the speculative modeling of motivating 
 program $\prog$. Figure~\ref{fig:3a} displays the control flow graph on 
 which we annotate the memory access related variables. E.g., \texttt{S[0]} 
-indicates the first array read in the $\mathit{while}$ loop, and \texttt{v2} 
-means the memory \emph{write} in the $\mathit{else}$ branch. The solid arrow 
-line denotes the execution flow of state $s$, which takes the $\mathit{if}$ 
+indicates the first array read in the $\mathit{while}$ loop, and \texttt{v1} 
+means the memory \emph{write} in the $\mathit{if}$ branch. The solid arrow 
+line denotes the execution flow of state $s$, which takes the $\mathit{else}$ 
 branch in regular symbolic execution. 
 
 
@@ -1232,23 +1232,22 @@ shown by the dashed arrow curve. Once meeting the speculation threshold,
 \SpecuSym stops the exploration and turns back to find state $s$ who is awaiting 
 the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporate the cache 
 state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminate $s'$. Right now, 
-the entire cache has been filled since the memory write in $s'$ mapped \texttt{v2} 
+the entire cache has been filled since the memory write in $s'$ mapped \texttt{v1} 
 into line \#256. 
 
 
-Subsequently, the memory \emph{store} to \texttt{v1} in state $s$ has to 
-replace \texttt{S[0]} following the LRU policy, as shown in Figure
-\ref{fig:3b}. Also, the last memory \emph{load} to \texttt{S[x]} might 
-result in a cache miss or a cache hit, depending on the value of \texttt{x}, 
-which is consistent with the situation in Section~\ref{sec:specu_leak}. 
-Hence, our proposed method succeeds in modeling speculative execution 
-and conforms to the three-step process designed in Section~\ref{sec:specu}. 
-Note that Figure~\ref{fig:3a} only shows the modeling of the \emph{else} 
-branch while \SpecuSym considers both branches and misses no potential cases. 
+Subsequently, executing the memory \emph{store} to \texttt{v2} in state $s$ has
+to evict \texttt{S[0]} from cache line \#1 following the LRU policy, as shown in 
+Figure~\ref{fig:3b}. Then, the last memory \emph{load} of \texttt{S[x]} might 
+result in a cache miss or a hit, counting on the value of \texttt{x}, which is 
+consistent with the situation explained in Section~\ref{sec:specu_leak}. Hence, 
+\SpecuSym succeeds in modeling speculative execution and conforms to the 
+three-phase analysis designed in Section~\ref{sec:specu}. Note that Figure
+\ref{fig:3a} only shows the modeling of the \emph{if} branch while \SpecuSym 
+considers both branches and misses no potential cases. 
 
 %Also, we can use different bounds of the speculative state for more practical 
 %cache analysis.
-
 
 \ignore{
 In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
@@ -1258,16 +1257,18 @@ cache state to state $s$ before its termination, as formally stated in Algorithm
 }
 
 
-In this example, updating the cache state is straightforward -- by checking 
-the in-cache addresses to find an available cache line on a cache miss, or 
-retain the current cache items in case of a hit. For the undecided address, 
-i.e., \texttt{S[x]}, we can try 255 possible cache mappings to test the 
-difference. However, it is impractical to eagerly enumerate all potentials since it can 
-cause unbearable overhead. Abstract interpretation based analysis~\cite{WuW19} 
-approximates concrete possibilities whereas this approach is impractical in 
-symbolic execution. Also, many mappings are indeed redundant w.r.t leak 
-exposure, e.g., only 1 mapping reveals leak in the motivating example. 
+In this example, updating the cache state is straightforward. By checking the 
+in-cache addresses to find a proper cache line upon a cache miss, or update the 
+most recently used line in case of a hit. For the undecided address, i.e., 
+\texttt{S[x]}, we can, at worst, try 254 possiblities to test the differences. 
+However, eagerly enumerating all potentials is impractical for real-world programs 
+due to the unbearable overhead. Furthermore, a great many cache mappings are
+indeed redundant in terms of leak exposure. For instance, only 1 mapping can 
+reveal a leak in the motivating example. 
 
+
+% Abstract interpretation based analysis~\cite{WuW19} approximates concrete 
+%possibilities, whereas this approach is ineffective in symbolic execution. 
 
 Instead, \SpecuSym models all possible branch mispredictions along with  an execution 
 path to maintain a \textit{stitched} trace of memory events as the alternative 
@@ -1298,8 +1299,8 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
   	\node[above=3pt, right, scale=.8] at (0.1, 2.2) {......};
 		\node[above=3pt, right, scale=.8] at (0.1, 2.0) {\texttt{S[253]}};
 		\node[above=3pt, right, scale=.8] at (0.1, 1.8) {\texttt{x}};
-		\node[above=3pt, right, scale=.8] at (-0.4, 1.2) {\texttt{v1}};
-    \node[above=3pt, right, scale=.8] at (0.05, 1.2) {\texttt{v2}};
+		\node[above=3pt, right, scale=.8] at (-0.4, 1.2) {\texttt{v2}};
+    \node[above=3pt, right, scale=.8] at (0.05, 1.2) {\texttt{v1}};
     \node[above=3pt, right, scale=.8] at (0.1, 0.45) {\texttt{S[x]}};
 
     \draw [-stealth,thin,blue](-0.2, 2.7)--(-0.2, 1.8);
@@ -1321,7 +1322,7 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
 	  \end{tikzpicture}
 \end{minipage}
 }
-\subfigure[The cache state from $s'$]{
+\subfigure[The cache state in $s'$]{
 \label{fig:3b}
 \begin{minipage}{0.3\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
@@ -1332,7 +1333,7 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
   	\node[left=4pt, right, scale=.8] at (-0.4, 1.3) {lines};
 
   	\draw (0, 0.2) rectangle (1.4, 0.6);
-		\node[above=5pt, right, scale=.8, red] at (0.55, 0.25) {v2} ;	
+		\node[above=5pt, right, scale=.8, red] at (0.55, 0.25) {v1} ;	
   	\draw (0, 0.6) rectangle (1.4, 1.0);
 		\node[above=5pt, right, scale=.8] at (0.6, 0.65) {x};
   	\draw (0, 1.0) rectangle (1.4, 1.4);
@@ -1343,7 +1344,7 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
   	\node[above=5pt, right, scale=.8] at (0.45, 1.85) {S[1]};
   	\draw(0, 2.2) rectangle (1.4, 2.6);
 		\node[above=5pt, right, scale=.8] at (0.45, 2.25) {S[0]};
-		\node[above=5pt, right, scale=.8, blue] at (1.55, 2.25) {v1};
+		\node[above=5pt, right, scale=.8, blue] at (1.55, 2.25) {v2};
 
 		\draw[<-, line width=0.6pt, blue] (1.2, 2.4) -- (1.6, 2.4) ;
 
