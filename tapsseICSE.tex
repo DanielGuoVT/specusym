@@ -1216,34 +1216,34 @@ models the speculative behavior but also precisely transfers the cache informati
 between symbolic states with controllable flexibility. 
 
 
-Figure~\ref{fig:specu_modeling} shows the speculative modeling of program $\prog$ 
-exampled in Figure~\ref{fig:motiv}. Figure~\ref{fig:fig3-a} displays the control 
-flow graph of $\prog$ on which we annotate the memory access related variables. 
-For example, {S[0]} means the first array read in the $\mathit{while}$ loop, and 
-\texttt{v2} means the memory \emph{write} in the $\mathit{else}$ branch. The solid 
-arrowed line denotes the execution flow of state $s$ which takes the $\mathit{if}$ 
+Figure~\ref{fig:specu_modeling} shows the speculative modeling of motivating 
+program $\prog$. Figure~\ref{fig:3a} displays the control flow graph on 
+which we annotate the memory access related variables. E.g., \texttt{S[0]} 
+indicates the first array read in the $\mathit{while}$ loop, and \texttt{v2} 
+means the memory \emph{write} in the $\mathit{else}$ branch. The solid arrow 
+line denotes the execution flow of state $s$, which takes the $\mathit{if}$ 
 branch in regular symbolic execution. 
 
 
-Then, in Figure~\ref{fig:fig3-a}, on reaching the branch we duplicate a 
-\textit{speculative} state $s'$ from $s$, and enforce a bounded execution
-(e.g., one memory access) into the \textit{else} branch of $s'$, as shown 
-by the red dashed line. Once $s'$ meets the threshold, we stop the 
-execution and turn back to its birth point where state $s$ is awaiting 
-the finish of $s'$. Also, we integrate the cache state of $s'$ (cf. 
-Figure~\ref{fig:fig3-b}) into $s$ and terminate $s'$ to resume $s$. Right 
-now, the whole cache has been filled since the memory write in $s'$ mapped 
-\texttt{v2} into the line \#256 . 
+In Figure~\ref{fig:3a}, on reaching the branch point, \SpecuSym duplicates a 
+\textit{speculative} state $s'$ from $s$. Then, it enforces a bounded symbolic 
+execution of $s'$, e.g., one memory access inside the \textit{else} branch, as 
+shown by the dashed arrow curve. Once meeting the speculation threshold, 
+\SpecuSym stops the exploration and turns back to find state $s$ who is awaiting 
+the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporate the cache 
+state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminate $s'$. Right now, 
+the entire cache has been filled since the memory write in $s'$ mapped \texttt{v2} 
+into line \#256. 
 
 
 Subsequently, the memory \emph{store} to \texttt{v1} in state $s$ has to 
 replace \texttt{S[0]} following the LRU policy, as shown in Figure
-\ref{fig:fig3-b}. Also, the last memory \emph{load} to \texttt{S[x]} might 
+\ref{fig:3b}. Also, the last memory \emph{load} to \texttt{S[x]} might 
 result in a cache miss or a cache hit, depending on the value of \texttt{x}, 
 which is consistent with the situation in Section~\ref{sec:specu_leak}. 
 Hence, our proposed method succeeds in modeling speculative execution 
 and conforms to the three-step process designed in Section~\ref{sec:specu}. 
-Note that Figure~\ref{fig:fig3-a} only shows the modeling of the \emph{else} 
+Note that Figure~\ref{fig:3a} only shows the modeling of the \emph{else} 
 branch while \SpecuSym considers both branches and misses no potential cases. 
 
 %Also, we can use different bounds of the speculative state for more practical 
@@ -1251,7 +1251,7 @@ branch while \SpecuSym considers both branches and misses no potential cases.
 
 
 \ignore{
-In Figure~\ref{fig:fig3-a}, the speculative state $s'$ inherits the cache 
+In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
 state from $s$, maps \texttt{v2} into a cache line, and merges back the updated 
 cache state to state $s$ before its termination, as formally stated in Algorithm
 \ref{alg:specusym} (lines 24-26). 
@@ -1276,12 +1276,11 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
 \ref{sec:modeling} and Section~\ref{sec:analysis}. 
 
 
-\begin{figure}%[htb]
-\subfigure[Stitched executions of $s$ and $s'$]{
-\label{fig:fig3-a}
+\begin{figure}
+\subfigure[Executions of states $s$ and $s'$]{
+\label{fig:3a}
 \begin{minipage}{0.4\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
-
 		\draw[->, line width=0.5pt, black](0, 0.8) -- (0, 0.275);
 		\draw[line width=0.5pt, black](0, 1.8)..controls (-0.55,1.3) .. (0, 0.8);
 		\draw[line width=0.5pt, black](0, 1.8)..controls (0.55,1.3) .. (0, 0.8);
@@ -1295,13 +1294,13 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
 		\filldraw [black] (0.4, 1.3) circle (1pt);
 		\filldraw [black] (0, 0.55) circle (1pt);
 
-    \node[above=3pt, right, scale=.8] at (0.1, 2.4) {S[0]};
+    \node[above=3pt, right, scale=.8] at (0.1, 2.4) {\texttt{S[0]}};
   	\node[above=3pt, right, scale=.8] at (0.1, 2.2) {......};
-		\node[above=3pt, right, scale=.8] at (0.1, 2.0) {S[253]};
-		\node[above=3pt, right, scale=.8] at (0.1, 1.8) {x};
-		\node[above=3pt, right, scale=.8] at (-0.9, 1.2) {v1};
-    \node[above=3pt, right, scale=.8] at (0.5, 1.2) {v2};
-    \node[above=3pt, right, scale=.8] at (0.1, 0.45) {S[x]};
+		\node[above=3pt, right, scale=.8] at (0.1, 2.0) {\texttt{S[253]}};
+		\node[above=3pt, right, scale=.8] at (0.1, 1.8) {\texttt{x}};
+		\node[above=3pt, right, scale=.8] at (-0.4, 1.2) {\texttt{v1}};
+    \node[above=3pt, right, scale=.8] at (0.05, 1.2) {\texttt{v2}};
+    \node[above=3pt, right, scale=.8] at (0.1, 0.45) {\texttt{S[x]}};
 
     \draw [-stealth,thin,blue](-0.2, 2.7)--(-0.2, 1.8);
 		\draw [thin,blue](-0.2, 1.8)..controls (-0.3, 1.7) and (-0.6, 1.5) .. (-0.5, 1.1);
@@ -1316,14 +1315,14 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
 		\draw [densely dashed, thin,red](0.5, 1.6)..controls (0.6, 1.2) and (0.5, 0.8) .. (0.3, 0.9);
 		\draw [-stealth, densely dashed, thin,red](0.3, 0.9)..controls (0.1, 1.2) .. (-0.2, 1.8);
 
-		\node[above=3pt, right, scale=.8, red] at (0.5, 0.9) {speculative};
-		\node[above=3pt, right, scale=.8, red] at (0.65, 0.7) {state $\mathit{s'}$};
+		\node[above=3pt, right, scale=.8, red] at (0.5, 1.3) {speculative};
+		\node[above=3pt, right, scale=.8, red] at (0.65, 1.1) {state $\mathit{s'}$};
 
 	  \end{tikzpicture}
 \end{minipage}
 }
 \subfigure[The cache state from $s'$]{
-\label{fig:fig3-b}
+\label{fig:3b}
 \begin{minipage}{0.3\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
 		\draw[->|, line width=0.4pt](-0.25, 1.7) -- (-0.25, 2.6);
@@ -1365,7 +1364,7 @@ and lazily searches for solutions. We detail this trace-based analysis in Sectio
 
 %The cache state during a program execution refers to the status of the 
 %cache lines after executing every memory-related instruction, e.g., the 
-%cache snapshot shown in Figure~\ref{fig:fig3-b}.
+%cache snapshot shown in Figure~\ref{fig:3b}.
 
 This section explains how \SpecuSym models the cache state. Since each explored 
 path in symbolic execution represents a unique program run, we thereby extend 
@@ -1483,7 +1482,7 @@ are qualified (cf. \circled{1}). Second, we count the unique addresses that
 map to the same cache set to $\mathit{m_i}$ and assure the sum is less than 
 the set associativity (cf. \circled{2}). Note that $\mathit{\eta_{in}(m_i)}$ 
 is close to but not equivalent to $\mathit{\mu_{in}(m_i)}$. E.g., for 
-\texttt{S[x]} \textit{read} in Figure~\ref{fig:fig3-a}, $\mathit{\mu_{in}(m_i)}$ 
+\texttt{S[x]} \textit{read} in Figure~\ref{fig:3a}, $\mathit{\mu_{in}(m_i)}$ 
 can be satisfied but $\mathit{\eta_{in}(m_i)}$ cannot.
 
 Based on $\mathit{\eta_{in}(m_i)}$ we define $\mathit{\eta^\prime_{in}(m_i)}$
@@ -1698,7 +1697,7 @@ the event as the leak witness.
 
 For instance, after obtaining a trace {\small \{\texttt{S[0]},...,\texttt{S[254]},
 \texttt{x},\texttt{v2},\texttt{v1},\texttt{S[x]}\}} from the stitched execution 
-in Figure~\ref{fig:fig3-a}, \SpecuSym finds that the sensitive data dependent 
+in Figure~\ref{fig:3a}, \SpecuSym finds that the sensitive data dependent 
 address {\small\texttt{S[x]}} is from \textit{symbolic} state $s$. Also, 
 in non-speculative execution visiting {\small\texttt{S[x]}} must get a cache hit 
 ($\mathit{\eta_{in'}^\prime(m_i)}$=1). Thus, the sub-constraint $\mathit{\eta_{in}(m_i)}$ 
