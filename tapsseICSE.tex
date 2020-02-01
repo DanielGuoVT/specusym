@@ -1270,11 +1270,13 @@ reveal a leak in the motivating example.
 % Abstract interpretation based analysis~\cite{WuW19} approximates concrete 
 %possibilities, whereas this approach is ineffective in symbolic execution. 
 
-Instead, \SpecuSym models all possible branch mispredictions along with  an execution 
-path to maintain a \textit{stitched} trace of memory events as the alternative 
-of the cache state. Then it builds the leak constraint by analyzing the trace, 
-and lazily searches for solutions. We detail this trace-based analysis in Section
+
+Instead, \SpecuSym models branch mispredictions along with a path exploration
+and maintains a trace of memory events as the alternative of the cache state. 
+Then it analyzes the event trace to build the leak constraint and lazily 
+searches for feasible solutions. We detail this trace-based analysis in Section
 \ref{sec:modeling} and Section~\ref{sec:analysis}. 
+
 
 
 \begin{figure}
