@@ -1537,23 +1537,24 @@ cache hit condition of $\mathit{m_i}$ in trace $\pi$:
 %
 %
 
-Still, given a $\mathit{m_i}$, we first seek a prior event $\mathit{m_j}$ from 
-$\pi$ who might let $\mathit{m_i}$ trigger a cache hit. That is, the addresses 
-$\mathit{a_j}$ and $\mathit{a_i}$ have the same \emph{tag} and \emph{set} values
-(cf. \circled{4}). Moreover, we need to find the nearest $\mathit{m_j}$ because 
-$\mathit{m_i}$'s cache behavior directly relates to it. This demand is accomplished
-by ensuring the non-existence of an event $\mathit{m_x}$ between $\mathit{m_j}$ and 
-$\mathit{m_i}$. Also, $\mathit{m_x}$ and $\mathit{m_i}$ have to own the same 
-\textit{tag} and \textit{set} values (cf. \circled{5}).
+Still, given a $\mathit{m_i}$, we first seek a prior $\mathit{m_j}$ 
+from $\pi$ who might let $\mathit{m_i}$ cause a cache hit. That is, the 
+addresses $\mathit{a_j}$ and $\mathit{a_i}$ have the same \emph{tag} 
+and \emph{set} values (cf. \circled{4}). Moreover, we need to find the 
+nearest $\mathit{m_j}$ since $\mathit{m_i}$'s cache behavior directly 
+relies on it --- this demand is achieved by ensuring the non-existence 
+of a $\mathit{m_x}$ between $\mathit{m_j}$ and $\mathit{m_i}$. And, 
+$\mathit{m_x}$ and $\mathit{m_i}$ own the same \textit{tag} and 
+\textit{set} values (cf. \circled{5}).
 
 
-Next, we consider the cache replacement policy. Without loss of generality, 
-\SpecuSym models a N-way set-associative cache with the LRU policy. Other 
-policies can apply to equation~(\ref{eqn:hc}) as well. Intuitively, on 
-finding a potential $\mathit{m_j}$ for $\mathit{m_i}$, the executed events 
+Next, we consider the cache replacement policy. \SpecuSym models the N-way 
+set-associative cache with the LRU policy, whereas other policies can be 
+modeled and embedded in equation~(\ref{eqn:hc}) as well. Intuitively, on 
+finding a candidate $\mathit{m_j}$ for $\mathit{m_i}$, the executed events 
 between $\mathit{m_j}$ and $\mathit{m_i}$ should not evict $\mathit{m_j}$ 
 from the cache, to promise a cache hit for $\mathit{m_i}$. Under the LRU 
-policy, we observe that iff satisfying property~\ref{pro:p1} can this 
+policy, we observe that if satisfying property~\ref{pro:p1}, can this 
 non-evict requirement be met.
 %
 \begin{pro}
@@ -1563,43 +1564,44 @@ non-evict requirement be met.
   \textsc{Set} must be less than the set associativity.
 \end{pro}
 %
-The sub-formula \circled{6} checks whether an event $\mathit{m_y}$ between 
-$\mathit{m_j}$ and $\mathit{m_i}$ can form a uniquely new mapping to the set 
-that $\mathit{a_i}$ maps to. We perform the check by first comparing the 
-set values of $\mathit{a_y}$ and $\mathit{a_i}$. If this precondition satisfies, 
-we check if address $\mathit{a_y}$ has never been accessed before by an event
-$\mathit{m_z}$ --- by confirming that the \emph{tag} value of $\mathit{a_z}$ 
-always differs from that of $\mathit{a_y}$. If this check also satisfies, then 
-$\mathit{a_y}$ forms a uniquely new cache mapping. We count these new 
-mappings to embed \textsc{Property}~\ref{pro:p1} in equation (\ref{eqn:hc}).
+Sub-formula \circled{6} checks whether an event $\mathit{m_y}$ between 
+$\mathit{m_j}$ and $\mathit{m_i}$ can form a uniquely new mapping to the 
+set that $\mathit{a_i}$ maps to. We perform the check by first comparing 
+the \textit{set} values of $\mathit{a_y}$ and $\mathit{a_i}$. If the 
+comparison satisfies, we further analyze if address $\mathit{a_y}$ has 
+never been accessed by an event $\mathit{m_z}$ --- by confirming that the 
+\emph{tag} values of $\mathit{a_z}$ and $\mathit{a_y}$ always differ. If 
+this check also satisfies, then $\mathit{a_y}$ must form a uniquely new 
+cache mapping. We count the new mappings and embed \textsc{Property}
+\ref{pro:p1} in equation (\ref{eqn:hc}).
 
 
-Take a 9-event trace $\mathit{M}$=
-\{$\mathit{m_1,m_2,\underline{m_1,m_3,m_3,m_4,m_5,m_4,m_1}}$\} as the example. For 
-brevity we assume all the visited memory addresses associate with the same cache 
-set and the set associativity is \textit{four}. Also, each memory event corresponds 
-to one cache line. And we want to check whether the last event, $\mathit{m_1}$, 
-can lead to a cache hit. Here we use \#$n$ to index each event where $n\in$[1,9].
+Take a 9-event trace $\pi$:=
+\{$\mathit{m_1,m_2,\underline{m_1,m_3,m_3,m_4,m_5,m_4,m_1}}$\} as the 
+example. For brevity, we assume all the memory addresses associate with 
+the same cache set, and each address corresponds to one cache line. And, 
+the cache set associativity is \textit{4}. The question is, whether the 
+last event, $\mathit{m_1}$, can lead to a cache hit. Here we use 
+\#$n$ to index these events where $n\in$[1,9].
 
 
-Backtracking from the last $\mathit{m_1}$, we first locate two preceding
+Backtracking from the last event $\mathit{m_1}$, we first locate two prior 
 $\mathit{m_1}$ events, \#1 and \#3, as the candidates that satisfy \circled{4}. 
 Then, according to \circled{5}, we select the nearest event \#3, to form a 
-sub-trace $\rho$ as underlined in $\mathit{M}$. Note that after $\rho$'s 
-head event $\mathit{m_1}$, the cache line used by $\mathit{m_1}$ becomes 
-the most recently used line. We name this line as \emph{l}. Then, following 
-\circled{6}, along $\rho$ we can identify \emph{three} uniquely new cache 
-mappings to the same set, incurred by events \#4 ($\mathit{m_3}$), \#6 
-($\mathit{m_4}$), and \#7 ($\mathit{m_5}$), respectively. Other events,
-i.e., \#5 ($\mathit{m_3}$) and \#8 ($\mathit{m_4}$), cannot form unique
-mappings since they do not satisfy \circled{6}.
+sub-trace $\rho$ as underlined in $\pi$. Note that after $\rho$'s head event 
+$\mathit{m_1}$, the cache line used by this $\mathit{m_1}$ becomes the most 
+recently used line. Let's name the line as \emph{l}. Then, following \circled{6}, 
+along $\rho$ we can identify \emph{3} uniquely new cache mappings, incurred by 
+events \#4 ($\mathit{m_3}$), \#6 ($\mathit{m_4}$), and \#7 ($\mathit{m_5}$), 
+respectively. Other events, i.e., \#5 ($\mathit{m_3}$) and \#8 ($\mathit{m_4}$),
+cannot form unique mappings since they do not satisfy \circled{6}.
 
 
 Therefore, we conclude that the target event, $\mathit{m_1}$, must lead to a 
-cache hit because the identified \emph{three} unique cache mappings at most 
-evict other three lines rather than the most recently used line \emph{l}. In 
-other words, the number of uniquely new mappings is less than the cache set 
-associativity, which conforms to \textsc{Property}~\ref{pro:p1}.
+cache hit because the identified \emph{3} unique cache mappings at most evict 
+the other 3 lines rather than the line \emph{l}. In other words, the number of 
+uniquely new mappings is less than the cache set associativity, which conforms 
+to \textsc{Property}~\ref{pro:p1}.
 
 
 \subsection{Cache Behavior Analysis}
