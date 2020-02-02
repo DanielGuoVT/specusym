@@ -1136,7 +1136,7 @@ these changes in blue.
         \uElseIf{$\mathit{s.e}$ is memory access event}{
           \textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s}$));\;	
           \textcolor{blue}{$\mathit{AnalyzeCache}$($s$);}\;
-          \textcolor{blue}{$\mathit{s}.\varpi\leftarrow $ update cache state by interpreting $\mathit{s.e}$;}\;
+          \textcolor{blue}{$\mathit{s}.\pi\leftarrow $ update cache state by interpreting $\mathit{s.e}$;}\;
         }
         ......\;
 }
@@ -1147,7 +1147,7 @@ $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
     $\mathit{s' \leftarrow }$ duplicate state $\mathit{s}$;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\textcolor{dkgreen}{// Fork speculative state}\;
     $\mathit{s' \leftarrow redirect~s'~to~the~\neg c~control~flow}$;~~\textcolor{dkgreen}{// Negate branch direction}\;
     \textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s'}$));\;
-    $\mathit{s}.\varpi \leftarrow \mathit{s'}.\varpi$;\;%\mathit{s}.\Xi \diamond 	
+    $\mathit{s}.\pi \leftarrow \mathit{s'}.\pi$;\;%\mathit{s}.\Xi \diamond 	
     Terminate $\mathit{s'}$;\;
   }
 }
@@ -1155,8 +1155,8 @@ $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
 $\mathit{AnalyzeCache}$(SymbolicState $s$)\;
 \Begin{
     \If{$\mathit{s}$ is a regular symbolic state {\bf{and}} s.e relates to secret input}{
-    $\xi\leftarrow$ build the leak constraint for $\mathit{s.e}$;\;
-    \If{$\mathit{s.pc}\wedge\xi~\mathit{is~satisfiable}$}{
+    $\theta\leftarrow$ build the leak constraint for $\mathit{s.e}$;\;
+    \If{$\mathit{s.pc}\wedge\theta~\mathit{is~satisfiable}$}{
       Generate witness;\;
     }
   }
@@ -1607,27 +1607,27 @@ to \textsc{Property}~\ref{pro:p1}.
 \subsection{Cache Behavior Analysis}
 \label{sec:analysis}
 
-In this section we leverage $\mathit{\mu_{in}(m_i)}$, $\mathit{\eta_{in}(m_i)}$ 
-and $\mathit{\eta^\prime_{in}(m_i)}$ to analyze the cache behavior of $\mathit{m_i}$. 
-In general, if $\mathit{m_i}$ has no cache behavior variance in both speculative 
-execution and non-speculative execution for any arbitrary inputs, then it leaks 
-no data. Otherwise, at the program location of $\mathit{m_i}$ there is a leak. 
+This section leverages the formal terms $\mathit{\mu_{in}(m_i)}$, 
+$\mathit{\eta_{in}(m_i)}$ and $\mathit{\eta^\prime_{in}(m_i)}$ (cf. Section
+\ref{sec:modeling}) to analyze the cache behavior of $\mathit{m_i}$. In general, 
+if $\mathit{m_i}$ has no cache behavior variance in both speculative execution 
+and non-speculative execution for any inputs, it has no leaks. Otherwise, at the 
+program location of $\mathit{m_i}$, there is a leak. 
 
 
 %\subsubsection{Leak Constraint Construction}
 %\label{sec:leak_constraint}
 
-Procedure $\mathit{AnalyzeCache}$ in Algorithm~\ref{alg:specusym} constructs the 
-leak constraint. \SpecuSym invokes $\mathit{AnalyzeCache}$ right after executing
-a memory event (line 14). Inside the procedure, \SpecuSym first examines whether 
-the current state $s$ is a $\mathit{symbolic}$ state and the event $s.e$ relates 
-to sensitive input. This is because the timing affects inside the speculative 
-execution is externally invisible and we only care about the sensitive data dependent 
-memory accesses. Next, \SpecuSym builds the leak constraint $\xi$ for event $s.e$, and 
-solves for solutions (lines 33-35). If such inputs do not exist, \SpecuSym claims 
-leakage-free at $s.e$ on the current program path.
+In Algorithm~\ref{alg:specusym}, \SpecuSym invokes $\mathit{AnalyzeCache}$ right
+after interpreting a memory event (line 14). In this procedure, \SpecuSym first 
+examines whether the current state $s$ is a $\mathit{symbolic}$ state, and the 
+event $s.e$ relates to sensitive input. It is because the timing effect inside 
+speculative execution is externally invisible, and we are interested in the 
+sensitive data relevant memory accesses. Next, \SpecuSym builds the leak constraint 
+$\theta$ for event $s.e$ and solves for a solution (lines 33-35). If the solution
+does not exist, \SpecuSym claims leakage-free at $s.e$ in current state $s$.
 
-To form $\xi$, we have to first build the constraint exposing new cache behaviors
+To form $\theta$, we have to build the constraint exposing new cache behaviors
 at a given memory event $\mathit{m_i}$ as follows.
 %
 \begin{multline}
@@ -1660,7 +1660,7 @@ at a given memory event $\mathit{m_i}$ as follows.
 \begin{multline}
   \label{eqn:leak}
   ~~
-  \xi:=
+  \theta:=
   \Big(
   \mathit{div_i}
   \wedge
@@ -1685,20 +1685,20 @@ speculative execution not only evicts cache lines to cause new misses but also l
 memory data into cache that benefits new hits. Since a leak refers to the noticeable 
 timing variance in program runs with and without speculative execution, from 
 $\mathit{opp_i}$ the amount of new misses should differ from the amount of new hits. 
-And we construct the final leak constraint $\xi$ on this observation:
+And we construct the final leak constraint $\theta$ on this observation:
 }
 
 
 Term $\mathit{div_i}$ represents the existence of \textit{New Divergent Behavior} 
 and term $\mathit{opp_i}$ checks \textit{New Opposite Behavior}, respectively. We 
-define $\xi:=\mathit{div_i}\vee\mathit{opp_i}$ as the leak constraint at $\mathit{m_i}$.
+define $\theta:=\mathit{div_i}\vee\mathit{opp_i}$ as the leak constraint at $\mathit{m_i}$.
 \SpecuSym first computes $\mathit{\eta_{in'}^\prime(m_i)}$ because of the lower cost 
 of a \textit{must-be} solving. Then, it uses the concretized value to substitute
 $\mathit{\eta_{in'}^\prime(m_i)}$ in $\mathit{opp_i}$ for the solving of $\mathit{in}$. 
 If such targeted $\mathit{in}$ exists then $opp_i$ must be satisfiable and \SpecuSym
 safely skips the solving of $\mathit{div_i}$. Otherwise, it has to continue reasoning 
 $\mathit{div_i}$. Finally, if the solver successfully returns concrete solutions
-of $\xi$, \SpecuSym generates a test case including the inputs, the trace $M$, and 
+of $\theta$, \SpecuSym generates a test case including the inputs, the trace $M$, and 
 the event as the leak witness.
 
 
@@ -1737,19 +1737,19 @@ To balance the precision and efficiency, \SpecuSym backwardly examines the
 memory accesses from last branch to the current branch. If the examination 
 determines a cache hit, we know that speculative analysis at this point is 
 unnecessary. Otherwise, we record this branch predicate and add the miss 
-constraints to $\xi$ for analysis.  
+constraints to $\theta$ for analysis.  
 
 
 \textbf{Formula Simplification and Reduction.}
 Formulas $\mathit{div_i}$ and $\mathit{opp_i}$ captures the complete set of 
 cache behavioral differences. However, we observe that if $\mathit{\eta_{in}(m_i)}$ 
 satisfies then $\mathit{\mu_{in}(m_i)}$ must satisfy. Thereby we can further 
-simplify $\xi$ into $\xi'$ as follows.  
+simplify $\theta$ into $\theta'$ as follows.  
 %
 \begin{multline}
   \label{eqn:leak}
   ~~~~~~~~~~~~~~~
-  \xi':=
+  \theta':=
   \exists\mathit{in}.
   \mathit{
     \mu_{in}(m_i)~\neq~\eta_{in}^\prime(m_i)
@@ -1761,8 +1761,8 @@ Since we assume a leakage-free program under non-speculative execution,
 $\mathit{\eta_{in}^\prime(m_i)}$ must be 0 (miss) or 1 (miss). Meanwhile, 
 if $\mathit{\mu_{in}(m_i)}$ (the may-hit condition) has a different solution 
 to $\mathit{\eta_{in}^\prime(m_i)}$, then there must be a new cache behavior, 
-either \textit{Divergent} or \textit{Opposite}. Thereby $\xi'$ conforms to 
-$\xi$. Also, since we repeatedly traverse memory access trace in constraint 
+either \textit{Divergent} or \textit{Opposite}. Thereby $\theta'$ conforms to 
+$\theta$. Also, since we repeatedly traverse memory access trace in constraint 
 construction, caching the intermediate results helps avoid redundant 
 computation. Therefore, we bank the computed address-comparing formulas into 
 a hash map so that they can be quickly retrieved with tolerable storage overhead. 
@@ -1813,7 +1813,7 @@ under non-speculative execution, $\mathit{\eta_{in}^\prime(m_i)}$ must be
 0 (miss) or 1 (miss). Meanwhile, if $\mathit{\mu_{in}(m_i)}$ who denotes 
 the may-hit condition has a different value to $\mathit{\eta_{in}^\prime(m_i)}$, 
 then there must be a new cache behavior, either \textit{Divergent} or 
-\textit{Opposite}. Thereby $\xi'$ conforms to $\xi$.
+\textit{Opposite}. Thereby $\theta'$ conforms to $\theta$.
 
 \sgnote{cf. Line 35 of Algorithm~\ref{alg:specusym}. We only build cache 
 hit condition on nondeterministic addresses.}
