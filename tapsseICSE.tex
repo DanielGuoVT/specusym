@@ -1274,15 +1274,15 @@ reveal a leak in the motivating example.
 Instead, \SpecuSym models branch mispredictions along with a path exploration
 and maintains a trace of memory events as the alternative of the cache state. 
 Then it analyzes the event trace to build the leak constraint and lazily 
-searches for feasible solutions. We detail this trace-based analysis in Section
+searches for feasible solutions. We detail this approach in Section
 \ref{sec:modeling} and Section~\ref{sec:analysis}. 
 
 
 
 \begin{figure}
-\subfigure[Executions of states $s$ and $s'$]{
+\subfigure[Interaction between $s$ and $s'$]{
 \label{fig:3a}
-\begin{minipage}{0.4\linewidth}
+\begin{minipage}{0.35\linewidth}
 	\begin{tikzpicture}[fill=blue!20,font=\footnotesize] 
 		\draw[->, line width=0.5pt, black](0, 0.8) -- (0, 0.275);
 		\draw[line width=0.5pt, black](0, 1.8)..controls (-0.55,1.3) .. (0, 0.8);
