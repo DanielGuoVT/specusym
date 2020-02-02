@@ -1374,21 +1374,21 @@ searches for feasible solutions. We detail this approach in Section
 
 This section addresses how \SpecuSym models the cache state. We extend the 
 definition of a symbolic state $s$ (cf. Section~\ref{sec:se}) to be a new 
-tuple $\langle \pcon, \mathit{e}, \mathit{brs},\Omega,\varpi\rangle$. The 
-newly introduced symbol $\varpi$ denotes the cache state in $s$. Then we 
-establish the following notions:
+tuple $\langle \pcon, \mathit{e}, \mathit{brs},\Omega,\pi\rangle$. The new 
+symbol $\pi$ denotes the memory event trace in $s$. Then we establish the 
+following notions:
 %
 %
 \begin{itemize*}
-  \item A program state in \SpecuSym is either a \textit{symbolic} state 
+  \item A program state in \SpecuSym is either a normal \textit{symbolic} state 
 	or a \textit{speculative} state that from the former can the latter be 
 	duplicated, but not vice versa. 
-  \item A memory event trace denoted as $\mathit{M}=\mathit{\{m_0,...,m_n\}}$, 
+  \item A memory event trace denoted as $\pi:=\mathit{\{m_0,...,m_n\}}$, 
     consists of happened memory events in the execution order.
-  \item Each memory event $\mathit{m_i}$ in $\mathit{M}$, where index $i\in [0,n]$, 
-	can be from either a \textit{symbolic} state or a \textit{speculative} state.
-  \item $\mathit{M}$ and the correlated computations alternatively represent 
-	the cache state $\varpi$ in a program state $s$.
+  \item Each memory event $\mathit{m_i}$ in $\pi$, where index $i\in [0,n]$, 
+	comes from either a \textit{symbolic} state or a \textit{speculative} state.
+  \item $\pi$ and the correlated computations alternatively represent the cache 
+	state in a program state $s$.
 \end{itemize*}
 %
 %
@@ -1401,49 +1401,46 @@ accesses upon concrete cache models. To better coordinate the speculative
 modeling component, \SpecuSym adopts an on-the-fly analysis.
 }
 
-To be specific, after executing a memory event $m_i$ in a \textit{symbolic} state, 
-we analyze if $\mathit{m_i}$ may lead to timing leak under two scenarios, namely 
-new \textit{divergent} behavior and new \textit{opposite} behavior. To formally 
-explain these scenarios, we define the following notions.
-
+To be specific, after interpreting an event $m_i$ in a \textit{symbolic} 
+state $s$, \SpecuSym analyzes if $\mathit{m_i}$ can cause timing leak 
+under two scenarios, namely the new \textit{divergent} behavior and the 
+new \textit{opposite} behavior. To explain these scenarios, we define 
+more notions as follows.
 %
-\begin{itemize}
-  \item [$-$]$\mathit{\mu_{in}(m_i)}$ denotes the condition satisfying which 
-    $\mathit{m_i}$ can trigger a cache hit under speculative execution with 
+%
+\begin{itemize*}
+  %\item [$-$]$\mathit{\mu_{in}(m_i)}$ denotes the condition satisfying which 
+  \item $\mathit{\mu_{in}(m_i)}$ denotes the condition that $\mathit{m_i}$ 
+	can trigger a cache hit under speculative execution with 
     input $\mathit{in}$. 
-  \item [$-$]$\mathit{a_i}$ denotes the accessed memory address in $\mathit{m_i}$.
-  \item [$-$]$\mathit{cs(a_i)}$ denotes the cache set that $\mathit{a_i}$ 
-    maps to.
-  \item [$-$]$\mathit{tag(a_i)}$ denotes the unique $\mathit{tag}$ of $\mathit{a_i}$.
-  \item [$-$]{N} denotes the cache associativity (i.e., N-way set associative 
-    cache, where N$\in$[1, the total number of cache lines]). 
-\end{itemize}
+  \item $\mathit{a_i}$ denotes the used memory address in event $\mathit{m_i}$.
+  \item $\mathit{cs(a_i)}$ denotes the cache set that address $\mathit{a_i}$ maps to.
+  \item $\mathit{tag(a_i)}$ denotes the unique $\mathit{tag}$ of address $\mathit{a_i}$.
+  \item {N} denotes the cache associativity where N$\in$[1, the total number of cache lines] (e.g., N-way set-associative cache). 
+\end{itemize*}
 %
-
-
+%
 \subsubsection{New Opposite Behavior}
 \label{sec:new_opp}
-It means executing $\mathit{m_i}$ under speculative execution causes a 
-always-hit then the cache behavior in non-speculative execution must be
-a always-miss, and vice versa. Recall that we only target new leaks from 
-speculative execution and this scenario depicts the exactly opposite leak
-behavior. To establish its definition, we introduce following new notions: 
-
+It means executing $\mathit{m_i}$ under non-speculative execution causes an 
+always-miss, while the result under speculative execution is an always-hit, 
+and vice versa. Recall that we only target new leaks introduced by speculative 
+execution, and this scene depicts the exact opposite situation. To build the 
+formal definition, we define new notions: 
 %
-\begin{itemize}
-  \item [$-$]$\mathit{\eta_{in}(m_i)}$ denotes the condition satisfying which 
-    $\mathit{m_i}$ \textit{always} triggers a cache hit under speculative 
-	execution.
-  \item [$-$]$\mathit{\eta^\prime_{in}(m_i)}$ denotes the condition satisfying which 
-    $\mathit{m_i}$ \textit{always} triggers a cache hit under non-speculative
-	execution.
-  \item [$-$]Boolean variable $\mathit{org(m_i)}$ shows the origin of $\mathit{m_i}$, 
-    where 0 means $\mathit{m_i}$ is from a \textit{symbolic} state and 1 means 
-    $\mathit{m_i}$ is from a \textit{speculative} state.
-\end{itemize}
 %
-
-Then we formalize $\mathit{\eta_{in}(m_i)}$ and $\mathit{\eta^\prime_{in}(m_i)}$ as follows. 
+\begin{itemize*}
+  \item $\mathit{\eta_{in}(m_i)}$ denotes the condition that $\mathit{m_i}$ 
+	triggers an always-hit under speculative execution with input $\mathit{in}$.
+  \item $\mathit{\eta^\prime_{in}(m_i)}$ denotes the condition that $\mathit{m_i}$ 
+	triggers an always-hit under non-speculative execution with input $\mathit{in}$.
+  \item Boolean variable $\mathit{org(m_i)}$ denotes the origin of $\mathit{m_i}$, 
+  where 0 means $\mathit{m_i}$ is from a normal \textit{symbolic} state, and 1 
+	means $\mathit{m_i}$ comes from a \textit{speculative} state.
+\end{itemize*}
+%
+%
+Then we can formalize $\mathit{\eta_{in}(m_i)}$ and $\mathit{\eta^\prime_{in}(m_i)}$ as follows. 
 %
 \begin{multline}
   \label{eqn:hc1}
@@ -1479,29 +1476,32 @@ Then we formalize $\mathit{\eta_{in}(m_i)}$ and $\mathit{\eta^\prime_{in}(m_i)}$
 \end{multline}
 %
 %
-Given a $\mathit{m_i}$, we first search $\mathit{M}$ for an identical 
-address $\mathit{a_j}$ ($\mathit{a_i}$=$\mathit{a_j}$) who was 
-visited before $\mathit{m_i}$. Also, $\mathit{a_j}$ has to be the nearest 
-candidate that no other addresses between $\mathit{a_j}$ and $\mathit{a_i}$ 
-are qualified (cf. \circled{1}). Second, we count the unique addresses that 
-map to the same cache set to $\mathit{m_i}$ and assure the sum is less than 
-the set associativity (cf. \circled{2}). Note that $\mathit{\eta_{in}(m_i)}$ 
-is close to but not equivalent to $\mathit{\mu_{in}(m_i)}$. E.g., for 
-\texttt{S[x]} \textit{read} in Figure~\ref{fig:3a}, $\mathit{\mu_{in}(m_i)}$ 
-can be satisfied but $\mathit{\eta_{in}(m_i)}$ cannot.
+
+Given a $\mathit{m_i}$, we first search $\pi$ for an identical address 
+$\mathit{a_j}$, which was visited in event $\mathit{m_j}$ happened before 
+$\mathit{m_i}$. Also, $\mathit{a_j}$ has to be the nearest candidate that 
+no other addresses between $\mathit{a_j}$ and $\mathit{a_i}$ are qualified
+(cf. \circled{1}). Second, we count the unique addresses who and $\mathit{m_i}$
+map to the same cache set and assure the number of such addresses is less 
+than the set associativity N (cf. \circled{2}).
+%
+Note that $\mathit{\eta_{in}(m_i)}$ is close to but not equivalent to 
+$\mathit{\mu_{in}(m_i)}$. E.g., for \texttt{S[x]} \textit{read} in 
+Figure~\ref{fig:3a}, $\mathit{\mu_{in}(m_i)}$ can be satisfied but 
+$\mathit{\eta_{in}(m_i)}$ cannot.
 
 Based on $\mathit{\eta_{in}(m_i)}$ we define $\mathit{\eta^\prime_{in}(m_i)}$
-who has an extra constraint (cf. \circled{3}) over $\mathit{\eta_{in}(m_i)}$. 
+who has an extra constraint (cf. \circled{3}) upon $\mathit{\eta_{in}(m_i)}$. 
 The new constraint ensures that all involved memory events must be from 
-\textit{symbolic} states hence filtering the influences of memory events 
-from \textit{speculative} states.
+normal \textit{symbolic} states hence filtering the influences of memory 
+events from \textit{speculative} states.
 
 \subsubsection{New Divergent Behavior}
 \label{sec:new_div}
-It means executing $\mathit{m_i}$ under speculative execution with two inputs 
-$\mathit{in}$ and $\mathit{in'}$ can cause a miss and a hit, respectively. To
-analyze this behavior, we build $\mathit{\mu(m_i)}$ which returns the cache hit
-condition of $\mathit{m_i}$ in trace $\mathit{M}$ as follows:
+It means executing $\mathit{m_i}$ under speculative execution with two different
+inputs $\mathit{in}$ and $\mathit{in'}$ can cause a miss and a hit, respectively. 
+To analyze this behavior, we build $\mathit{\mu_{in}(m_i)}$ which returns the 
+cache hit condition of $\mathit{m_i}$ in trace $\pi$:
 %
 %
 \begin{multline}
@@ -1537,14 +1537,14 @@ condition of $\mathit{m_i}$ in trace $\mathit{M}$ as follows:
 %
 %
 
-Given a $\mathit{m_i}$, we first seek a preceding $\mathit{m_j}$ from 
-$\mathit{M}$ who might triggers a cache hit on executing $\mathit{m_i}$. 
-That is, their addresses $\mathit{a_j}$ and $\mathit{a_i}$ have the same 
-\emph{tag} and \emph{set} (cf. \circled{4}). Moreover, we have to check 
-the nearest $\mathit{m_j}$ because $\mathit{m_i}$'s cache behavior directly 
-relates to this $\mathit{m_j}$. This is accomplished by ensuring non-existence 
-of a $\mathit{a_x}$ between $\mathit{a_j}$ and $\mathit{a_i}$ who has the same 
-\textit{tag} and \textit{set} values to $\mathit{a_i}$ (cf. \circled{5}).
+Still, given a $\mathit{m_i}$, we first seek a prior event $\mathit{m_j}$ from 
+$\pi$ who might let $\mathit{m_i}$ trigger a cache hit. That is, the addresses 
+$\mathit{a_j}$ and $\mathit{a_i}$ have the same \emph{tag} and \emph{set} values
+(cf. \circled{4}). Moreover, we need to find the nearest $\mathit{m_j}$ because 
+$\mathit{m_i}$'s cache behavior directly relates to it. This demand is accomplished
+by ensuring the non-existence of an event $\mathit{m_x}$ between $\mathit{m_j}$ and 
+$\mathit{m_i}$. Also, $\mathit{m_x}$ and $\mathit{m_i}$ have to own the same 
+\textit{tag} and \textit{set} values (cf. \circled{5}).
 
 
 Next, we consider the cache replacement policy. Without loss of generality, 
