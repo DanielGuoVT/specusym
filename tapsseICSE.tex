@@ -1410,9 +1410,8 @@ more notions as follows.
 %
 \begin{itemize*}
   %\item [$-$]$\mathit{\mu_{in}(m_i)}$ denotes the condition satisfying which 
-  \item $\mathit{\mu_{in}(m_i)}$ denotes the condition that $\mathit{m_i}$ 
-	can trigger a cache hit under speculative execution with 
-    input $\mathit{in}$. 
+% \item $\mathit{\mu_{in}(m_i)}$ denotes the condition that $\mathit{m_i}$ 
+%	can trigger a cache hit under speculative execution with input $\mathit{in}$. 
   \item $\mathit{a_i}$ denotes the used memory address in event $\mathit{m_i}$.
   \item $\mathit{cs(a_i)}$ denotes the cache set that address $\mathit{a_i}$ maps to.
   \item $\mathit{tag(a_i)}$ denotes the unique $\mathit{tag}$ of address $\mathit{a_i}$.
@@ -1485,10 +1484,8 @@ no other addresses between $\mathit{a_j}$ and $\mathit{a_i}$ are qualified
 map to the same cache set and assure the number of such addresses is less 
 than the set associativity N (cf. \circled{2}).
 %
-Note that $\mathit{\eta_{in}(m_i)}$ is close to but not equivalent to 
-$\mathit{\mu_{in}(m_i)}$. E.g., for \texttt{S[x]} \textit{read} in 
-Figure~\ref{fig:3a}, $\mathit{\mu_{in}(m_i)}$ can be satisfied but 
-$\mathit{\eta_{in}(m_i)}$ cannot.
+%Note that $\mathit{\eta_{in}(m_i)}$ is close to but not equivalent to 
+%$\mathit{\mu_{in}(m_i)}$. 
 
 Based on $\mathit{\eta_{in}(m_i)}$ we define $\mathit{\eta^\prime_{in}(m_i)}$
 who has an extra constraint (cf. \circled{3}) upon $\mathit{\eta_{in}(m_i)}$. 
@@ -1500,8 +1497,9 @@ events from \textit{speculative} states.
 \label{sec:new_div}
 It means executing $\mathit{m_i}$ under speculative execution with two different
 inputs $\mathit{in}$ and $\mathit{in'}$ can cause a miss and a hit, respectively. 
-To analyze this behavior, we build $\mathit{\mu_{in}(m_i)}$ which returns the 
-cache hit condition of $\mathit{m_i}$ in trace $\pi$:
+E.g., reading \texttt{S[x]} exposes this symptom (cf. Section~\ref{sec:specu_leak}). 
+To analyze the behavior, we build $\mathit{\mu_{in}(m_i)}$ which returns the cache
+hit condition of $\mathit{m_i}$ in trace $\pi$:
 %
 %
 \begin{multline}
@@ -1627,19 +1625,8 @@ sensitive data relevant memory accesses. Next, \SpecuSym builds the leak constra
 $\theta$ for event $s.e$ and solves for a solution (lines 33-35). If the solution
 does not exist, \SpecuSym claims leakage-free at $s.e$ in current state $s$.
 
-To form $\theta$, we have to build the constraint exposing new cache behaviors
+To form $\theta$, we need to build the constraint exposing new cache behaviors
 at a given memory event $\mathit{m_i}$ as follows.
-%
-\begin{multline}
-  \label{eqn:new_behav}
-  ~~~~~~~
-  \mathit{div_i}:=~
-  \exists\mathit{in,in'}.
-  \big(
-  \mathit{in\neq in'\wedge\mu_{in}(m_i) \neq \mu_{in'}(m_i)}
-  \big)
-  ~~~~~~~
-\end{multline}
 %
 \begin{multline}
   \label{eqn:new_behav}
@@ -1652,9 +1639,18 @@ at a given memory event $\mathit{m_i}$ as follows.
   ~~~~~~~~~~~~~~~~~~~~~~~
 \end{multline}
 %
-
-
-
+\begin{multline}
+  \label{eqn:new_behav}
+  ~~~~~~~
+  \mathit{div_i}:=~
+  \exists\mathit{in,in'}.
+  \big(
+  \mathit{in\neq in'\wedge\mu_{in}(m_i) \neq \mu_{in'}(m_i)}
+  \big)
+  ~~~~~~~
+\end{multline}
+%
+%
 \ignore{
 %
 \begin{multline}
@@ -1678,7 +1674,7 @@ at a given memory event $\mathit{m_i}$ as follows.
 \end{multline}
 %
 }
-
+%
 \ignore{
 Note that 
 speculative execution not only evicts cache lines to cause new misses but also loads 
@@ -1687,19 +1683,19 @@ timing variance in program runs with and without speculative execution, from
 $\mathit{opp_i}$ the amount of new misses should differ from the amount of new hits. 
 And we construct the final leak constraint $\theta$ on this observation:
 }
-
-
-Term $\mathit{div_i}$ represents the existence of \textit{New Divergent Behavior} 
-and term $\mathit{opp_i}$ checks \textit{New Opposite Behavior}, respectively. We 
-define $\theta:=\mathit{div_i}\vee\mathit{opp_i}$ as the leak constraint at $\mathit{m_i}$.
+%
+%
+$\mathit{opp_i}$ checks the existence of \textit{New Opposite Behavior} and 
+$\mathit{div_i}$ reasons \textit{New Divergent Behavior}, respectively. We define 
+$\theta:=\mathit{opp_i}\vee\mathit{div_i}$ as the leak constraint at $\mathit{m_i}$.
 \SpecuSym first computes $\mathit{\eta_{in'}^\prime(m_i)}$ because of the lower cost 
 of a \textit{must-be} solving. Then, it uses the concretized value to substitute
-$\mathit{\eta_{in'}^\prime(m_i)}$ in $\mathit{opp_i}$ for the solving of $\mathit{in}$. 
-If such targeted $\mathit{in}$ exists then $opp_i$ must be satisfiable and \SpecuSym
-safely skips the solving of $\mathit{div_i}$. Otherwise, it has to continue reasoning 
-$\mathit{div_i}$. Finally, if the solver successfully returns concrete solutions
-of $\theta$, \SpecuSym generates a test case including the inputs, the trace $M$, and 
-the event as the leak witness.
+$\mathit{\eta_{in'}^\prime(m_i)}$ in $\mathit{opp_i}$ for the further solving of 
+$\mathit{in}$. If this targeted $\mathit{in}$ exists, then $opp_i$ must be satisfiable, 
+and \SpecuSym can safely skip the rest analysis of $\mathit{div_i}$. Otherwise, it has
+to continue reasoning $\mathit{div_i}$. Finally, if the solver successfully returns 
+a concrete solution of $\theta$, \SpecuSym generates a test case including two inputs, 
+the trace $\pi$, and event $\mathit{m_i}$ as the leak witness.
 
 
 For instance, after obtaining a trace {\small \{\texttt{S[0]},...,\texttt{S[254]},
