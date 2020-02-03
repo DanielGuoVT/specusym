@@ -1798,7 +1798,7 @@ map so that \SpecuSym can quickly retrieve them with tolerable storage overhead.
 \subsubsection{Speculative Assumption Checking.}
 Recall that in Algorithm~\ref{alg:specusym} \SpecuSym duplicates a new state 
 $s'$ from symbolic state $s$ (line 22) if the branch predicate relates to a
-memory value rather than a cache value. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where speculative execution is not conducted. To deal with this assumption requires a heavy cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. However, to balance the precision and efficiency, \SpecuSym instead backwardly examines the memory accesses from the current branch to the last branch. If the predicate value is in cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and cache speculative analysis at this 
+memory value rather than a cache value. This is because speculative execution is not conducted if predicate doesn't access memory. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where predicate values are all in cache. To deal with this assumption requires a cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. This analysis needs to calculate the cache states for all possible paths and thus is very heavy. However, it's easy to observe that the memory accesses from the current branch to the last branch are included in all possible paths and have the most influence on the cache state before the branch. Therefore, to balance the precision and efficiency, \SpecuSym instead only backwardly examines the memory access in this sequence. If the predicate value is in cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and cache speculative analysis at this 
 point is unnecessary. Otherwise, we still conduct $\theta$ for analysis as usual for precision. 
 
 
@@ -1845,30 +1845,30 @@ a must hit or must miss one, we directly skip it for speedup.}
 
 We have implemented \SpecuSym based on the KLEE~\cite{CadarDE08} symbolic 
 executor and the LLVM compiler~\cite{LattnerA04}. We refit KLEE in three
-main aspects. First, we made KLEE support bounded execution of the  
-auxiliary \textit{speculative} states and schedule the parent \textit{symbolic} 
-state afterwards, to mimic the mispredictions. Second, we made KLEE stitch 
+main aspects. First, we made KLEE support bounded execution of the auxiliary 
+\textit{speculative} state and schedule the parent \textit{symbolic} state 
+afterwards, to mimic the branch misprediction. Second, we made KLEE stitch 
 a sequence of memory events from both regular \textit{symbolic} state and 
-\textit{speculative} states, to represent the worst-case situation of 
-speculative behaviors. Third, we made KLEE analyze the cache behaviors on 
-memory events to generate concrete inputs for timing leaks. Based on these 
-new components, we built \SpecuSym for the cache timing leak analysis 
-under speculative execution.
+\textit{speculative} states, to represent the incorporation of cache data 
+from speculation. Third, we made KLEE analyze the cache behaviors on memory 
+events to generate concrete inputs for timing leaks. Based on these new 
+components, we built \SpecuSym for the cache timing leak analysis under 
+speculative execution.
 
 Specifically, after loading the LLVM bit-code of the target program, \SpecuSym 
-executes it symbolically, explores speculative states, stitches the memory 
-events, and conducts cache analysis following Algorithm~\ref{alg:specusym}. 
+executes it symbolically, explores speculative states, records the memory 
+event trace, and conducts cache analysis following Algorithm~\ref{alg:specusym}. 
 Each leak constraint is encoded in Z3-compatible form. On solving the leak
-constraint, \SpecuSym outputs leak witness including the speculated event 
-trace, the leaky memory visit, and concrete inputs. 
+constraint, \SpecuSym outputs leak witness including the event trace, the 
+leaky memory operation, and the concrete inputs. 
 
-We design the following research questions for the experiments: 
+We design following research questions for the experiments: 
 \begin{compactitem}
-\item Can \SpecuSym identify cache timing leaks introduced 
+\item Can \SpecuSym successfully identify cache timing leaks introduced 
 by speculative execution?
-\item Can \SpecuSym complement the abstract interpretation 
-based method by providing more accurate results?
-\item Can the optimizations boost the overall performance?
+\item Can \SpecuSym complement the abstract interpretation based method 
+by providing more accurate results?
+\item Can the proposed optimizations boost the overall performance of \textsc{SpecuSym}?
 \end{compactitem}
 
 %\textbf{(1)} 
@@ -2569,6 +2569,9 @@ between \SpecuSym and state-of-the-art abstract interpretation based
 leak detection method shows \SpecuSym not only successfully eliminates 
 false positives but also generates precise inputs for leak exposure.
 
+
+\section*{Acknowledgement}
+We thank xxx for xxx.
 
 \clearpage\newpage
 \bibliographystyle{ACM-Reference-Format}
