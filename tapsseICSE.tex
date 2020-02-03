@@ -660,7 +660,7 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 
 
 \subsection{Leakage-free in Non-speculative Execution}
-\label{sec:normal_exec}
+\label{sec:no_leak}
 
 Running $\prog$ without speculative execution won't leak any information 
 about \texttt{x}. This section analyzes the cache behavior in details. 
@@ -696,7 +696,7 @@ cache timing leaks under non-speculative execution.
 \subsection{New Leak under Speculative Execution}
 \label{sec:specu_leak}
 
-In Section~\ref{sec:normal_exec}, only one \textit{store} operation can happen 
+In Section~\ref{sec:no_leak}, only one \textit{store} operation can happen 
 in non-speculative execution. However, the situation changes, and a new timing 
 leak appears when taking speculative execution into account.  
 
@@ -842,7 +842,7 @@ flow of symbolic execution.
   }\uElseIf{$\mathit{s.e}$ is other interpretable event}{
     \textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~~~~~~~~ \textcolor{dkgreen}{// The $\varphi$ event}
   }\Else{
-    Terminate state $s$;\;
+    Terminate state $s$ and report error;\;
   }
   $\textsc{Stack}$.pop();\;
 }
@@ -1133,10 +1133,10 @@ these changes in blue.
 
           }
         } 
-        \uElseIf{$\mathit{s.e}$ is memory access event}{
-          \textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s}$));\;	
+        \uElseIf{$\mathit{s.e}$ is memory access event}{	
           \textcolor{blue}{$\mathit{AnalyzeCache}$($s$);}\;
-          \textcolor{blue}{$\mathit{s}.\pi\leftarrow $ update cache state by interpreting $\mathit{s.e}$;}\;
+					\textcolor{blue}{$\mathit{s}.\pi\leftarrow $ update cache state by interpreting $\mathit{s.e}$;}\;
+					\textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s}$));\;
         }
         ......\;
 }
@@ -1617,10 +1617,10 @@ program location of $\mathit{m_i}$, there is a leak.
 %\label{sec:leak_constraint}
 
 In Algorithm~\ref{alg:specusym}, \SpecuSym invokes $\mathit{AnalyzeCache}$ right
-after interpreting a memory event (line 14). In this procedure, \SpecuSym first 
+before interpreting a memory event (line 13). In this procedure, \SpecuSym first 
 examines whether the current state $s$ is a $\mathit{symbolic}$ state, and the 
-event $s.e$ relates to sensitive input. It is because the timing effect inside 
-speculative execution is externally invisible, and we are interested in the 
+event $s.e$ relates to sensitive input (line 32). It is because the timing effect 
+inside speculative execution is externally invisible, and we are interested in the 
 sensitive data relevant memory accesses. Next, \SpecuSym builds the leak constraint 
 $\theta$ for event $s.e$ and solves for a solution (lines 33-35). If the solution
 does not exist, \SpecuSym claims leakage-free at $s.e$ in current state $s$.
@@ -1686,36 +1686,44 @@ And we construct the final leak constraint $\theta$ on this observation:
 %
 %
 $\mathit{opp_i}$ checks the existence of \textit{New Opposite Behavior} and 
-$\mathit{div_i}$ reasons \textit{New Divergent Behavior}, respectively. We define 
-$\theta:=\mathit{opp_i}\vee\mathit{div_i}$ as the leak constraint at $\mathit{m_i}$.
-\SpecuSym first computes $\mathit{\eta_{in'}^\prime(m_i)}$ because of the lower cost 
-of a \textit{must-be} solving. Then, it uses the concretized value to substitute
-$\mathit{\eta_{in'}^\prime(m_i)}$ in $\mathit{opp_i}$ for the further solving of 
-$\mathit{in}$. If this targeted $\mathit{in}$ exists, then $opp_i$ must be satisfiable, 
-and \SpecuSym can safely skip the rest analysis of $\mathit{div_i}$. Otherwise, it has
-to continue reasoning $\mathit{div_i}$. Finally, if the solver successfully returns 
-a concrete solution of $\theta$, \SpecuSym generates a test case including two inputs, 
-the trace $\pi$, and event $\mathit{m_i}$ as the leak witness.
+$\mathit{div_i}$ reasons \textit{New Divergent Behavior}, respectively. We 
+define $\theta:=\mathit{opp_i}\vee\mathit{div_i}$ as the leak constraint at 
+$\mathit{m_i}$. \SpecuSym first computes $\mathit{\eta_{in'}^\prime(m_i)}$ 
+because of the lower cost of a \textit{must-be} solving. Then, it uses the 
+concretized value to substitute $\mathit{\eta_{in'}^\prime(m_i)}$ in 
+$\mathit{opp_i}$ for the further solving of $\mathit{in}$. If this targeted 
+$\mathit{in}$ exists, then $opp_i$ must be satisfiable, and \SpecuSym can 
+safely skip the rest analysis of $\mathit{div_i}$. Otherwise, it has to 
+continue reasoning $\mathit{div_i}$. Finally, if the solver successfully 
+returns a concrete solution of $\theta$, \SpecuSym generates a test case 
+including two inputs, the trace $\pi$, and event $\mathit{m_i}$ as the leak 
+witness.
 
 
-For instance, after obtaining a trace {\small \{\texttt{S[0]},...,\texttt{S[254]},
-\texttt{x},\texttt{v2},\texttt{v1},\texttt{S[x]}\}} from the stitched execution 
-in Figure~\ref{fig:3a}, \SpecuSym finds that the sensitive data dependent 
-address {\small\texttt{S[x]}} is from \textit{symbolic} state $s$. Also, 
-in non-speculative execution visiting {\small\texttt{S[x]}} must get a cache hit 
-($\mathit{\eta_{in'}^\prime(m_i)}$=1). Thus, the sub-constraint $\mathit{\eta_{in}(m_i)}$ 
-should be 0 in terms of a \textit{New Opposite Behavior}. Undoubtedly, \SpecuSym solves 
-out the value 0 for {\small\texttt{x}}. Finally, \SpecuSym outputs the value 0, the 
-trace including the speculative flow, and the \textit{read} event of {\small\texttt{S[x]}}.
+For instance, in Figure~\ref{fig:3a}, before interpreting the \texttt{load} 
+event of \texttt{S[x]}, \SpecuSym analyzes the cache since the sensitive 
+data relevant address {\texttt{S[x]}} is from a \textit{symbolic} state 
+$s$. At this point, trace $\pi$ in $s$ is {\small \{\texttt{S[0]},...,
+\texttt{S[254]},\texttt{x},\texttt{v2},\texttt{v1},\texttt{S[x]}\}}. Also,
+in non-speculative execution reading {\small\texttt{S[x]}} must get a cache 
+hit (cf. Section~\ref{sec:no_leak}). 
+Substituting $\mathit{\eta_{in'}^\prime(m_i)}$ with value 1 in $\mathit{opp_i}$, 
+\SpecuSym tries to solve  \forall\mathit{in}.($\mathit{\eta_{in}(m_i)\neq}$1). 
+Unfortunately, this simplified $\mathit{opp_i}$ is still unsatisfiable since 
+$\mathit{\eta_{in}(m_i)}$ evaluates to 1 if $\mathit{in}$$\neq$0. Therefore, 
+\SpecuSym moves forward to $\mathit{div_i}$. This time, it successfully returns 
+two values 0 and 1, which expose a cache miss and a hit, respectively. Finally, 
+\SpecuSym outputs the solved values, the trace $s.\pi$, and the \textit{read} 
+event of {\texttt{S[x]}}.
 
 
-It is worth noting that processors might mis-predict branches more than once 
-along a program path. As a result, we need to count the cache side affects 
+It is worth noting that processors may mispredict branches several times 
+along a program path. As a result, we need to count the cache side effects 
 from multiple mispredictions. However, attackers always expect the minimum 
-effort to trigger mispredictions for leak exposure. Meanwhile, manipulating 
-multiple speculation windows would be of great difficulties for external 
-attackers. In \SpecuSym, we follow the adversary perspective to study whether 
-one misprediction could be enough to cause timing leaks and leave the multiple 
+effort to trigger mispredictions for leak purposes. Meanwhile, manipulating 
+multiple speculation windows is usually difficult for external attackers. In 
+\SpecuSym, we follow the adversary perspective to study whether one 
+misprediction could be enough to cause timing leaks and leave the multiple 
 speculation cases as our future work. 
 
 
