@@ -1143,7 +1143,7 @@ these changes in blue.
 ~~~\\
 $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
 \Begin{
-  \If{$\mathit{c}$ relies on a memory visit}{
+  \If{$\mathit{c}$ relies on a memory access}{
     $\mathit{s' \leftarrow }$ duplicate state $\mathit{s}$;~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\textcolor{dkgreen}{// Fork speculative state}\;
     $\mathit{s' \leftarrow redirect~s'~to~the~\neg c~control~flow}$;~~\textcolor{dkgreen}{// Negate branch direction}\;
     \textbf{\SpecuSym}($\mathit{SubsequentState}$($\mathit{s'}$));\;
@@ -1798,8 +1798,7 @@ map so that \SpecuSym can quickly retrieve them with tolerable storage overhead.
 \subsubsection{Speculative Assumption Checking.}
 Recall that in Algorithm~\ref{alg:specusym} \SpecuSym duplicates a new state 
 $s'$ from symbolic state $s$ (line 22) if the branch predicate relates to a
-memory value rather than a cache value. This is because speculative execution is not conducted if predicate doesn't access memory. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where predicate values are all in cache. To deal with this assumption requires a cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. This analysis needs to calculate the cache states for all possible paths and thus is very heavy. However, it's easy to observe that the memory accesses from the current branch to the last branch are included in all possible paths and have the most influence on the cache state before the branch. Therefore, to balance the precision and efficiency, \SpecuSym instead only backwardly examines the memory access in this sequence. If the predicate value is in cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and cache speculative analysis at this 
-point is unnecessary. Otherwise, we still conduct $\theta$ for analysis as usual for precision. 
+memory value rather than a cache value. This is because speculative execution is not conducted if predicate doesn't access memory. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where predicate values are all in cache. To deal with this assumption requires a cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. This analysis needs to calculate the cache states for all possible paths and thus is very heavy. However, it's easy to observe that the memory accesses from the current branch to the last branch are included in all possible paths and have the most influence on the cache state before the branch. Therefore, to balance the precision and efficiency, \SpecuSym instead only backwardly examines the memory access in this sequence. If the predicate value is fetched to cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and thus cache speculative analysis at this point is unnecessary. Otherwise, we still conduct $\theta$ for analysis as usual to avoid missing any input resulting in speculative execution at this branch. Although this optimization introduces an extra cache analysis for some cases, it's still worthy as we found that predicate values are in cache before the branch in most cases due to time and spatial locality.
 
 
 \ignore{
