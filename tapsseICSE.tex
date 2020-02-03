@@ -268,7 +268,7 @@
 \email{yxc431@ist.psu.edu}
 
 \author{Peng Li, Yueqiang Cheng}
-\authornote{Corresponding author.}
+%\authornote{Corresponding author.}
 \affiliation{%
   \institution{Baidu Security}
 }
@@ -520,8 +520,8 @@ work. To summarize, we have made the following contributions:
 
 \begin{compactitem}
   \item 
-    A new approach \emph{Speculative Symbolic Execution} for modeling speculative 
-		execution and analyzing the affected cache behaviors in symbolic execution.
+    A novel approach for modeling microarchitectural speculative execution and 
+		analyzing the affected cache behaviors in symbolic execution.
   \item 
 		Implementation of \textsc{SpecuSym}, which addresses the challenges mentioned
 		above and supports cache timing leak detection under speculative execution. 
@@ -1747,11 +1747,11 @@ we observe a property which helps \SpecuSym accelerate the cache analysis:
 Property~\ref{pro:p2} reflects the intersection of $\mathit{opp_i}$ and 
 $\mathit{div_i}$. As assumed, the cache behavior of $\mathit{m_i}$ in 
 non-speculative execution is deterministic. In case an opposite behavior 
-under speculative execution, $\mathit{m_i}$ must cause either new opposite 
+under speculative execution, $\mathit{m_i}$ would cause either new opposite 
 behavior or new divergent behavior. In any case, it is a leak. Then the 
-solving of $\theta$ turns to be solving the existence of such $\mathit{in}$, 
-which has cheaper computation cost. Thereby we define a new constraint
-$\theta'$ as follows.  
+solving of $\theta$ turns to be reasoning the existence of such $\mathit{in}$, 
+which has cheaper computation cost. We model the property into a new constraint 
+$\theta'$:  
 %
 \begin{multline}
   \label{eqn:leak}
@@ -1764,43 +1764,42 @@ $\theta'$ as follows.
   ~~~~~~~~~~~~~~~
 \end{multline}
 %
-Since we assume a leakage-free program under non-speculative execution, 
-$\mathit{\eta_{in}^\prime(m_i)}$ must be 0 (miss) or 1 (miss). Meanwhile, 
-if $\mathit{\mu_{in}(m_i)}$ (the may-hit condition) has a different solution 
-to $\mathit{\eta_{in}^\prime(m_i)}$, then there must be a new cache behavior, 
-either \textit{Divergent} or \textit{Opposite}. Thereby $\theta'$ conforms to 
-$\theta$. Also, since we repeatedly traverse memory access trace in constraint 
-construction, caching the intermediate results helps avoid redundant 
-computation. Therefore, we bank the computed address-comparing formulas into 
-a hash map so that they can be quickly retrieved with tolerable storage overhead. 
+Due to the assumption mentioned above, $\mathit{\eta_{in}^\prime(m_i)}$ 
+is always 1 (hit) or 0 (miss). Accordingly, if $\mathit{\mu_{in}(m_i)}$
+(may-hit condition under speculation) evaluates to 0 or 1 on the same 
+$\mathit{in}$, either $\mathit{opp_i}$ or $\mathit{div_i}$ may evaluate 
+to 1, which already deduces a leak without solving $\mathit{opp_i}$ or 
+$\mathit{div_i}$. Therefore, if $\theta'$ is satisfiable, $\theta$ also 
+satisfies. 
 
 
 \subsubsection{Formula Reduction.}
-However, the size of equation (\ref{eqn:leak}) still increases quickly along
-with the increase of $i$, which pressures the constraint solver. By inspecting 
-the formula structure, we seperate lengthy equations into smaller pieces 
-with following strategies. First, if a sub-constraint of a conjunctive normal 
-form (CNF) formula is determined as \textit{false}, we directly return 
-\textit{false}. E.g., in equation (\ref{eqn:hc}), if \circled{4} is false, 
-we skip querying solver for \circled{5}, and \circled{6}. Second, if a 
-sub-constraint in a disjunction normal form (DNF) formula is determined as 
-\textit{true}, we discard all other sub-constraints. As in equation 
-(\ref{eqn:hc}), once we find the nearest $\mathit{a_j}$ by \circled{5}, we 
-discard sub-formulas for indices before $j$. Third, if two sub-formulas are 
-in negated forms, we avoid a second solver query. E.g., in equation~\ref{eqn:hc}, 
-constraint \circled{5} of $\mathit{m_j}$ is the negation of constraint \circled{4} 
-of $\mathit{m}_{\mathit{j}+1}$, which implies we can save one constraint solving time. 
+However, the size of $\theta'$ still increases drastically along with the 
+increase of $i$, which pressures the constraint solver. By inspecting 
+the constraint structure, we separate lengthy formulas into smaller pieces 
+by following strategies. First, if a subformula of a Conjunctive Normal 
+Form (CNF) formula evaluates as \textit{false}, we directly return \textit{false}. 
+E.g., in equation (\ref{eqn:hc}), if \circled{4} is \textit{false}, we skip 
+querying solver for \circled{5} and \circled{6}. Second, if a subformula 
+in a Disjunction Normal Form (DNF) formula is determined as \textit{true}, 
+we discard all other subformulas. As in equation (\ref{eqn:hc}), once we 
+find the nearest $\mathit{a_j}$ by \circled{5}, we discard subformulas 
+for indices before $j$. Third, if two subformulas are in negated forms, 
+we avoid an extra solver query. E.g., in equation~\ref{eqn:hc}, constraint 
+\circled{5} of $\mathit{m_j}$ is the negation of constraint \circled{4} 
+of $\mathit{m}_{\mathit{j}+1}$, which implies we can save one constraint 
+solving time. Fourth, since we repeatedly traverse memory access trace in 
+constraint construction, caching the intermediate results avoids repeated 
+computation. We bank the computed address-comparing formulas into a hash 
+map so that \SpecuSym can quickly retrieve them with tolerable storage overhead. 
+
 
 
 \subsubsection{Speculative Assumption Checking.}
 Recall that in Algorithm~\ref{alg:specusym} \SpecuSym duplicates a new state 
 $s'$ from symbolic state $s$ (line 22) if the branch predicate relates to a
-memory value rather than a cache value. This assumption indeed requires a heavy 
-cache analysis whereas~\cite{WuW19} over-approximately treats all accesses as 
-memory visit. To balance the precision and efficiency, \SpecuSym backwardly 
-examines the memory accesses from last branch to the current branch. If the 
-examination results in a cache hit, we know that speculative analysis at this 
-point is unnecessary. Otherwise, we conduct $\theta$ for analysis as usual. 
+memory value rather than a cache value. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where speculative execution is not conducted. To deal with this assumption requires a heavy cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. However, to balance the precision and efficiency, \SpecuSym instead backwardly examines the memory accesses from the current branch to the last branch. If the predicate value is in cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and cache speculative analysis at this 
+point is unnecessary. Otherwise, we still conduct $\theta$ for analysis as usual for precision. 
 
 
 \ignore{
