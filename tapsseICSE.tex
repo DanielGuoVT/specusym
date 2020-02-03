@@ -268,7 +268,6 @@
 \email{yxc431@ist.psu.edu}
 
 \author{Peng Li, Yueqiang Cheng}
-%\authornote{Corresponding author.}
 \affiliation{%
   \institution{Baidu Security}
 }
@@ -295,7 +294,7 @@
 
 
 %\author{Shengjian Guo, Yueqi Chen, Peng Li, Yueqiang Cheng, Huibo Wang, Meng Wu, Zhiqiang Zuo}
-
+%\authornote{Corresponding author.}
 %\affiliation{
 %\begin{tabular}{cccc}
 %  \institution{\baidu~Baidu Security} &
@@ -514,7 +513,7 @@ are visible and cache timing leaks from speculative execution detectable now.
 
 We have implemented \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04} 
 and evaluated it on 15 benchmarks, which have 8,791 lines of C code in total. Results 
-show that \SpecuSym successfully detects from 22 to 130 leaks in 6 programs under 4 
+show that \SpecuSym successfully detects from 2 to 61 leaks in 6 programs under 4 
 set-associative caches and identifies false positives in 2 programs reported by recent 
 work. To summarize, we have made the following contributions:
 
@@ -527,8 +526,8 @@ work. To summarize, we have made the following contributions:
 		above and supports cache timing leak detection under speculative execution. 
   \item 
     Evaluation of \SpecuSym on 15 open-source benchmarks to demonstrate its 
-    effectiveness through discovering from 22 to 130 leaks upon 4 different 
-		caches.
+    effectiveness through discovering from 2 to 61 leaks upon 4 different 
+		cache settings.
 \end{compactitem}
 
 
@@ -1140,7 +1139,7 @@ these changes in blue.
         }
         ......\;
 }
-~~~\\
+\BlankLine
 $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
 \Begin{
   \If{$\mathit{c}$ relies on a memory access}{
@@ -1151,7 +1150,7 @@ $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
     Terminate $\mathit{s'}$;\;
   }
 }
-~~~\\
+\BlankLine
 $\mathit{AnalyzeCache}$(SymbolicState $s$)\;
 \Begin{
     \If{$\mathit{s}$ is a regular symbolic state {\bf{and}} s.e relates to secret input}{
@@ -1178,8 +1177,8 @@ algorithm first checks if current state $s$ is a \textit{speculative state}
 and whether $s$ has reached the predefined threshold (line 3). If both 
 conditions are met, \SpecuSym stops the recursive symbolic execution on $s$ 
 and returns immediately (line 4). Note that a state becomes a 
-\textit{speculative state} if it is duplicated from a normal symbolic state 
-(line 22) by invoking \textit{SpeculativeExplore} at a branch event (line 9). 
+\textit{speculative} state if it is duplicated from a normal symbolic state 
+(line 21) by invoking \textit{SpeculativeExplore} at a branch event (line 9). 
 
 
 %At the high level, subroutine $\mathit{SpeculativeExplore}$ models 
@@ -1190,10 +1189,10 @@ and returns immediately (line 4). Note that a state becomes a
 Lines 19-28 in Algorithm~\ref{alg:specusym} present the modeling procedure 
 \textit{SpeculativeExplore}. Generally, at a conditional branch (line 8), 
 we call \textit{SpeculativeExplore} (line 9) to start the speculative probe. 
-That is, if the branch predicate closely relates to memory visit (line 21), 
+That is, if the branch predicate closely relates to memory visit (line 20), 
 e.g., using a variable for the first time, we duplicate a new state $s'$ 
-from current state \textit{s} (line 22) with a negated branch direction 
-(line 23). This assumption bases on the observation that the memory visiting 
+from current state \textit{s} (line 21) with a negated branch direction 
+(line 22). This assumption bases on the observation that the memory visiting 
 latency at a branch may form a time window for speculative execution to load 
 data into the cache. Otherwise, despite a branch misprediction, CPU may spend 
 only several cycles on speculative execution before its rollback, which is too 
@@ -1202,10 +1201,10 @@ transient to let speculation affect the cache.
 
 After state duplication, new state ${s'}$ becomes a \textit{speculative} state, 
 since it is about to mimic the speculation of the mispredicted branch. We let 
-\SpecuSym explore $s'$ (line 24) and assess the effects of the memory accesses 
+\SpecuSym explore $s'$ (line 23) and assess the effects of the memory accesses 
 in $s'$ on the cache (line 15). Details of the assessment present in Section
 \ref{sec:modeling}. Once the execution of $s'$ finishes, we use the accumulated 
-cache data in $s'$ to update that of $s$ (line 25) and terminate $s'$ (line 26) 
+cache data in $s'$ to update that of $s$ (line 24) and terminate $s'$ (line 25) 
 to end its lifecycle. Such design ensures that the speculation of $s'$ only 
 contributes to the cache state changes but never affects the memory $\Omega$ of 
 its parent symbolic state.
@@ -1256,7 +1255,7 @@ considers both branches and misses no potential cases.
 In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
 state from $s$, maps \texttt{v2} into a cache line, and merges back the updated 
 cache state to state $s$ before its termination, as formally stated in Algorithm
-\ref{alg:specusym} (lines 24-26). 
+\ref{alg:specusym} (lines 23-25). 
 }
 
 
@@ -1619,10 +1618,10 @@ program location of $\mathit{m_i}$, there is a leak.
 In Algorithm~\ref{alg:specusym}, \SpecuSym invokes $\mathit{AnalyzeCache}$ right
 before interpreting a memory event (line 13). In this procedure, \SpecuSym first 
 examines whether the current state $s$ is a $\mathit{symbolic}$ state, and the 
-event $s.e$ relates to sensitive input (line 32). It is because the timing effect 
+event $s.e$ relates to sensitive input (line 30). It is because the timing effect 
 inside speculative execution is externally invisible, and we are interested in the 
 sensitive data relevant memory accesses. Next, \SpecuSym builds the leak constraint 
-$\theta$ for event $s.e$ and solves for a solution (lines 33-35). If the solution
+$\theta$ for event $s.e$ and solves for a solution (lines 31-33). If the solution
 does not exist, \SpecuSym claims leakage-free at $s.e$ in current state $s$.
 
 To form $\theta$, we need to build the constraint exposing new cache behaviors
@@ -1797,7 +1796,7 @@ map so that \SpecuSym can quickly retrieve them with tolerable storage overhead.
 
 \subsubsection{Speculative Assumption Checking.}
 Recall that in Algorithm~\ref{alg:specusym}, \SpecuSym duplicates a new state 
-$s'$ from symbolic state $s$ (line 22) if the branch predicate closely relates 
+$s'$ from symbolic state $s$ (line 21) if the branch predicate closely relates 
 to a memory value rather than a cache value. As mentioned earlier in Section
 \ref{sec:modeling}, this strategy filters transient speculations that are unlikely 
 to affect the cache. Wu et al.~\cite{WuW19} over-approximately treat all memory 
@@ -2020,68 +2019,67 @@ most 12 hours.
 
 
 
-We first design experiments for the research question (1). Table
-\ref{tbl:detection} shows the leak detection results under aforementioned 
-three set-associative cache settings. Let's name them as {$C_1$}, $C_2$, 
-and $C_3$. $C_1$ has 32KB size and each cache set consists of 4 lines. 
-As each line has 64 bytes, $C_1$ has 128 sets in total. $C_2$ also owns 
-32KB size but its cache associativity increases to 8. Hence it has 64 
-sets. $C_3$ has 64KB size while its associativity remains 8, thereby it
-has 128 sets and 1024 cache lines. For each program, we collect execution 
-statistics under different cache settings, including the total execution 
-time in minute (Time (m)) and the amount of divergent/opposite leaks(\#.D/O) . 
+In this section, we design experiments for the research question (1). Table
+\ref{tbl:detection} shows the leak detection results under the 3 set-associative 
+cache settings. Let's name these caches as {$C_1$}, $C_2$, and $C_3$. $C_1$ has 
+a 32KB size, and each cache set consists of 4 lines. As each line has 64 bytes, 
+$C_1$ has 128 sets in total. $C_2$ also owns 32KB size, but its associativity 
+increases to 8. Hence it has 64 sets. $C_3$ has 64KB size while its associativity 
+remains 8, thereby it has 128 sets and 1024 cache lines. For each benchmark, we 
+collect execution statistics under all 3 cache settings, including the total 
+execution time in minute (Time (m)) and the amount of divergent/opposite leaks,
+named \#.D/O. 
 
 
-Overall, \SpecuSym identified that 6 out of 15 benchmarks have timing 
-leaks. Specifically, \texttt{blowfish} is leaky only under cache $C_2$ 
-while other 5 programs have leaks under all three caches. Among these 
-5 programs, \texttt{DES}~\cite{glibc} has both D/O leaks in all caches; 
-\texttt{AES} has both D/O leaks in $C_1$ but only opposite leaks in $C_2$ 
-and $C_3$; and the rest three programs (\texttt{chacha20}, \texttt{encoder}, 
-and \texttt{DES}~\cite{OpenSSL111c}) have only opposite leaks under all 
-the three caches.
+Overall, \SpecuSym identified that 6 out of 15 benchmarks suffer from timing 
+leaks. Specifically, \texttt{blowfish} is leaky only under cache $C_2$ while 
+the other 5 programs have leaks under all 3 caches. Among these 5 programs, 
+\texttt{DES}~\cite{glibc} has both D/O leaks in all caches; \texttt{AES} has 
+both D/O leaks in $C_1$, but only opposite leaks in $C_2$ and $C_3$; and the 
+rest three programs (\texttt{chacha20}, \texttt{encoder}, and \texttt{DES}
+\cite{OpenSSL111c}) have only opposite leaks under all the 3 caches.
 
 
-Next, we compare the results of $C_1$ and $C_2$, to research how the cache 
-associativity could affect the leak occurrence. Intuitively, the more lines 
-per cache set, the less potential cache conflicts hence less leaks. However, 
-experiments show that the increased associativity indeed triggers more leaks. 
-First, \SpecuSym detected 60 and 130 leaks under $C_1$ and $C_2$, respectively. 
-Second, 5 out of the 6 leaky programs have more leaks under $C_2$. The only 
+Next, we compare the results under $C_1$ and $C_2$ to research how the cache 
+associativity variation affects leak occurrence. Intuitively, the more lines 
+per cache set, the less potential cache conflicts hence fewer leaks. However, 
+experiments affirm that the increased associativity indeed triggers more leaks. 
+First, \SpecuSym detected 60 and 130 leaks under $C_1$ and $C_2$, respectively; 
+second, 5 out of the 6 leaky programs have more leaks under $C_2$. The only 
 exception, \texttt{encoder}, has 5 leaks in both $C_1$ and $C_2$. Third, the 
-non-leaky program under $C_1$, \texttt{blowfish}, now turns to reveal 2 new 
-leaks under $C_2$. This phenomenon is because the speculative memory visits 
-raise more cache hits --- the cache misses under non-speculative execution 
-now have higher possibilities to be hits as memory data has been loaded into 
-cache sets earlier from speculative execution. 
+non-leaky program under $C_1$, \texttt{blowfish}, now turns to expose 2 new 
+leaks under $C_2$. This phenomenon is mostly because the speculative memory 
+visits raise more cache hits --- the misses under non-speculative execution 
+now have higher possibilities to be cache hits since speculative executio has
+feteched memory data earlier into the cache. 
 
 
-
-Moreover, we compare between $C_2$ and $C_3$, to research how the cache size 
-could affect leak detection. We find that despite the different cache sizes, 
-the detection results show no drastic variances. First, \SpecuSym detected 
-exactly the same types and amounts of leaks in 3 programs (\texttt{chacha20}, 
+Further, we compare between $C_2$ and $C_3$, to research how the cache size 
+could affect leak detection. We find that despite the large 32KB cache size 
+difference, the detection results show no drastic variances. First, \SpecuSym
+detected the same types and amounts of leaks in 3 programs (\texttt{chacha20}, 
 \texttt{encoder}, and \texttt{DES}~\cite{OpenSSL111c}) in both $C_2$ and
-$C_3$. The analysis costs are also close. Second, another two leaky programs, 
-\texttt{AES} and \texttt{DES}~\cite{glibc}, also show similar statistics.
-Third, the major difference comes from \texttt{blowfish}, which has two 
-leaks on $C_2$ but no leaks on $C_3$. Though this unique case indicates 
-smaller cache might incur more leaks, it is not the majority situation. 
+$C_3$. The analysis time is also close. Second, another two leaky programs, 
+\texttt{AES} and \texttt{DES}~\cite{glibc}, also exhibit similar statistics.
+Third, the main difference comes from \texttt{blowfish}, which has two leaks 
+on $C_2$ but no leaks on $C_3$. Though this unique case indicates that smaller 
+cache might incur more leaks, it is not the majority situation. 
 
-We also observe drastically diverse results from different versions of 
-the same algorithm. E.g., in three DES implementations from OpenSSL
+
+Besides, we also observe drastically varying results from different versions 
+of the same algorithm. E.g., in three DES implementations from OpenSSL
 \cite{OpenSSL111c}, glibc~\cite{glibc}, and Libgcrpt~\cite{Libgcrypt}, 
-\SpecuSym detected only oppsite leaks in OpenSSL \texttt{DES}, both D/O 
-leaks in glibc \texttt{DES}, and no leaks in Libgcrypt \texttt{DES}. Also, 
-OpenSSL \texttt{DES} consumes about 11 minutes in all caches. The glibc 
-\texttt{DES} uses 52 minutes on $C_1$ but around 6.5 hours on $C_2$ 
-and $C_3$. By constrast, the Libgcrypt \texttt{DES} costs merely 1 minute in 
-all experiments. 
+\SpecuSym detected only opposite leaks in OpenSSL \texttt{DES}, both D/O 
+leaks in glibc \texttt{DES}, and no leaks in Libgcrypt \texttt{DES}. Meanwhile, 
+OpenSSL \texttt{DES} needs about 11 minutes of analysis time upon all caches. 
+The glibc \texttt{DES} uses 52 minutes for $C_1$ but around 6.5 hours on both 
+$C_2$ and $C_3$. By contrast, Libgcrypt \texttt{DES} costs merely 1 minute under 
+all 3 caches. 
 
-Therefore, we can answer the first research question: \SpecuSym is able to 
-detect timing leaks introduced by speculative execution. It also supports 
-various caches for the effective leak detection.
 
+Therefore, we can answer the first research question: \SpecuSym is capable of 
+detecting timing leaks introduced by speculative execution. It also supports 
+various caches for comparative analysis.
 
 
 \subsubsection{Existing Method Comparison}
