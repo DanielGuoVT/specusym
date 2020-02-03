@@ -815,8 +815,8 @@ three categories in terms of the type of \textit{inst} that $e$ contains.
 
 Although symbolic executors always support a rich set of instructions, we use 
 the above event types to abstract away the internal implementation details like 
-memory allocation, function return, and et.al., to center on the high-level 
-flow of symbolic execution.
+memory allocation, function return, etc.to center on the high-level flow of 
+symbolic execution.
 
 
 \begin{algorithm}[hpt]
@@ -1796,9 +1796,26 @@ map so that \SpecuSym can quickly retrieve them with tolerable storage overhead.
 
 
 \subsubsection{Speculative Assumption Checking.}
-Recall that in Algorithm~\ref{alg:specusym} \SpecuSym duplicates a new state 
-$s'$ from symbolic state $s$ (line 22) if the branch predicate relates to a
-memory value rather than a cache value. This is because speculative execution is not conducted if predicate doesn't access memory. Without this assumption, \cite{WuW19} over-approximately treats all accesses as memory visit and thus includes the scenarios where predicate values are all in cache. To deal with this assumption requires a cache analysis starting from the current branch to the first memory access, examining whether the value involved in the predicate is in cache or not. This analysis needs to calculate the cache states for all possible paths and thus is very heavy. However, it's easy to observe that the memory accesses from the current branch to the last branch are included in all possible paths and have the most influence on the cache state before the branch. Therefore, to balance the precision and efficiency, \SpecuSym instead only backwardly examines the memory access in this sequence. If the predicate value is fetched to cache and not evicted in this memory access sequence, we know that cache is always hit for predicate and thus cache speculative analysis at this point is unnecessary. Otherwise, we still conduct $\theta$ for analysis as usual to avoid missing any input resulting in speculative execution at this branch. Although this optimization introduces an extra cache analysis for some cases, it's still worthy as we found that predicate values are in cache before the branch in most cases due to time and spatial locality.
+Recall that in Algorithm~\ref{alg:specusym}, \SpecuSym duplicates a new state 
+$s'$ from symbolic state $s$ (line 22) if the branch predicate closely relates 
+to a memory value rather than a cache value. As mentioned earlier in Section
+\ref{sec:modeling}, this strategy filters transient speculations that are unlikely 
+to affect the cache. Wu et al.~\cite{WuW19} over-approximately treat all memory 
+events as actual memory visits through predicate relevant values may have been 
+loaded to the cache. \SpecuSym proposes an alternative for symbolic execution to 
+deal with this issue. Ideally, to address the problem, we have to perform a 
+burdensome cache analysis starting from the current branch to the first memory 
+access, examining whether the value involved in the branch predicate is in cache 
+or not. However, we also observe that the memory accesses from the current branch 
+to the last branch typically have a critical influence on the cache state before 
+current branch. Therefore, to balance the precision and efficiency, \SpecuSym 
+backwardly examines the memory accesses in this range. If the predicate-related 
+values have been fetched to cache beforehand and still exists in the cache, we 
+regard the speculative modeling at this branch as unnecessary. Otherwise, we still 
+conduct all modeling and analysis, as usual, to avoid missing leaks. Although this 
+optimization introduces extra computation overhead, it still benefits overall 
+performance since the targted cases commonly exist in programs because of the time 
+and spatial locality purposes.
 
 
 \ignore{
@@ -1844,24 +1861,24 @@ a must hit or must miss one, we directly skip it for speedup.}
 
 We have implemented \SpecuSym based on the KLEE~\cite{CadarDE08} symbolic 
 executor and the LLVM compiler~\cite{LattnerA04}. We refit KLEE in three
-main aspects. First, we made KLEE support bounded execution of the auxiliary 
+main aspects. First, we made KLEE support the bounded execution of auxiliary 
 \textit{speculative} state and schedule the parent \textit{symbolic} state 
-afterwards, to mimic the branch misprediction. Second, we made KLEE stitch 
-a sequence of memory events from both regular \textit{symbolic} state and 
+afterward, to mimic the branch misprediction. Second, we made KLEE stitch 
+a sequence of memory events from both normal \textit{symbolic} state and 
 \textit{speculative} states, to represent the incorporation of cache data 
 from speculation. Third, we made KLEE analyze the cache behaviors on memory 
-events to generate concrete inputs for timing leaks. Based on these new 
+events to generate concrete test cases for timing leaks. Based on these new 
 components, we built \SpecuSym for the cache timing leak analysis under 
 speculative execution.
 
 Specifically, after loading the LLVM bit-code of the target program, \SpecuSym 
 executes it symbolically, explores speculative states, records the memory 
 event trace, and conducts cache analysis following Algorithm~\ref{alg:specusym}. 
-Each leak constraint is encoded in Z3-compatible form. On solving the leak
-constraint, \SpecuSym outputs leak witness including the event trace, the 
-leaky memory operation, and the concrete inputs. 
+The leak constraint is encoded in Z3-compatible form. On solving the constructed 
+constraints, \SpecuSym outputs leak witness, including the event trace, the leaky 
+memory operation location, and the solved inputs. 
 
-We design following research questions for the experiments: 
+We design the following research questions for the experiments: 
 \begin{compactitem}
 \item Can \SpecuSym successfully identify cache timing leaks introduced 
 by speculative execution?
@@ -1870,35 +1887,9 @@ by providing more accurate results?
 \item Can the proposed optimizations boost the overall performance of \textsc{SpecuSym}?
 \end{compactitem}
 
-%\textbf{(1)} 
-%\textbf{(2)}  
-%\textbf{(3)} 
-
-%i.e., number of mispredictions, number of nested branches, and the sizes of 
-%input buffers,
 
 \subsection{Benchmark Programs}
 \label{sec:benchs}
-
-Table~\ref{tbl:benchs} shows the statistics of the benchmarks for evaluation.  
-The first three columns, \textbf{Name}, \textbf{LoC} and \textbf{Source} 
-indicate the names, the lines of code and the sources of these benchmarks. 
-Column \textbf{S-In} denotes the sensitive input size in bytes. The last 
-column \textbf{Brs} shows the number of conditional branches in each program.
-
-
-Our benchmark suite consists of a diverse set of open-source C programs. 
-Specifically, the first program is from hpn-ssh~\cite{hpn-ssh}; the second 
-group has five programs from LibTomCrypt 1.18.1~\cite{LibTomCrypt}; the 
-third group uses two programs from glibc 2.29~\cite{glibc}; the fourth
-group includes three programs from the Tegra library~\cite{Tegra}; the 
-rest benchmarks are from the Libgcrypt 1.8.4~\cite{Libgcrypt} and the 
-Spectre vulnerability application~\cite{spectre-attack}. Most benchmarks 
-are computation intensive despite the compact program sizes. The sensitive 
-input of each benchmark is initialized to a symbolic array whose size is 
-shown in column \textbf{S-In}. Also, each program has 1 to 133 conditional 
-branches.
-
 
 \begin{table}%[htb!]
 \caption{\fontsize{8}{11}\selectfont Benchmark Statistics: Name, Lines 
@@ -1942,18 +1933,36 @@ Branches (Brs).}
 \end{table}
 
 
+Table~\ref{tbl:benchs} shows the statistics of the benchmarks for evaluation.  
+The first three columns, \textbf{Name}, \textbf{LoC}, and \textbf{Source}, 
+indicate the names, the lines of code, and the sources of these benchmarks. 
+Column \textbf{S-In} denotes the sensitive input size in bytes. The last 
+column \textbf{Brs} shows the number of conditional branches in each program.
+
+
+Our benchmark suite consists of a diverse set of open-source C programs. 
+The first program comes from hpn-ssh~\cite{hpn-ssh}. The second group has 
+five programs from LibTomCrypt 1.18.1~\cite{LibTomCrypt}. The third group 
+uses two programs from glibc 2.29~\cite{glibc}. The fourth group includes 
+three programs from the Tegra library~\cite{Tegra}. The rest benchmarks 
+are from the Libgcrypt 1.8.4~\cite{Libgcrypt} and the Spectre vulnerability
+application~\cite{spectre-attack}. Most benchmarks are computation-intensive 
+despite the compact program volumes. The sensitive input of each benchmark 
+is initialized to a symbol whose size shows in column \textbf{S-In}. Also, 
+each program has 1 to 133 conditional branches.
+
 
 We evaluate the benchmarks on the N-way set-associative cache and LRU 
 policy with different cache settings. To be specific, we design four 
 caches as (1) 32KB cache size with N=4; (2) 32KB cache size with N=8; (3) 
 64KB cache size with N=8; and (4) 32KB cache size with N=512. Each cache 
-line has 64 bytes among all caches. The first three settings are close to 
-the L1 data cache types in modern processors like~\cite{Skylake,Kabylake}. 
+line has 64 bytes for all caches. The first three settings are close to 
+the L1 data cache classes in modern processors like~\cite{Skylake,Kabylake}. 
 The last setting forms a fully-associative cache on which we compare 
 \SpecuSym with \cite{WuW19}. Besides, we evaluate the effectiveness of 
 optimizations using the third setting. All the evaluations are conducted 
 on a machine running Ubuntu 16.04 64-bit Server Linux with Intel(R) Xeon(R) 
-2.20GHz CPUs 24 cores and 256GB RAM. Each benchmark is set to run at 
+2.20GHz CPUs 24 cores and 256GB RAM. Each benchmark is allowed to run at 
 most 12 hours.
 
 
@@ -1962,49 +1971,6 @@ most 12 hours.
 
 \subsubsection{Timing Leak Detection}
 \label{sec:leak_detect}
-
-
-
-
-We first design experiments for the research question (1). Table
-\ref{tbl:detection} shows the leak detection results under aforementioned 
-three set-associative cache settings. Let's name them as {$C_1$}, $C_2$, 
-and $C_3$. $C_1$ has 32KB size and each cache set consists of 4 lines. 
-As each line has 64 bytes, $C_1$ has 128 sets in total. $C_2$ also owns 
-32KB size but its cache associativity increases to 8. Hence it has 64 
-sets. $C_3$ has 64KB size while its associativity remains 8, thereby it
-has 128 sets and 1024 cache lines. For each program, we collect execution 
-statistics under different cache settings, including the total execution 
-time in minute (Time (m)) and the amount of divergent/opposite leaks(\#.D/O) . 
-
-
-%Note that \SpecuSym supports even 
-%more specifications to accommodate new caches according to its flexible
-%analysis design. 
-
-
-
-Overall, \SpecuSym identified that 6 out of 15 benchmarks have timing 
-leaks. Specifically, \texttt{blowfish} is leaky only under cache $C_2$ 
-while other 5 programs have leaks under all three caches. Among these 
-5 programs, \texttt{DES}~\cite{glibc} has both D/O leaks in all caches; 
-\texttt{AES} has both D/O leaks in $C_1$ but only opposite leaks in $C_2$ 
-and $C_3$; and the rest three programs (\texttt{chacha20}, \texttt{encoder}, 
-and \texttt{DES}~\cite{OpenSSL111c}) have only opposite leaks under all 
-the three caches.
-
-Next, we compare the results of $C_1$ and $C_2$, to research how the cache 
-associativity could affect the leak occurrence. Intuitively, the more lines 
-per cache set, the less potential cache conflicts hence less leaks. However, 
-experiments show that the increased associativity indeed triggers more leaks. 
-First, \SpecuSym detected 60 and 130 leaks under $C_1$ and $C_2$, respectively. 
-Second, 5 out of the 6 leaky programs have more leaks under $C_2$. The only 
-exception, \texttt{encoder}, has 5 leaks in both $C_1$ and $C_2$. Third, the 
-non-leaky program under $C_1$, \texttt{blowfish}, now turns to reveal 2 new 
-leaks under $C_2$. This phenomenon is because the speculative memory visits 
-raise more cache hits --- the cache misses under non-speculative execution 
-now have higher possibilities to be hits as memory data has been loaded into 
-cache sets earlier from speculative execution. 
 
 \begin{table}%[htb!]
 \caption{Detection results on Set-associative Caches}
@@ -2053,6 +2019,44 @@ cache sets earlier from speculative execution.
 
 
 
+
+We first design experiments for the research question (1). Table
+\ref{tbl:detection} shows the leak detection results under aforementioned 
+three set-associative cache settings. Let's name them as {$C_1$}, $C_2$, 
+and $C_3$. $C_1$ has 32KB size and each cache set consists of 4 lines. 
+As each line has 64 bytes, $C_1$ has 128 sets in total. $C_2$ also owns 
+32KB size but its cache associativity increases to 8. Hence it has 64 
+sets. $C_3$ has 64KB size while its associativity remains 8, thereby it
+has 128 sets and 1024 cache lines. For each program, we collect execution 
+statistics under different cache settings, including the total execution 
+time in minute (Time (m)) and the amount of divergent/opposite leaks(\#.D/O) . 
+
+
+Overall, \SpecuSym identified that 6 out of 15 benchmarks have timing 
+leaks. Specifically, \texttt{blowfish} is leaky only under cache $C_2$ 
+while other 5 programs have leaks under all three caches. Among these 
+5 programs, \texttt{DES}~\cite{glibc} has both D/O leaks in all caches; 
+\texttt{AES} has both D/O leaks in $C_1$ but only opposite leaks in $C_2$ 
+and $C_3$; and the rest three programs (\texttt{chacha20}, \texttt{encoder}, 
+and \texttt{DES}~\cite{OpenSSL111c}) have only opposite leaks under all 
+the three caches.
+
+
+Next, we compare the results of $C_1$ and $C_2$, to research how the cache 
+associativity could affect the leak occurrence. Intuitively, the more lines 
+per cache set, the less potential cache conflicts hence less leaks. However, 
+experiments show that the increased associativity indeed triggers more leaks. 
+First, \SpecuSym detected 60 and 130 leaks under $C_1$ and $C_2$, respectively. 
+Second, 5 out of the 6 leaky programs have more leaks under $C_2$. The only 
+exception, \texttt{encoder}, has 5 leaks in both $C_1$ and $C_2$. Third, the 
+non-leaky program under $C_1$, \texttt{blowfish}, now turns to reveal 2 new 
+leaks under $C_2$. This phenomenon is because the speculative memory visits 
+raise more cache hits --- the cache misses under non-speculative execution 
+now have higher possibilities to be hits as memory data has been loaded into 
+cache sets earlier from speculative execution. 
+
+
+
 Moreover, we compare between $C_2$ and $C_3$, to research how the cache size 
 could affect leak detection. We find that despite the different cache sizes, 
 the detection results show no drastic variances. First, \SpecuSym detected 
@@ -2079,22 +2083,13 @@ detect timing leaks introduced by speculative execution. It also supports
 various caches for the effective leak detection.
 
 
+
 \subsubsection{Existing Method Comparison}
-
-
-We compare \SpecuSym with the latest work~\cite{WuW19} in Table~\ref{tbl:cmp}, 
-to answer the the second research question. Column 1 lists all the benchmarks 
-used in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the detection 
-result and the computation time of the abstract interpretation based method 
-\cite{WuW19}. Columns 4-6 depict the result of \SpecuSym while column 5 lists 
-the total amount of detected leaks. We set up the same cache setting used in
-\cite{WuW19} (512-line fully-associative cache with LRU policy) to assure a 
-fair comparison. Let's name it as $C_4$.
 
 %We also add the \texttt{klee\_make\_symbolic} invocations for the sensitive 
 %input in each benchmark.
 \begin{table}
-\caption{Comparison betwee Wu et.al~\cite{WuW19} and \SpecuSym}
+\caption{Comparison betwee Wu et al~\cite{WuW19} and \SpecuSym}
 \label{tbl:cmp}
 \centering
 \resizebox{\linewidth}{!}{
@@ -2102,7 +2097,7 @@ fair comparison. Let's name it as $C_4$.
 \toprule
 %\cline{1-6}
 \multirow{2}{*}{\textbf{Name~~~~}} 		&  
-\multicolumn{2}{c}{\textbf{Wu et.al}~\cite{WuW19}}&		
+\multicolumn{2}{c}{\textbf{Wu et al}~\cite{WuW19}}&		
 \multicolumn{3}{c}{\textbf{SpecuSym}}\\
 \cmidrule(r){2-3} \cmidrule(r){4-6} 
 %\cline{2-7}
@@ -2128,6 +2123,16 @@ fair comparison. Let's name it as $C_4$.
 \end{tabular}
 }
 \end{table}
+
+
+We compare \SpecuSym with the latest work~\cite{WuW19} in Table~\ref{tbl:cmp}, 
+to answer the the second research question. Column 1 lists all the benchmarks 
+used in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the detection 
+result and the computation time of the abstract interpretation based method 
+\cite{WuW19}. Columns 4-6 depict the result of \SpecuSym while column 5 lists 
+the total amount of detected leaks. We set up the same cache setting used in
+\cite{WuW19} (512-line fully-associative cache with LRU policy) to assure a 
+fair comparison. Let's name it as $C_4$.
 
 
 Overall, \cite{WuW19} analyzed that 5 of the 10 benchmarks are leaky, 
@@ -2181,32 +2186,6 @@ elimination and concrete leak witness generation.
 
 \subsubsection{Optimization Performance}
 \label{sec:opt_perform}
-We study the performance of our optimization strategies (cf. Section~\ref{sec:optimize})
-in this section. As shown in Table~\ref{tbl:opt}, after optimization (\texttt{Optimized}), 
-the overall execution time (\textbf{Time}) decreases to $30.75\%$ of the non-optimization 
-situation (\texttt{Base}), which demonstrates the effectiveness of optimization. 
-
-Apart from time cost, our optimization reduces constraint size by more than $20\%$ to 
-ease the solver cost. Moreover, we find that the \texttt{Base} setting missed almost 
-$2/3$ (44) leaks within the time bound (12 hours). This highlights the necessity of 
-optimization because it helps detect as many leaks as possible under limited resources. 
-In Figure~\ref{fig:opt}, we examine the impact of optimization on each benchmark in 
-terms of both time cost and constraint size. In the figure, we present each case using 
-their orders in table~\ref{tbl:benchs}. 
-
-Clearly in Figure 4(a) that optimization 
-largely decreases time cost for $6$ out of $15$ cases from hundreds of minutes to less
-than one hour. On the one hand, this is because the \texttt{Base} situation involves
-a great many redundant computation while the intermediate results cached in optimization 
-can be re-used. On the other hand, the size of constraint is reduced through formula 
-simplification which lowers the cost of solving. We show the detail in Figure 4(b)
-that optimization reduces constraint size, especially for AES~\cite{LibTomCrypt}, glibc DES~\cite{glibc}, and seed~\cite{Tegra}. 
-
-For the remaining cases, the length of execution 
-trace is typically short which means the number of memory access to analyze is limited. 
-Thus, our optimization does not differ much from the base computation.
-
-
 
 \tikzset{align at top/.style={baseline=(current bounding box.north)}}
 \begin{figure}
@@ -2354,6 +2333,57 @@ Thus, our optimization does not differ much from the base computation.
 \end{figure}
 
 
+
+\begin{table}%[!tb]
+\caption{Overall performance Increases from Optimization. }
+%\vspace{-1em}
+\label{tbl:opt}
+\centering
+\resizebox{\linewidth}{!}{
+\begin{tabular}{ccccc}
+\hline
+\textbf{~~Optimization~~} &\textbf{~~Time~~}&\textbf{~~Constraints Size~~}&~~\#\textbf{.Div}~~&~~\#\textbf{.Opp}~~ \\ 
+\hline
+\texttt{Base} &~~~100\%~~~ &100\%    &12  &76\\ 
+%\texttt{+S\&C} &~~~2400~~~ &2.13k  &8  &7\\ %2
+%\texttt{+SCR} &~~~1200~~~ &1.24  &9  &10\\ %2
+\texttt{Optimized} &~~~30.73\%~~~ &78.89\%  &50 &79\\ %2
+\hline
+%\bottomrule
+\end{tabular}
+}
+\end{table}
+
+
+
+
+We study the performance of our optimization strategies (cf. Section~\ref{sec:optimize})
+in this section. As shown in Table~\ref{tbl:opt}, after optimization (\texttt{Optimized}), 
+the overall execution time (\textbf{Time}) decreases to $30.75\%$ of the non-optimization 
+situation (\texttt{Base}), which demonstrates the effectiveness of optimization. 
+
+Apart from time cost, our optimization reduces constraint size by more than $20\%$ to 
+ease the solver cost. Moreover, we find that the \texttt{Base} setting missed almost 
+$2/3$ (44) leaks within the time bound (12 hours). This highlights the necessity of 
+optimization because it helps detect as many leaks as possible under limited resources. 
+In Figure~\ref{fig:opt}, we examine the impact of optimization on each benchmark in 
+terms of both time cost and constraint size. In the figure, we present each case using 
+their orders in table~\ref{tbl:benchs}. 
+
+Clearly in Figure 4(a) that optimization 
+largely decreases time cost for $6$ out of $15$ cases from hundreds of minutes to less
+than one hour. On the one hand, this is because the \texttt{Base} situation involves
+a great many redundant computation while the intermediate results cached in optimization 
+can be re-used. On the other hand, the size of constraint is reduced through formula 
+simplification which lowers the cost of solving. We show the detail in Figure 4(b)
+that optimization reduces constraint size, especially for AES~\cite{LibTomCrypt}, glibc DES~\cite{glibc}, and seed~\cite{Tegra}. 
+
+For the remaining cases, the length of execution 
+trace is typically short which means the number of memory access to analyze is limited. 
+Thus, our optimization does not differ much from the base computation.
+
+
+
 \ignore{
 \begin{filecontents*}{mydata.csv}
 a, No-opt, Simplify and Caching, Solving Reduction, All
@@ -2441,28 +2471,6 @@ a, No-opt, Simplify and Caching, Solving Reduction, All
 }
 
 
-\begin{table}%[!tb]
-\caption{Overall performance Increases from Optimization. }
-%\vspace{-1em}
-\label{tbl:opt}
-\centering
-\resizebox{\linewidth}{!}{
-\begin{tabular}{ccccc}
-\hline
-\textbf{~~Optimization~~} &\textbf{~~Time~~}&\textbf{~~Constraints Size~~}&~~\#\textbf{.Div}~~&~~\#\textbf{.Opp}~~ \\ 
-\hline
-\texttt{Base} &~~~100\%~~~ &100\%    &12  &76\\ 
-%\texttt{+S\&C} &~~~2400~~~ &2.13k  &8  &7\\ %2
-%\texttt{+SCR} &~~~1200~~~ &1.24  &9  &10\\ %2
-\texttt{Optimized} &~~~30.73\%~~~ &78.89\%  &50 &79\\ %2
-\hline
-%\bottomrule
-\end{tabular}
-}
-\end{table}
-
-
-
 \subsection{Threat to Validity}
 \label{sec:threat}
 Our approach considers nested speculative execution because branch 
@@ -2529,7 +2537,7 @@ reasoning in terms of its scalable analysis and sound approximation. CacheS
 secrets and dependencies. It treats public data in a coarse-grained fashion 
 and secret data in a finer-grained manner to balance the scalability and 
 precision. However, CacheS is also unaware of the impact from speculative 
-execution on cache state. Though Wu et.al~\cite{WuW19} developed a dedicated 
+execution on cache state. Though Wu et al.~\cite{WuW19} developed a dedicated 
 abstract interpretation method for worst case exectuion estimation and cache 
 timing leak analysis under speculative execution, they are unable to generate 
 precise inputs to diagnose the leaks in depth. 
