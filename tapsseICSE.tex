@@ -1,6 +1,6 @@
 \documentclass[sigconf]{acmart}
 \settopmatter{printfolios=true,printccs=true,printacmref=true}
-\linespread{0.98}
+\linespread{1.0}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setcopyright{acmcopyright}
@@ -1721,34 +1721,37 @@ It is worth noting that processors may mispredict branches several times
 along a program path. As a result, we need to count the cache side effects 
 from multiple mispredictions. However, attackers always expect the minimum 
 effort to trigger mispredictions for leak purposes. Meanwhile, manipulating 
-multiple speculation windows is usually difficult for external attackers. In 
-\SpecuSym, we follow the adversary perspective to study whether one 
-misprediction could be enough to cause timing leaks and leave the multiple 
-speculation cases as our future work. 
+multiple speculation windows is very difficult for external attackers. In 
+\SpecuSym, we follow the attacker perspective to study whether one misprediction 
+could be enough to cause timing leaks and leave the multiple speculation cases 
+as our future work. 
 
 
 
 \subsection{Optimizations}
 \label{sec:optimize}
 
-
-\textbf{Speculative Assumption Checking.}
-Recall that in Algorithm~\ref{alg:specusym} we duplicate a new state $s'$ 
-from state $s$ (line 22) if the branch predicate involves a memory visit 
-rather than a cache visit. This assumption requires a heavy cache analysis 
-whereas \cite{WuW19} over-approximately treats such access as memory visit. 
-To balance the precision and efficiency, \SpecuSym backwardly examines the 
-memory accesses from last branch to the current branch. If the examination 
-determines a cache hit, we know that speculative analysis at this point is 
-unnecessary. Otherwise, we record this branch predicate and add the miss 
-constraints to $\theta$ for analysis.  
-
-
-\textbf{Formula Simplification and Reduction.}
-Formulas $\mathit{div_i}$ and $\mathit{opp_i}$ captures the complete set of 
-cache behavioral differences. However, we observe that if $\mathit{\eta_{in}(m_i)}$ 
-satisfies then $\mathit{\mu_{in}(m_i)}$ must satisfy. Thereby we can further 
-simplify $\theta$ into $\theta'$ as follows.  
+\subsubsection{Constraint Transformation.}
+In Section~\ref{sec:analysis}, constraints $\mathit{opp_i}$ and $\mathit{div_i}$
+captures the complete set of leak-related cache behaviors. However, based on the
+timing-leakage-free assumption of a target program under non-speculative execution,
+we observe a property which helps \SpecuSym accelerate the cache analysis:
+%
+\begin{pro}
+  \label{pro:p2}
+  If under the same input $\mathit{in:=\{\lambda,t\}}$, the cache behaviors of a 
+	$\lambda$-related	memory event $\mathit{m_i}$ in speculative execution and 
+	non-speculative execution are opposite, there is a cache timing leak. 
+\end{pro}
+%
+Property~\ref{pro:p2} reflects the intersection of $\mathit{opp_i}$ and 
+$\mathit{div_i}$. As assumed, the cache behavior of $\mathit{m_i}$ in 
+non-speculative execution is deterministic. In case an opposite behavior 
+under speculative execution, $\mathit{m_i}$ must cause either new opposite 
+behavior or new divergent behavior. In any case, it is a leak. Then the 
+solving of $\theta$ turns to be solving the existence of such $\mathit{in}$, 
+which has cheaper computation cost. Thereby we define a new constraint
+$\theta'$ as follows.  
 %
 \begin{multline}
   \label{eqn:leak}
@@ -1771,6 +1774,8 @@ construction, caching the intermediate results helps avoid redundant
 computation. Therefore, we bank the computed address-comparing formulas into 
 a hash map so that they can be quickly retrieved with tolerable storage overhead. 
 
+
+\subsubsection{Formula Reduction.}
 However, the size of equation (\ref{eqn:leak}) still increases quickly along
 with the increase of $i$, which pressures the constraint solver. By inspecting 
 the formula structure, we seperate lengthy equations into smaller pieces 
@@ -1787,12 +1792,22 @@ constraint \circled{5} of $\mathit{m_j}$ is the negation of constraint \circled{
 of $\mathit{m}_{\mathit{j}+1}$, which implies we can save one constraint solving time. 
 
 
+\subsubsection{Speculative Assumption Checking.}
+Recall that in Algorithm~\ref{alg:specusym} \SpecuSym duplicates a new state 
+$s'$ from symbolic state $s$ (line 22) if the branch predicate relates to a
+memory value rather than a cache value. This assumption indeed requires a heavy 
+cache analysis whereas~\cite{WuW19} over-approximately treats all accesses as 
+memory visit. To balance the precision and efficiency, \SpecuSym backwardly 
+examines the memory accesses from last branch to the current branch. If the 
+examination results in a cache hit, we know that speculative analysis at this 
+point is unnecessary. Otherwise, we conduct $\theta$ for analysis as usual. 
+
+
 \ignore{
 Besides, we also record 
 instructions whose memory access has manifested leakage so that 
 following analysis can directly skip these instructions and carries on. 
 }
-
 
 \ignore{
 \textbf{Bound mis-prediction rate.}
@@ -1807,8 +1822,6 @@ observation: using LRU policy, the nearer a memory access is, the more impact
 it has on cache state. Thus, we only analyze combinations of speculative 
 state traces that share no common suffixes.
 }
-
-
 
 \ignore{
 From implementation, we skip analyzing memory access that has already 
