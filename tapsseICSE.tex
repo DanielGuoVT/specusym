@@ -1773,8 +1773,8 @@ satisfies.
 
 
 \subsubsection{Formula Reduction.}
-However, the size of $\theta'$ still increases drastically along with the 
-increase of $i$, which pressures the constraint solver. By inspecting 
+However, the size of $\theta'$ still intensely increases along with the 
+increment of $i$, which pressures the constraint solver. By inspecting 
 the constraint structure, we separate lengthy formulas into smaller pieces 
 by following strategies. First, if a subformula of a Conjunctive Normal 
 Form (CNF) formula evaluates as \textit{false}, we directly return \textit{false}. 
@@ -2086,7 +2086,7 @@ various caches for comparative analysis.
 \label{sec:comparison}
 
 \begin{table}
-\caption{Comparison betwee Wu et al~\cite{WuW19} and \SpecuSym}
+\caption{Comparison betwee Wu et al.~\cite{WuW19} and \SpecuSym}
 \label{tbl:cmp}
 \centering
 \resizebox{\linewidth}{!}{
@@ -2094,7 +2094,7 @@ various caches for comparative analysis.
 \toprule
 %\cline{1-6}
 \multirow{2}{*}{\textbf{Name~~~~}} 		&  
-\multicolumn{2}{c}{\textbf{Wu et al}~\cite{WuW19}}&		
+\multicolumn{2}{c}{\textbf{Wu et al.}~\cite{WuW19}}&		
 \multicolumn{3}{c}{\textbf{SpecuSym}}\\
 \cmidrule(r){2-3} \cmidrule(r){4-6} 
 %\cline{2-7}
@@ -2350,16 +2350,31 @@ interpretation based analysis on false positive elimination and leak witness gen
 This section studies the performance of our optimization strategies proposed in Section
 \ref{sec:optimize}. Table~\ref{tbl:opt} compares the overall performance between the 
 \texttt{Baseline} \SpecuSym without optimizations, and the \texttt{Optimized} \SpecuSym 
-with optimizations enabled.
+version with all optimizations enabled, as shown in column 1. The second and the third 
+columns display the comparisons of the execution time and the size of involved constraints. 
+The fourth column and the last column disclose the identified new divergent leaks and new
+opposite leaks, respectively.
 
-As shown in Table~\ref{tbl:opt}, after optimization (\texttt{Optimized}), 
-the overall execution time (\textbf{Time}) decreases to $30.75\%$ of the non-optimization 
-situation (\texttt{Base}), which demonstrates the effectiveness of optimization. 
 
-Apart from time cost, our optimization reduces constraint size by more than $20\%$ to 
-ease the solver burden. Moreover, we find that the \texttt{Base} setting missed almost 
-$2/3$ (44) leaks within the time bound (12 hours). This highlights the necessity of 
-optimization because it helps detect as many leaks as possible under limited resources. 
+As shown in column 2, after optimizations, the analysis time of the \texttt{Optimized} 
+\SpecuSym significantly decreases, falling to only $30.75\%$ of the \texttt{Baseline} 
+\textsc{SpecuSym} execution time, which proves the effectiveness of the optimizations 
+in accelerating the analysis. 
+
+
+Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces the size of the 
+involved constraint by more than $20\%$, compared to the \texttt{Baseline} version, 
+as shown in column 3. Though the constraint size reduction looks not as impressive 
+as the time reduction, the proposed strategies greatly ease the solver burden by 
+constraint transformation and formula reduction. Undoubtedly, constraint optimization 
+is the primary reason for the time decrease.
+
+
+Moreover, column 4 and column 5 disclose that the \texttt{Baseline} version detects
+60\% less leaks in total than the \texttt{Optimized} {\sc{SpecuSym}}, in a 12-hour time-bound. 
+This result highlights the utmost importance of optimizations because it energizes 
+\SpecuSym to detect as many as possible leaks within a given resource budget. 
+
 In Figure~\ref{fig:opt}, we examine the impact of optimization on each benchmark in 
 terms of both time cost and constraint size. In the figure, we present each case using 
 their orders in table~\ref{tbl:benchs}. 
