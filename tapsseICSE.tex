@@ -1279,7 +1279,7 @@ Then it analyzes the event trace to build the leak constraint and lazily
 searches for feasible solutions. We detail this approach in Section
 \ref{sec:modeling} and Section~\ref{sec:analysis}. 
 
-
+As mentioned before, speculative execution terminates when meeting a threshold such as the size of the ROB, the pipeline stage number, the branch depth, etc. Since these thresholds vary across architectures and hardware configurations, we use a single bound to represent them all and set it as configurable in our modeling. The bound restricts the maximum number of instructions that can be executed in a speculative state. When reaching the bound, the speculative state as well as those forked from it are all killed.  
 
 \begin{figure}
 \subfigure[Interaction between $s$ and $s'$]{
@@ -2346,54 +2346,61 @@ interpretation based analysis on false positive elimination and leak witness gen
 
 
 
-This section studies the performance of our optimization strategies proposed in Section
-\ref{sec:optimize}. Table~\ref{tbl:opt} compares the overall performance between the 
-\texttt{Baseline} \SpecuSym without optimizations, and the \texttt{Optimized} \SpecuSym 
-version with all optimizations enabled, as shown in column 1. The second and the third 
-columns display the comparisons of the execution time and the size of involved constraints. 
-The fourth column and the last column disclose the identified new divergent leaks and new
-opposite leaks, respectively.
+This section studies the performance of the optimization strategies 
+proposed in Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares 
+the overall performance between the \texttt{Baseline} \SpecuSym with
+no optimizations, and the \texttt{Optimized} \SpecuSym version with 
+all optimizations enabled, as listed in column 1. The second and the 
+third columns compare the execution time and the size of involved 
+constraints. The fourth column and the last column disclose the 
+identified new divergent leaks and new opposite leaks, respectively. 
+The used cache setting for this experiment is $C_3$.
 
 
-As shown in column 2, after optimizations, the analysis time of the \texttt{Optimized} 
-\SpecuSym significantly decreases, falling to only $30.7\%$ of the \texttt{Baseline} 
-\textsc{SpecuSym} execution time, which proves the effectiveness of the optimizations 
-in accelerating the analysis. 
+As shown in column 2, after optimizations, the analysis time of the 
+\texttt{Optimized} \SpecuSym significantly decreases, falling to only 
+$30.7\%$ of the \texttt{Baseline} \textsc{SpecuSym} execution time, 
+which proves the effectiveness of the optimizations in accelerating 
+the analysis. 
 
 
-Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces the size of the 
-involved constraint by more than $20\%$, compared to the \texttt{Baseline} version, 
-as shown in column 3. Though the constraint size reduction looks not as impressive 
-as the time reduction, the proposed strategies greatly ease the solver burden by 
-constraint transformation and formula reduction. Undoubtedly, constraint optimization 
+Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces
+the size of the involved constraint by more than $20\%$, compared 
+to the \texttt{Baseline} version, as shown in column 3. Though the 
+constraint size reduction looks not as impressive as the time reduction, 
+the proposed strategies greatly ease the solver burden by constraint 
+transformation and formula reduction. Undoubtedly, constraint optimization 
 is the primary reason for the time decrease.
 
 
-Moreover, column 4 and column 5 disclose that the \texttt{Baseline} version detects
-60\% less leaks in total than the \texttt{Optimized} {\sc{SpecuSym}}, in a 12-hour
-time-bound. This result highlights the utmost importance of optimizations because it 
-energizes \SpecuSym to detect as many as possible leaks within a given resource budget. 
+Moreover, column 4 and column 5 disclose that the \texttt{Optimized} 
+\SpecuSym detects 31.8\% more leaks in total than the \texttt{Baseline} 
+version, in a 12-hour threshold. This result highlights the utmost 
+importance of optimizations because it energizes \SpecuSym to detect more 
+leaks within a given resource budget. 
 
 
-We also examine how the optimizations impact each benchmark in terms of the analysis 
-time in Figure~\ref{fig:4a} and the constraint size in Figure~\ref{fig:4b}. Programs
-in these two figures are arranged using their orders in Table~\ref{tbl:benchs}. 
-Tags \texttt{Base} and \texttt{Opt} stand for the \SpecuSym versions without and with
-optimizations, respectively. 
-
-Clearly, Figure~\ref{fig:4a} shows that optimizations drastically reduce time cost 
-for $6$ out of $15$ cases from hundreds of minutes to less than an hour. On the one 
-hand, \texttt{Base} has much more redundant computations while \texttt{Opt} reuses 
-cached intermediate results. On the other hand, formula reduction lowers the cost 
-of solving. Figure~\ref{fig:4b} shows how optimizations reduce the constraint size 
-where AES~\cite{LibTomCrypt}, glibc DES~\cite{glibc}, and seed~\cite{Tegra} have 
-significant improvements. For the other cases, the memory trace length is typically 
-short. Thus, our optimizations have no apparent impacts upon them.
+We also examine how the optimizations impact each benchmark in terms of 
+the analysis time in Figure~\ref{fig:4a} and the constraint size in Figure
+\ref{fig:4b}. Programs in these two figures are arranged using their orders 
+in Table~\ref{tbl:benchs}. Tags \texttt{Base} and \texttt{Opt} stand for the 
+\SpecuSym versions without and with optimizations, respectively. 
 
 
-Finally, we answer the last research question: the proposed optimizations significantly 
-boost the overall performance by saving 69.3\% execution time and detecting 60\% more 
-timing leaks.
+Clearly, Figure~\ref{fig:4a} shows that optimizations drastically reduce 
+time cost for $6$ out of $15$ cases from hundreds of minutes to less than 
+an hour. On the one hand, \texttt{Base} has more redundant computations 
+while \texttt{Opt} reuses cached intermediate results. On the other hand, 
+formula reduction lowers the cost of solving. Figure~\ref{fig:4b} shows 
+how optimizations reduce the constraint size where AES~\cite{LibTomCrypt}, 
+glibc DES~\cite{glibc}, and seed~\cite{Tegra} have significant improvements. 
+For the other cases, the memory trace length is typically short. Thus, our 
+optimizations have no apparent impacts upon them.
+
+
+Finally, we answer the last research question: our optimizations significantly 
+boost the overall performance by saving 69.3\% execution time and detecting 
+31.8\% more timing leaks.
 
 
 
