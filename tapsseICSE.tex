@@ -229,7 +229,7 @@
 }
 \tikzset{
   hoval/.style={
-    draw
+    drawhttps://www.overleaf.com/project/5e2b89ed125b5500011bf213
     , line width=1pt
     , fill=salmon
     , anchor=center
@@ -2179,13 +2179,12 @@ interpretation based analysis on false positive elimination and leak witness gen
 
 \tikzset{align at top/.style={baseline=(current bounding box.north)}}
 \begin{figure}
-
-\subfigure[(a) Benchmark analysis time]{
-	\label{fig:opta}
+\subfigure[The benchmark analysis time]{
+	\label{fig:4a}
 	\begin{minipage}{0.485\linewidth}
 	\centering
 		\resizebox{1.0\linewidth}{!}
-	{
+		{
 		\begin{tikzpicture}
 		\begin{axis}[ 
 			%axis lines=left,
@@ -2242,15 +2241,15 @@ interpretation based analysis on false positive elimination and leak witness gen
 				(15, 0.00)
 		};
 		\label{plot:LibOSSGX}
-		\addlegendentry{Base}
-		\addlegendentry{Opt}
+		\addlegendentry{\texttt{Base}}
+		\addlegendentry{\texttt{Opt}}
 		\end{axis}
 		\end{tikzpicture}
 	}
 	\end{minipage}\hfill%
 }
-\subfigure[(b) SMT constraint size]{
-	\label{fig:optb}
+\subfigure[The SMT constraint size]{
+	\label{fig:4b}
 	\begin{minipage}{0.485\linewidth}
 	\centering
 		\resizebox{1.0\linewidth}{!}{
@@ -2310,8 +2309,8 @@ interpretation based analysis on false positive elimination and leak witness gen
 					(15, 111)
 				};
 				\label{plot:LibOSSGX}
-			\addlegendentry{Base}
-			\addlegendentry{Opt}
+			\addlegendentry{\texttt{Base}}
+			\addlegendentry{\texttt{Opt}}
 			\end{axis}
 			\end{tikzpicture}
 		}
@@ -2336,7 +2335,7 @@ interpretation based analysis on false positive elimination and leak witness gen
 \texttt{Baseline} &~~~100\%~~~ &100\%    &12  &76\\ 
 %\texttt{+S\&C} &~~~2400~~~ &2.13k  &8  &7\\ %2
 %\texttt{+SCR} &~~~1200~~~ &1.24  &9  &10\\ %2
-\texttt{Optimized} &~~~30.73\%~~~ &78.89\%  &50 &79\\ %2
+\texttt{Optimized} &~~~30.7\%~~~ &78.9\%  &50 &79\\ %2
 \hline
 %\bottomrule
 \end{tabular}
@@ -2357,7 +2356,7 @@ opposite leaks, respectively.
 
 
 As shown in column 2, after optimizations, the analysis time of the \texttt{Optimized} 
-\SpecuSym significantly decreases, falling to only $30.75\%$ of the \texttt{Baseline} 
+\SpecuSym significantly decreases, falling to only $30.7\%$ of the \texttt{Baseline} 
 \textsc{SpecuSym} execution time, which proves the effectiveness of the optimizations 
 in accelerating the analysis. 
 
@@ -2371,114 +2370,31 @@ is the primary reason for the time decrease.
 
 
 Moreover, column 4 and column 5 disclose that the \texttt{Baseline} version detects
-60\% less leaks in total than the \texttt{Optimized} {\sc{SpecuSym}}, in a 12-hour time-bound. 
-This result highlights the utmost importance of optimizations because it energizes 
-\SpecuSym to detect as many as possible leaks within a given resource budget. 
-
-In Figure~\ref{fig:opt}, we examine the impact of optimization on each benchmark in 
-terms of both time cost and constraint size. In the figure, we present each case using 
-their orders in table~\ref{tbl:benchs}. 
-
-Clearly in Figure 4(a) that optimization 
-largely decreases time cost for $6$ out of $15$ cases from hundreds of minutes to less
-than one hour. On the one hand, this is because the \texttt{Base} situation involves
-a great many redundant computation while the intermediate results cached in optimization 
-can be re-used. On the other hand, the size of constraint is reduced through formula 
-simplification which lowers the cost of solving. We show the detail in Figure 4(b)
-that optimization reduces constraint size, especially for AES~\cite{LibTomCrypt}, glibc 
-DES~\cite{glibc}, and seed~\cite{Tegra}. 
-
-For the remaining cases, the length of execution 
-trace is typically short which means the number of memory access to analyze is limited. 
-Thus, our optimization does not differ much from the base computation.
+60\% less leaks in total than the \texttt{Optimized} {\sc{SpecuSym}}, in a 12-hour
+time-bound. This result highlights the utmost importance of optimizations because it 
+energizes \SpecuSym to detect as many as possible leaks within a given resource budget. 
 
 
+We also examine how the optimizations impact each benchmark in terms of the analysis 
+time in Figure~\ref{fig:4a} and the constraint size in Figure~\ref{fig:4b}. Programs
+in these two figures are arranged using their orders in Table~\ref{tbl:benchs}. 
+Tags \texttt{Base} and \texttt{Opt} stand for the \SpecuSym versions without and with
+optimizations, respectively. 
 
-\ignore{
-\begin{filecontents*}{mydata.csv}
-a, No-opt, Simplify and Caching, Solving Reduction, All
-1, 3.56, 1.19, 1.66, 0.56 % hash
-2, 720, 0,0, 32.21 % aes
-3, 2.57, 0.87, 1.21, 0.04  % blowfish 
-4, 61.42, 0,0, 0.31 % chacha20
-5, 0.01, 0.65, 1.32, 0.00 % encoder
-6, 0.00, 0.75, 1.32, 0.00 % ocb
-7, 416.58, 0.85, 1.32, 10.71 % des
-8, 0.73, 0.95, 1.32, 0.01 % str2key
-9, 720, 0, 0, 52 % des
-10, 48.108, 1.45, 1.32, 0.13 % camellia
-11, 3.71, 1.45, 1.32, 0.03 % salsa
-12, 290.68, 1.45, 1.32, 0.21 % seed 
-13, 0.42, 1.45, 1.32, 0.37 % des
-14, 0.02, 1.45, 1.32, 0.00 % salsa
-15, 0.00, 1.45, 1.32, 0.00 % spectre
-\end{filecontents*}
-
-\begin{filecontents*}{cmp2.csv}
-a, No-opt, Simplify and Caching, Solving Reduction, All
-1, 1003, 1.19, 1.66, 949 % hash
-2, 2964, 0.87, 1.21, 524 % aes
-3, 0, 0.64, 1.21, 0 % blowfish 
-4, 8, 0.65, 1.32, 8 % chacha20
-5, 16, 0.75, 1.32, 16 % encoder
-6, 0, 0.85, 1.32, 0 % ocb
-7, 17, 0.95, 1.32, 17 % des
-8, 44, 1.45, 1.32, 25 % str2key
-9, 3816, 1.45, 1.32, 2207  % des
-10, 2265, 1.45, 1.32, 1972 % camellia
-11, 0, 1.45, 1.32, 0 % salsa
-12, 2382, 1.45, 1.32, 321 % seed 
-13, 457, 1.45, 1.32, 273 % des
-14, 0, 1.45, 1.32, 0 % salsa
-15, 111, 1.45, 1.32, 111 % spectre
-\end{filecontents*}
+Clearly, Figure~\ref{fig:4a} shows that optimizations drastically reduce time cost 
+for $6$ out of $15$ cases from hundreds of minutes to less than an hour. On the one 
+hand, \texttt{Base} has much more redundant computations while \texttt{Opt} reuses 
+cached intermediate results. On the other hand, formula reduction lowers the cost 
+of solving. Figure~\ref{fig:4b} shows how optimizations reduce the constraint size 
+where AES~\cite{LibTomCrypt}, glibc DES~\cite{glibc}, and seed~\cite{Tegra} have 
+significant improvements. For the other cases, the memory trace length is typically 
+short. Thus, our optimizations have no apparent impacts upon them.
 
 
-\begin{figure}%[htb!]
-  \centering
-  \subfigure[Benchmark analysis time.]{
-    \label{fig:opta}
-    \scalebox{.5}{
-      \begin{tikzpicture}
-        \pgfplotsset{every axis legend/.append style={
-          at={(0.84,0.76)}, anchor=south},every axis y label/.append style={at={(0.09,0.5)}}}
-        \begin{axis}[%title=(a) Mean STD for ,xlabel=Benchmarks,
-            ylabel=Time (m),xtick =data, %xticklabels={hash,AES,blowfish,chacha20,encoder,ocb}, 
-            legend columns=1,legend style={font=\large},font=\large,width=8cm]
-            \addplot table [x=a, y=No-opt,, col sep=comma] {mydata.csv};
-            %\addplot table [x=a, y=Simplify and Caching, col sep=comma] {mydata.csv};
-            %\addplot table [x=a, y=Solving Reduction, col sep=comma] {mydata.csv};
-            \addplot table [x=a, y=All, col sep=comma] {mydata.csv};
-            %\legend{Base, +S\&C, +SCR, All}
-            \legend{Base, Opt}
-        \end{axis}
-      \end{tikzpicture}
-      }
-    }
-    \subfigure[SMT constraint size.]{
-    \label{fig:optb}
-      \scalebox{.5}{
-        \begin{tikzpicture}
-          \pgfplotsset{every axis legend/.append style={
-            at={(0.84,0.76)}, anchor=south},every axis y label/.append style={at={(0.09,0.5)}}}
-          \begin{axis}[%title=(a) Mean STD for ,xlabel=Benchmarks,
-              ylabel=Size,xtick =data, %xticklabels={hash,AES,blowfish,chacha20,encoder,ocb}, 
-              legend columns=1,legend style={font=\large},font=\large,width=8cm]
-              \addplot table [x=a, y=No-opt,, col sep=comma] {cmp2.csv};
-              %\addplot table [x=a, y=Simplify and Caching, col sep=comma] {cmp2.csv};
-              %\addplot table [x=a, y=Solving Reduction, col sep=comma] {cmp2.csv};
-              \addplot table [x=a, y=All, col sep=comma] {cmp2.csv};
-              %\legend{Base, +S\&C, +SCR, All}
-              \legend{Base, Opt}
-          \end{axis}
-        \end{tikzpicture}
-        }
-      }
-      \vspace{-1.5em}
-      \caption{Breakdown of Optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}\label{fig:InsampleOutsample}
-     \label{fig:opt}
-\end{figure}
-}
+Finally, we answer the last research question: the proposed optimizations significantly 
+boost the overall performance by decreasing 69.3\% execution time and detecting 60\% 
+more timing leaks.
+
 
 
 \subsection{Threat to Validity}
@@ -2589,6 +2505,96 @@ false positives but also generates precise inputs for leak exposure.
 
 \section*{Acknowledgement}
 We thank xxx for xxx.
+
+
+\ignore{
+\begin{filecontents*}{mydata.csv}
+a, No-opt, Simplify and Caching, Solving Reduction, All
+1, 3.56, 1.19, 1.66, 0.56 % hash
+2, 720, 0,0, 32.21 % aes
+3, 2.57, 0.87, 1.21, 0.04  % blowfish 
+4, 61.42, 0,0, 0.31 % chacha20
+5, 0.01, 0.65, 1.32, 0.00 % encoder
+6, 0.00, 0.75, 1.32, 0.00 % ocb
+7, 416.58, 0.85, 1.32, 10.71 % des
+8, 0.73, 0.95, 1.32, 0.01 % str2key
+9, 720, 0, 0, 52 % des
+10, 48.108, 1.45, 1.32, 0.13 % camellia
+11, 3.71, 1.45, 1.32, 0.03 % salsa
+12, 290.68, 1.45, 1.32, 0.21 % seed 
+13, 0.42, 1.45, 1.32, 0.37 % des
+14, 0.02, 1.45, 1.32, 0.00 % salsa
+15, 0.00, 1.45, 1.32, 0.00 % spectre
+\end{filecontents*}
+
+\begin{filecontents*}{cmp2.csv}
+a, No-opt, Simplify and Caching, Solving Reduction, All
+1, 1003, 1.19, 1.66, 949 % hash
+2, 2964, 0.87, 1.21, 524 % aes
+3, 0, 0.64, 1.21, 0 % blowfish 
+4, 8, 0.65, 1.32, 8 % chacha20
+5, 16, 0.75, 1.32, 16 % encoder
+6, 0, 0.85, 1.32, 0 % ocb
+7, 17, 0.95, 1.32, 17 % des
+8, 44, 1.45, 1.32, 25 % str2key
+9, 3816, 1.45, 1.32, 2207  % des
+10, 2265, 1.45, 1.32, 1972 % camellia
+11, 0, 1.45, 1.32, 0 % salsa
+12, 2382, 1.45, 1.32, 321 % seed 
+13, 457, 1.45, 1.32, 273 % des
+14, 0, 1.45, 1.32, 0 % salsa
+15, 111, 1.45, 1.32, 111 % spectre
+\end{filecontents*}
+
+
+\begin{figure}%[htb!]
+  \centering
+  \subfigure[The benchmark analysis time.]{
+    \label{fig:4a}
+    \scalebox{.5}{
+      \begin{tikzpicture}
+        \pgfplotsset{every axis legend/.append style={
+          at={(0.84,0.76)}, anchor=south},every axis y label/.append style={at={(0.09,0.5)}}}
+        \begin{axis}[%title=(a) Mean STD for ,xlabel=Benchmarks,
+            ylabel=Time (m),xtick =data, %xticklabels={hash,AES,blowfish,chacha20,encoder,ocb}, 
+            legend columns=1,legend style={font=\large},font=\large,width=8cm]
+            \addplot table [x=a, y=No-opt,, col sep=comma] {mydata.csv};
+            %\addplot table [x=a, y=Simplify and Caching, col sep=comma] {mydata.csv};
+            %\addplot table [x=a, y=Solving Reduction, col sep=comma] {mydata.csv};
+            \addplot table [x=a, y=All, col sep=comma] {mydata.csv};
+            %\legend{Base, +S\&C, +SCR, All}
+            \legend{Base, Opt}
+        \end{axis}
+      \end{tikzpicture}
+      }
+    }
+    \subfigure[The SMT constraint size.]{
+    \label{fig:4b}
+      \scalebox{.5}{
+        \begin{tikzpicture}
+          \pgfplotsset{every axis legend/.append style={
+            at={(0.84,0.76)}, anchor=south},every axis y label/.append style={at={(0.09,0.5)}}}
+          \begin{axis}[%title=(a) Mean STD for ,xlabel=Benchmarks,
+              ylabel=Size,xtick =data, %xticklabels={hash,AES,blowfish,chacha20,encoder,ocb}, 
+              legend columns=1,legend style={font=\large},font=\large,width=8cm]
+              \addplot table [x=a, y=No-opt,, col sep=comma] {cmp2.csv};
+              %\addplot table [x=a, y=Simplify and Caching, col sep=comma] {cmp2.csv};
+              %\addplot table [x=a, y=Solving Reduction, col sep=comma] {cmp2.csv};
+              \addplot table [x=a, y=All, col sep=comma] {cmp2.csv};
+              %\legend{Base, +S\&C, +SCR, All}
+              \legend{Base, Opt}
+          \end{axis}
+        \end{tikzpicture}
+        }
+      }
+      \vspace{-2em}
+      \caption{Breakdown of Optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}\label{fig:InsampleOutsample}
+     \label{fig:opt}
+\end{figure}
+}
+
+
+
 
 \clearpage\newpage
 \bibliographystyle{ACM-Reference-Format}
