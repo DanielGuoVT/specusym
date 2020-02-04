@@ -2150,30 +2150,28 @@ and they are indeed false positives.
 For the remaining programs, \texttt{chacha20}, \texttt{encoder}, and \texttt{DES}, 
 both \SpecuSym and~\cite{WuW19} have detected leaks. However, \cite{WuW19} only 
 claims the leaky results whereas \SpecuSym generates richer information than
-\cite{WuW19}. E.g., \SpecuSym pinpoints 9, 5, and 8 leaky memory operations in these 
-benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory event 
-trace for leak diagnosis. Note that \SpecuSym generally performs faster on $C_4$ 
-than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache 
+\cite{WuW19}. E.g., \SpecuSym pinpoints 9, 5, and 8 leaky memory operations in 
+these benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory 
+event trace for leak diagnosis. Note that \SpecuSym generally performs faster on 
+$C_4$ than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache 
 setting of $C_4$ advances cache utilization and cache hit rate in these benchmarks. 
 
 
-One drawback of \SpecuSym is the computation cost. In Table~\ref{tbl:cmp}
-\cite{WuW19} finishes all benchmarks in 35 seconds, whereas \SpecuSym needs 
-725.7 seconds to analyze an OpenSSL \texttt{DES}. Worse, the analysis time 
-for the glibc \texttt{DES}~\cite{glibc} rises to about 6.5 hours (cf. Table
-\ref{tbl:detection}). The overhead mainly comes from the constraint-solving 
-since \SpecuSym reasons individual memory accesses on each program path. 
-However, sacrificing the performance for the precision achieves reasonable 
-paybacks. First, the increased overhead of most benchmarks is still tolerable.
-Next, \SpecuSym eliminates false positives from~\cite{WuW19} and generates 
-precise inputs. Moreover, if~\cite{WuW19} could provide assisting information, 
-e.g., the suspicious locations on the control flow graph, \SpecuSym could dedicate 
-its analysis on the problematic areas. 
+One drawback of \SpecuSym is the computation overhead. Table~\ref{tbl:cmp} shows 
+that the abstract interpretation based method~\cite{WuW19} finishes all benchmarks 
+in 35 seconds, whereas \SpecuSym needs 725.7 seconds to analyze an OpenSSL {\ttt{DES}}. 
+Worse, the analysis time under $C_3$ for the glibc \texttt{DES}~\cite{glibc} even 
+rises to about 6.6 hours (cf. Table~\ref{tbl:detection}). The cost mainly comes from 
+constraint solver since \SpecuSym reasons individual memory accesses on each program 
+path. However, sacrificing the performance for the precision achieves reasonable 
+paybacks. First, the increased overhead of most benchmarks is still tolerable. Next, 
+\SpecuSym finds false positives from~\cite{WuW19} and generates precise inputs. Moreover, 
+if~\cite{WuW19} provides assisting information, e.g., the suspicious locations on the 
+control flow graph, \SpecuSym can guide its analysis to the problematic area earlier. 
 
 
-Therefore, we answer the second research question: \SpecuSym can complement the 
-fast abstract interpretation based analysis on false positive elimination and 
-concrete leak witness generation.
+Now, we answer the second research question: \SpecuSym can complement the abstract 
+interpretation based analysis on false positive elimination and leak witness generation.
 
 
 \subsubsection{Optimization Performance}
@@ -2325,7 +2323,6 @@ concrete leak witness generation.
 \end{figure}
 
 
-
 \begin{table}%[!tb]
 \caption{Overall performance Increases from Optimization. }
 %\vspace{-1em}
@@ -2334,9 +2331,9 @@ concrete leak witness generation.
 \resizebox{\linewidth}{!}{
 \begin{tabular}{ccccc}
 \hline
-\textbf{~~Optimization~~} &\textbf{~~Time~~}&\textbf{~~Constraints Size~~}&~~\#\textbf{.Div}~~&~~\#\textbf{.Opp}~~ \\ 
+\textbf{~~Version~~} &\textbf{~~Time~~}&\textbf{~~Constraints Size~~}&~~\#\textbf{.Div}~~&~~\#\textbf{.Opp}~~ \\ 
 \hline
-\texttt{Base} &~~~100\%~~~ &100\%    &12  &76\\ 
+\texttt{Baseline} &~~~100\%~~~ &100\%    &12  &76\\ 
 %\texttt{+S\&C} &~~~2400~~~ &2.13k  &8  &7\\ %2
 %\texttt{+SCR} &~~~1200~~~ &1.24  &9  &10\\ %2
 \texttt{Optimized} &~~~30.73\%~~~ &78.89\%  &50 &79\\ %2
@@ -2344,18 +2341,23 @@ concrete leak witness generation.
 %\bottomrule
 \end{tabular}
 }
+\vspace{-2ex}
 \end{table}
 
 
 
 
-We study the performance of our optimization strategies (cf. Section~\ref{sec:optimize})
-in this section. As shown in Table~\ref{tbl:opt}, after optimization (\texttt{Optimized}), 
+This section studies the performance of our optimization strategies proposed in Section
+\ref{sec:optimize}. Table~\ref{tbl:opt} compares the overall performance between the 
+\texttt{Baseline} \SpecuSym without optimizations, and the \texttt{Optimized} \SpecuSym 
+with optimizations enabled.
+
+As shown in Table~\ref{tbl:opt}, after optimization (\texttt{Optimized}), 
 the overall execution time (\textbf{Time}) decreases to $30.75\%$ of the non-optimization 
 situation (\texttt{Base}), which demonstrates the effectiveness of optimization. 
 
 Apart from time cost, our optimization reduces constraint size by more than $20\%$ to 
-ease the solver cost. Moreover, we find that the \texttt{Base} setting missed almost 
+ease the solver burden. Moreover, we find that the \texttt{Base} setting missed almost 
 $2/3$ (44) leaks within the time bound (12 hours). This highlights the necessity of 
 optimization because it helps detect as many leaks as possible under limited resources. 
 In Figure~\ref{fig:opt}, we examine the impact of optimization on each benchmark in 
@@ -2368,7 +2370,8 @@ than one hour. On the one hand, this is because the \texttt{Base} situation invo
 a great many redundant computation while the intermediate results cached in optimization 
 can be re-used. On the other hand, the size of constraint is reduced through formula 
 simplification which lowers the cost of solving. We show the detail in Figure 4(b)
-that optimization reduces constraint size, especially for AES~\cite{LibTomCrypt}, glibc DES~\cite{glibc}, and seed~\cite{Tegra}. 
+that optimization reduces constraint size, especially for AES~\cite{LibTomCrypt}, glibc 
+DES~\cite{glibc}, and seed~\cite{Tegra}. 
 
 For the remaining cases, the length of execution 
 trace is typically short which means the number of memory access to analyze is limited. 
