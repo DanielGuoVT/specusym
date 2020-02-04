@@ -2019,7 +2019,7 @@ most 12 hours.
 
 
 
-In this section, we design experiments for the research question (1). Table
+In this section, we conduct experiments for the first research question. Table
 \ref{tbl:detection} shows the leak detection results under the 3 set-associative 
 cache settings. Let's name these caches as {$C_1$}, $C_2$, and $C_3$. $C_1$ has 
 a 32KB size, and each cache set consists of 4 lines. As each line has 64 bytes, 
@@ -2083,9 +2083,8 @@ various caches for comparative analysis.
 
 
 \subsubsection{Existing Method Comparison}
+\label{sec:comparison}
 
-%We also add the \texttt{klee\_make\_symbolic} invocations for the sensitive 
-%input in each benchmark.
 \begin{table}
 \caption{Comparison betwee Wu et al~\cite{WuW19} and \SpecuSym}
 \label{tbl:cmp}
@@ -2120,66 +2119,61 @@ various caches for comparative analysis.
 %\hline
 \end{tabular}
 }
+\vspace{-2ex}
 \end{table}
 
 
-We compare \SpecuSym with the latest work~\cite{WuW19} in Table~\ref{tbl:cmp}, 
-to answer the the second research question. Column 1 lists all the benchmarks 
-used in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the detection 
-result and the computation time of the abstract interpretation based method 
-\cite{WuW19}. Columns 4-6 depict the result of \SpecuSym while column 5 lists 
-the total amount of detected leaks. We set up the same cache setting used in
-\cite{WuW19} (512-line fully-associative cache with LRU policy) to assure a 
-fair comparison. Let's name it as $C_4$.
+
+We compare \SpecuSym with \cite{WuW19} in Table~\ref{tbl:cmp}, to answer the 
+second research question. Column 1 of Table~\ref{tbl:cmp} lists all the used
+benchmarks in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the 
+detection result and the computation time of this abstract interpretation 
+based method~\cite{WuW19}. Columns 4-6 depict the result of \textsc{SpecuSym}, 
+while column 5 lists the total amount of detected leaks. To ensure a fair 
+comparison, we configure a 512-line fully-associative cache with LRU policy, 
+which equals the cache setting used in~\cite{WuW19}. Let's name it as $C_4$.
 
 
-Overall, \cite{WuW19} analyzed that 5 of the 10 benchmarks are leaky, 
-as marked with \ding{52} in column 2. Consequently, the rest 5 programs are 
-free of timing leaks. For these non-leaky programs, \SpecuSym also detects 
-no leaks, as shown in column 4. This means \SpecuSym does not introduce false 
-positives on validating these robust programs. In contrast, for those \ding{52}
-results from~\cite{WuW19}, \SpecuSym has different results on two benchmarks, 
-\texttt{hash} and \texttt{ocb}, as underlined in Table~\ref{tbl:cmp}. 
-They are deemed to be leaky in~\cite{WuW19} while \SpecuSym found no leaks in 
-them. We manually inspect the two benchmarks and confirm that \SpecuSym gives 
-the right answer --- no leaks exist in the two programs. The inaccurate results 
-of~\cite{WuW19} might root from its over-approximation nature and they are 
-indeed false positives.
+Overall, \cite{WuW19} reported that 5 of the 10 benchmarks are leaky, as marked 
+with \ding{52} in column 2. Consequently, the rest 5 programs are free of cache
+timing leaks. For these non-leaky programs, \SpecuSym also detects no leaks, as 
+shown in column 4. This means \SpecuSym introduces no false positives on analyzing 
+these robust programs. In contrast, for those \ding{52} results from~\cite{WuW19}, 
+\SpecuSym provides different results on two benchmarks \texttt{hash} and \texttt{ocb}, 
+as underlined in Table~\ref{tbl:cmp}. They are deemed to be leaky in~\cite{WuW19},
+while \SpecuSym found no leaks in them. We manually inspect the two benchmarks and 
+confirm that \SpecuSym gives the right answer --- no leaks exist in the two programs. 
+The inaccurate results of~\cite{WuW19} may root from its over-approximation nature,
+and they are indeed false positives.
 
 
-For the remaining programs \texttt{chacha20}, \texttt{encoder}, and \texttt{DES}, 
+For the remaining programs, \texttt{chacha20}, \texttt{encoder}, and \texttt{DES}, 
 both \SpecuSym and~\cite{WuW19} have detected leaks. However, \cite{WuW19} only 
-claims the leaky situation while \SpecuSym generates richer information. E.g., 
-\SpecuSym pingpoints 9, 5, and 8 leaky memory operations in these benchmarks, 
-respectively. Moreover, \SpecuSym is able to provide inputs and the speculative 
-traces for leak diagnosis.
-Note that \SpecuSym performs generally faster on $C_4$ than on set-associative 
-caches $C_1$, $C_2$, and $C_3$ since the extreme cache setting of $C_4$
-promotes cache utilization and cache hit rate in these benchmarks. 
-
-
-%Thus, 
-%if using a variable in branch predicate only involves cache access, we do not
-%model speculative execution. Consequently, the overhead in leak analysis decreases.
+claims the leaky results whereas \SpecuSym generates richer information than
+\cite{WuW19}. E.g., \SpecuSym pinpoints 9, 5, and 8 leaky memory operations in these 
+benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory event 
+trace for leak diagnosis. Note that \SpecuSym generally performs faster on $C_4$ 
+than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache 
+setting of $C_4$ advances cache utilization and cache hit rate in these benchmarks. 
 
 
 One drawback of \SpecuSym is the computation cost. In Table~\ref{tbl:cmp}
-\cite{WuW19} finishes all benchmarks in 35 seconds whereas \SpecuSym needs 
+\cite{WuW19} finishes all benchmarks in 35 seconds, whereas \SpecuSym needs 
 725.7 seconds to analyze an OpenSSL \texttt{DES}. Worse, the analysis time 
 for the glibc \texttt{DES}~\cite{glibc} rises to about 6.5 hours (cf. Table
 \ref{tbl:detection}). The overhead mainly comes from the constraint-solving 
 since \SpecuSym reasons individual memory accesses on each program path. 
 However, sacrificing the performance for the precision achieves reasonable 
-paybacks. First, the increased overhead of most benchmarks are still tolerable.
+paybacks. First, the increased overhead of most benchmarks is still tolerable.
 Next, \SpecuSym eliminates false positives from~\cite{WuW19} and generates 
 precise inputs. Moreover, if~\cite{WuW19} could provide assisting information, 
 e.g., the suspicious locations on the control flow graph, \SpecuSym could dedicate 
 its analysis on the problematic areas. 
 
 
-Therefore, we answer the second research question: \SpecuSym can complement 
-the fast abstract interpretation based analysis~\cite{WuW19} on false positive 
-elimination and concrete leak witness generation.
+Therefore, we answer the second research question: \SpecuSym can complement the 
+fast abstract interpretation based analysis on false positive elimination and 
+concrete leak witness generation.
 
 
 \subsubsection{Optimization Performance}
