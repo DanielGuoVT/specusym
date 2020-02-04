@@ -1800,7 +1800,7 @@ $s'$ from symbolic state $s$ (line 21) if the branch predicate closely relates
 to a memory value rather than a cache value. As mentioned earlier in Section
 \ref{sec:modeling}, this strategy filters transient speculations that are unlikely 
 to affect the cache. Wu et al.~\cite{WuW19} over-approximately treat all memory 
-events as actual memory visits through predicate relevant values may have been 
+events as actual memory visits though predicate relevant values may have been 
 loaded to the cache. \SpecuSym proposes an alternative for symbolic execution to 
 deal with this issue. Ideally, to address the problem, we have to perform a 
 burdensome cache analysis starting from the current branch to the first memory 
@@ -2406,35 +2406,42 @@ boost the overall performance by saving 69.3\% execution time and detecting
 
 \subsection{Threat to Validity}
 \label{sec:threat}
-Our approach considers nested speculative execution because branch 
-instruction may also exist in speculative states. Since the time window 
-of speculative execution is typically short, we implement the nest depth 
-as configurable and set it to 2 in evaluation. Though speculative execution 
-may end at arbitrary points, we demonstrate the effectiveness of our
-under-approximation in the experiments. 
-
-Another threat is from the impact 
-of out-of-order execution. Out-of-order execution also reschedules memory 
-accesses, which may affect the accuracy our analysis. However, considering 
-both speculative execution and out-of-order execution is challenging. We 
-leave it as our future work. 
-
-We do not consider the speculative execution 
-that leverages Branch Target Buffer (BTB) or Return Stack Buffer (RSB) to 
-select the destinations of indirect branches. Such vulnerabilities have 
-been effectively mitigated by Intel and AMD through Indirect Branch 
-Prediction Barrier (IBPB) settings.
-
-\SpecuSym analyzes LLVM IR to detect leaks caused by speculative execution. 
-However, the program runtime behavior can be different due to back-end 
-compiler optimization and address space layout randomization (ASLR). 
-Although we have simulated the execution environment, more low-level 
-details of benchmarks can further facilitate us to improve analysis 
-results.
 
 
+\SpecuSym considers nested speculative execution because branch instruction 
+may also exist in speculation. As the speculative window is usually short, 
+we treat the nested depth as configurable and set it to 2 in evaluation. 
+Experiments demonstrate the effectiveness of this under-approximation approach.
+			 
 
+\SpecuSym works on the LLVM IR. However, the program runtime behavior might 
+differ due to backend compiler optimization and address space layout 
+randomization (ASLR). More low-level details can further facilitate \SpecuSym 
+to improve the analysis.
+
+
+\SpecuSym does not support the analysis of multithreaded programs. {\sc{SymSC}}
+\cite{GuoWW18} leveraged multithreading for timing leak detection. However, 
+considering multithreading and speculative execution greatly amplifies the 
+state space and interleaving space, which pose exceptional challenges for a 
+precise analysis.
+
+
+Another threat is from the out-of-order execution, which schedules a set of 
+data-independent instructions in an out-of-order manner, rather than sticking 
+to the program order. This processor optimization may affect the accuracy of 
+our analysis. However, incorporating both speculative execution and out-of-order 
+execution requires more dedicated analysis. We leave it as future work. 
+
+
+\ignore{
+We do not consider the situation that speculative execution leverages Branch 
+Target Buffer (BTB) or Return Stack Buffer (RSB) to select the destinations 
+of indirect branches. Such vulnerabilities have been effectively mitigated 
+by Intel and AMD through Indirect Branch Prediction Barrier (IBPB) settings.
+}
 %\newpage
+
 \section{Related Work}
 \label{sec:related}
 
