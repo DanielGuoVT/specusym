@@ -377,6 +377,14 @@
 \label{sec:intro}
 
 
+\begin{figure}[htb]
+  \centering
+  \scalebox{1.0}{\input{fig_flow.tex}}
+  \caption{Overall flow of \textsc{SpecuSym}.}
+  \label{fig:overall_flow}
+	\vspace{-2ex}
+\end{figure}
+
 
 % First, introduce cache timing side-channel attacks
 CPU cache is a limited but crucial storage area on modern processor chips. 
@@ -427,15 +435,6 @@ method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} questi
 --- it is incapable of generating input and speculative flows to diagnose leaks in 
 depth. Moreover, the over-approximation nature inevitably leads to false positives, 
 which desires a more precise method.
-
-
-
-\begin{figure}
-  \centering
-  \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \textsc{SpecuSym}.}
-  \label{fig:overall_flow}
-\end{figure}
 
 
 
@@ -514,15 +513,13 @@ work. To summarize, we have made the following contributions:
     A novel approach for modeling microarchitectural speculative execution and 
 		analyzing the affected cache behaviors in symbolic execution.
   \item 
-		Implementation of \textsc{SpecuSym}, which addresses the challenges mentioned
-		above and supports cache timing leak detection under speculative execution. 
+		Implementation of \textsc{SpecuSym}, which addresses three maojor challenges
+		and supports cache timing leak detection under speculative execution. 
   \item 
     Evaluation of \SpecuSym on 15 open-source benchmarks to demonstrate its 
-    effectiveness through discovering from 2 to 61 leaks upon 4 different 
+    effectiveness through revealing from 2 to 61 leaks upon 4 different 
 		cache settings.
 \end{compactitem}
-
-
 
 
 The remainder of this paper is organized as follows. Section~\ref{sec:mtv} 
@@ -533,8 +530,6 @@ and discuss the related work in Section~\ref{sec:related}. Finally, we
 conclude our work in Section~\ref{sec:conclusion}.
 
 
-
-
 \section{Motivation}
 \label{sec:mtv}
 
@@ -542,44 +537,6 @@ This section uses an example to explain the motivation. By studying its
 leakage-free cache behavior under non-speculative execution and the new 
 leaks caused by speculative execution, we position how \SpecuSym should
 facility leak diagnosis.
-
-
-\subsection{Program ${\prog}$ and the Cache Mapping}
-\label{sec:leak_example}
-
-Figure~\ref{fig:fig2-a} shows a program snippet ${\prog}$ whose execution 
-time remains stationary in non-speculative execution but varies in terms
-of the sensitive input when running under speculative execution.
-
-
-Listed at line 2, ${\prog}$ has 4 local variables as \texttt{S}, \texttt{x}, 
-\texttt{v1}, and \texttt{v2}. Operating these variables leads to memory 
-access. E.g., the implicit memory read of \texttt{x} (line 6) and the 
-explicit \emph{store} to \texttt{v1} (line 7). The remaining variable 
-\texttt{i} (line 3) is a register variable that incurs no memory access. 
-Also, variable \texttt{x} is the sensitive input, and any form of revealing 
-its value turns to be a leak. 
-
-
-We leverage a fully associative cache $\mathcal{C}$ for the analysis purpose 
-of $\prog$, as shown in Figure~\ref{fig:2b}. It is an extreme case of the 
-N-way associative cache where the memory address of a variable in $\prog$ may 
-map to any cache line of $\mathcal{C}$, subjecting to the line availability 
-and the replacement policy. Here we assume $\mathcal{C}$ adopts the \emph{Least
-Recently Used} (LRU) policy, which always evicts the least used line once 
-$\mathcal{C}$ has been entirely occupied.
-
-
-Cache $\mathcal{C}$ consists of 256 cache lines, and each line has exactly 
-1-byte size. Local variables are mapped to $\mathcal{C}$ according to the 
-program execution order and their sizes. E.g., in Figure~\ref{fig:2b} array 
-\texttt{S} maps from cache lines \#1 to \#254 because of the array traverse 
-in the \emph{while} loop (lines 4-5), and each 1-byte array item successively 
-occupies a full cache line. Then variable \texttt{x} associates with line 
-\#255. Next, \texttt{v1} fills the last available line (line \#256) if 
-\texttt{x}$>$\texttt{128} satisfies; thus, the execution proceeds into the 
-\textit{if} flow. Otherwise, the execution takes the \textit{else} branch 
-and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 
 
 \begin{figure}%[htb]
@@ -647,7 +604,48 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 \vspace{-3ex}
 \caption{Program $\mathcal{P}$ and its cache mapping.}
 \label{fig:motiv}
+\vspace{-2ex}
 \end{figure}
+
+
+\subsection{Program ${\prog}$ and the Cache Mapping}
+\label{sec:leak_example}
+
+Figure~\ref{fig:fig2-a} shows a program snippet ${\prog}$ whose execution 
+time remains stationary in non-speculative execution but varies in terms
+of the sensitive input when running under speculative execution.
+
+
+Listed at line 2, ${\prog}$ has 4 local variables as \texttt{S}, \texttt{x}, 
+\texttt{v1}, and \texttt{v2}. Operating these variables leads to memory 
+access. E.g., the implicit memory read of \texttt{x} (line 6) and the 
+explicit \emph{store} to \texttt{v1} (line 7). The remaining variable 
+\texttt{i} (line 3) is a register variable that incurs no memory access. 
+Also, variable \texttt{x} is the sensitive input, and any form of revealing 
+its value turns to be a leak. 
+
+
+We leverage a fully associative cache $\mathcal{C}$ for the analysis purpose 
+of $\prog$, as shown in Figure~\ref{fig:2b}. It is an extreme case of the 
+N-way associative cache where the memory address of a variable in $\prog$ may 
+map to any cache line of $\mathcal{C}$, subjecting to the line availability 
+and the replacement policy. Here we assume $\mathcal{C}$ adopts the \emph{Least
+Recently Used} (LRU) policy, which always evicts the least used line once 
+$\mathcal{C}$ has been entirely occupied.
+
+
+Cache $\mathcal{C}$ consists of 256 cache lines, and each line has exactly 
+1-byte size. Local variables are mapped to $\mathcal{C}$ according to the 
+program execution order and their sizes. E.g., in Figure~\ref{fig:2b} array 
+\texttt{S} maps from cache lines \#1 to \#254 because of the array traverse 
+in the \emph{while} loop (lines 4-5), and each 1-byte array item successively 
+occupies a full cache line. Then variable \texttt{x} associates with line 
+\#255. Next, \texttt{v1} fills the last available line (line \#256) if 
+\texttt{x}$>$\texttt{128} satisfies; thus, the execution proceeds into the 
+\textit{if} flow. Otherwise, the execution takes the \textit{else} branch 
+and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
+
+
 
 
 \subsection{Leakage-free in Non-speculative Execution}
@@ -749,8 +747,8 @@ our new method.
 First, \SpecuSym should be able to systematically explore the program state 
 space to identify execution paths and speculative flows that may cause leaks. 
 E.g., $\mathit{p_2}$ and the speculative execution of the \textit{if} branch. 
-Note that speculation of the \textit{else} branch won't cause a similar 
-leak along with $\mathit{p_1}$.
+By contrast, speculation of the \textit{else} branch won't cause any leak along 
+with $\mathit{p_1}$.
 
 
 Second, \SpecuSym should be able to pinpoint the leak sites by a precise cache 
@@ -2406,7 +2404,7 @@ to improve the analysis.
 
 
 \SpecuSym considers nested speculative execution because branch instruction 
-may also exist in speculation. As the speculative window is usually short, 
+may also exist in speculation. As the speculative window is usually transient, 
 we treat the nested depth as configurable and set it to 2 in evaluation. 
 However, experiments demonstrate the effectiveness of this under-approximation 
 approach.
@@ -2444,32 +2442,32 @@ cache timing attacks, which motivates the design of \textsc{SpecuSym}.
 
 
 Symbolic execution~\cite{King76} has been applying to side-channel analysis 
-because of the inherent natures of precise reasoning and input generation. 
-To quantify the information leakage through a timing side-channel, 
+because of the inherent natures of precise reasoning and input generation
+\cite{PasareanuPM16,BangAPPB16,PhanBPMB17,BrennanSB18,BangRB18}.
+To quantify the information leakage through a cache timing side-channel, 
 Chattopadhyay et al.~\cite{ChattopadhyayBRZ17,Chattopadhyay17} and Basu et al.
 \cite{BasuC17} developed symbolic execution methods to study dependencies 
 between sensitive data and cache behaviors. Wang et al. developed CacheD
 \cite{WangWLZW17}, which targets timing leaks through a trace-based symbolic 
 execution. Furthermore, Brotzman et al.~\cite{BrotzmanLZTK2018} proposed 
-CaSym, a symbolic reasoning method that supports cache analysis over multiple 
+CaSym, a symbolic reasoning method that supports cache analysis upon multiple 
 program paths. Considering the cache effects from thread interleavings, Guo
 et al.~\cite{GuoWW18} proposed \textsc{SymSC} to analyze cache timing leaks 
-due to multithreading. These methods, however, are all unaware of cache state 
-changes due to speculative execution.  
+due to multithreading. These methods, however, all miss cache changes due to 
+speculative execution.  
 
 
 Abstract interpretation~\cite{CousotC77} has also been adopting to cache 
-reasoning in terms of its scalable analysis and sound approximation. 
-To estimate cache side channels, CacheAudit~\cite{DoychevFKMR13}
-approximates cache states by concrete state abstraction. Based on CacheAudit, 
-Barthe et al.~\cite{BartheKMO14} track the program cache state affected by
-the attacker from a separate process. CacheS~\cite{WangBLWZW19} provides a 
-secret-augmented abstract domain to track program secrets and dependencies. 
-However, CacheAudit and CacheS are unaware of the impact of speculative 
-execution. Though Wu et al.~\cite{WuW19} developed a dedicated abstract 
-interpretation method for cache timing leak analysis under speculative 
-execution, the technique is incapable of generating precise inputs to 
-diagnose leaks in depth. 
+timing side-channel reasoning because of its scalable analysis and sound 
+approximation.CacheAudit~\cite{DoychevFKMR13} approximates cache states 
+by concrete state abstraction. Based on CacheAudit, Barthe et al.
+\cite{BartheKMO14} track the program cache state affected by the attacker 
+from a separate process. CacheS~\cite{WangBLWZW19} provides a secret-augmented 
+abstract domain to track program secrets and dependencies. However, CacheAudit 
+and CacheS are unaware of the impact of speculative execution. Though Wu et al.
+\cite{WuW19} developed a dedicated abstract interpretation method for cache 
+timing leak analysis under speculative execution, the technique is incapable of 
+generating speculative flow and precise inputs to diagnose leaks. 
 
 
 \ignore{
@@ -2489,9 +2487,9 @@ count on the fuzz heuristics while \SpecuSym systematically solves for precise
 inputs.
 
 
-Besides the above analysis methods, there also exists compiler assisted techniques 
-that remove or model timing leaks. Doychev et al.~\cite{DoychevK17} studied 
-that compiler optimization can remove cache side channels.  Sung et al.
+Besides the above analysis methods, there also exists compiler assisted 
+techniques that remove or model timing leaks. Doychev et al.~\cite{DoychevK17} 
+studied that compiler optimization can remove cache side channels. Sung et al.
 \cite{SungPW18} developed a compiler frontend transformation that models cache
 timing behaviors for verification purposes. Still, none of them considers
 speculative execution.
@@ -2499,7 +2497,7 @@ speculative execution.
 
 Among the existing works, KLEESPECTRE~\cite{WangCBMR19}, Spectector
 \cite{GuarnieriKMRS19}, and~\cite{ZhangCW12} are closely related to 
-\textsc{SpecuSym}. KLEESPECTRE~\cite{WangCBMR19} has a similar 
+\textsc{SpecuSym}. KLEESPECTRE~\cite{WangCBMR19} has an analogous 
 understanding of modeling speculation in symbolic execution. However, 
 KLEESPECTRE~\cite{WangCBMR19} aims at Spectre-style vulnerability; 
 thus, it has a crucial difference in constraint semantics. Spectector 
