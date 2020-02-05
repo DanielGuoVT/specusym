@@ -2447,57 +2447,60 @@ by Intel and AMD through Indirect Branch Prediction Barrier (IBPB) settings.
 
 Regarding the security impact of processor speculative execution
 \cite{kimuraKT1996}, Kocher et al.~\cite{KocherGGHHLMPSY19} demonstrated 
-that speculative execution influences the cache state and leads to cache 
-timing attacks, which motivates the design of \SpecuSym. 
+that speculative execution influences the cache state, thus leading to 
+cache timing attacks, which motivates the design of \SpecuSym. 
+
 
 To estimate cache side channels, Doychev et al.~\cite{DoychevFKMR13}
-approximate cache states through concrete state abstraction. Despite the
-upper bound of information leakage, the estimation offers few guidance on 
-fixing the problems. Doychev et al.~\cite{DoychevK17} also shows that 
-compiler optimization can remove side channels. However, it is undesirable 
-for critical libraries to make the security guarantee be compiler-dependent. 
+approximate cache states by concrete state abstraction. Despite the
+upper bound of information leakage, the estimation supplies guidance on 
+leakage fixing. Doychev et al.~\cite{DoychevK17} also show that compiler 
+optimization can remove side channels. However, it is undesirable for 
+critical software to offer a compiler-dependent security guarantee. 
 
-Symbolic execution~\cite{King76} has been applying to cache analysis because
-of its precise reasoning and input generation natures. To quantify the 
-information leakage through cache side channel, Chattopadhyay et al.
-\cite{ChattopadhyayBRZ17,Chattopadhyay17} and Basu et al.~\cite{BasuC17}
+
+Symbolic execution~\cite{King76} has been applying to side-channel analysis 
+because of the inherent natures of precise reasoning and input generation. 
+To quantify the information leakage through a cache side-channel, Chattopadhyay 
+et al.~\cite{ChattopadhyayBRZ17,Chattopadhyay17} and Basu et al.~\cite{BasuC17}
 developed symbolic execution methods to study dependencies between sensitive 
-data and cache behaviors. Wang et al. developed CacheD~\cite{WangWLZW17} which 
-aims at timing leaks through a trace-based symbolic execution. Furthermore, 
+data and cache behaviors. Wang et al. developed CacheD~\cite{WangWLZW17}, which 
+targets timing leaks through a trace-based symbolic execution. Furthermore, 
 Brotzman et al.~\cite{BrotzmanLZTK2018} proposed CaSym, a symbolic reasoning 
-method which supports cache analysis over multiple program paths. Considering
-the cache affects from thread interleavings, Guo et al.~\cite{GuoWW18} proposed
-\textsc{SymSC} to analyze cache timing leaks due to multithreading. These methods,
-however, are all unaware of cache state changes under speculative execution.  
+method that supports cache analysis over multiple program paths. Considering
+the cache effects from thread interleavings, Guo et al.~\cite{GuoWW18} proposed
+\textsc{SymSC} to analyze cache timing leaks due to multithreading. These 
+methods, however, are all unaware of cache state changes due to speculative 
+execution.  
 
 
 Abstract interpretation~\cite{CousotC77} has also been adopting to cache 
 reasoning in terms of its scalable analysis and sound approximation. CacheS
-\cite{CacheS} proposes a secret-augmented abstract domain to track program 
-secrets and dependencies. It treats public data in a coarse-grained fashion 
-and secret data in a finer-grained manner to balance the scalability and 
-precision. However, CacheS is also unaware of the impact from speculative 
-execution on cache state. Though Wu et al.~\cite{WuW19} developed a dedicated 
-abstract interpretation method for worst case exectuion estimation and cache 
-timing leak analysis under speculative execution, they are unable to generate 
-precise inputs to diagnose the leaks in depth. 
+\cite{WangBLWZW19} provides a secret-augmented abstract domain to track 
+program secrets and dependencies. It treats public data in a coarse-grained 
+fashion and secret data in a finer-grained manner to balance the scalability 
+and precision. However, CacheS is also unaware of the impact of speculative 
+execution on the cache state. Though Wu et al.~\cite{WuW19} developed a 
+dedicated abstract interpretation method for worst-case execution estimation 
+and cache timing leak analysis under speculative execution, the method is 
+incapable of generating precise inputs to diagnose leaks in depth. 
 
 
 Likewise, grey-box fuzz testing has been used in detecting Spectre-type
 \cite{KocherGGHHLMPSY19} program vulnerabilities~\cite{OleksenkoTSF19}, 
 exposing side channels~\cite{NilizadehNP19}, and revealing timing leaks
 \cite{HeEC19}. However, these methods are either unaware of speculative 
-exectution~\cite{NilizadehNP19,HeEC19} or relying on costful 
-instrumentations on control flow graph. Also, due to the testing nature, 
-these methods heavily count on the fuzz heuristics wheres \SpecuSym 
+execution~\cite{NilizadehNP19,HeEC19} or relying on costly
+instrumentations on the control flow graph. Also, due to the testing nature, 
+these methods primarily count on the fuzz heuristics while \SpecuSym 
 systematically solves for precise inputs.
 
 
-To conclude, existing program analysis approaches either fail to 
-generate inputs or ignore cache affects from speculative execution. 
-To fill the gap, \SpecuSym models speculative execution through 
-stateful symbolic execution so as to produce inputs that endorse 
-the leaks. 
+To conclude, existing program analysis approaches either fail to generate 
+inputs or ignore cache affects from speculative execution. In contrast, 
+\SpecuSym models speculative execution through stateful symbolic execution 
+to produce precise inputs that can study the cache timing side-channel leaks 
+in depth. 
 
 
 \section{Conclusions}
