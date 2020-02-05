@@ -1,0 +1,4 @@
+1. related work (1) KLEESpectre; (2) Speculative SE short paper;
+2. explain the speculative window;
+3. explain why we may have under-appox but no over-approx;
+4. possible case study between specusym and ai;

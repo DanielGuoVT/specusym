@@ -333,12 +333,12 @@
 	property under speculative execution, it is incapable of producing endorsements 
 	including inputs and speculated flows to diagnose leaks in depth. 
   %
-  This work proposes a new method, \textit{Speculative symbolic Execution} 
-	(\textsc{SpecuSym}), for precisely detecting cache timing leaks introduced by 
-	speculative execution. Given a program (leakage-free in non-speculative 
-	execution), \textsc{SpecuSym} systematically explores the program state space, 
-	models speculative behavior at conditional branches, and accumulates the	
-	cache side effects along with subsequent explorations. 
+  This work proposes a new speculative symbolic execution method, \textsc{SpecuSym}, 
+	for precisely detecting cache timing leaks introduced by speculative execution. 
+	Given a program (leakage-free in non-speculative execution), \textsc{SpecuSym} 
+	systematically explores the program state space, models speculative behavior at 
+	conditional branches, and accumulates the	cache side effects along with subsequent 
+	explorations. 
 	%
 	During the dynamic execution, \textsc{SpecuSym} constructs leak predicates for 
 	memory visits based on the specified cache model and conducts a 
@@ -433,33 +433,25 @@ which desires a more precise method.
 \begin{figure}
   \centering
   \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \emph{Speculative Symbolic Execution}.}
+  \caption{Overall flow of \textsc{SpecuSym}.}
   \label{fig:overall_flow}
 \end{figure}
 
 
 
 % Fifth, introduce our method 
-To this end, we propose a new method \textit{speculative symbolic execution}
-(\textsc{SpecuSym}), for detecting cache timing leaks caused by speculative execution. 
-Figure~\ref{fig:overall_flow} displays the overall flow of \textsc{SpecuSym}. Given
-a program $\prog$, which is timing-leakage-free in non-speculative execution, the 
-sensitive input presented in symbol, and the insensitive input, \textsc{SpecuSym} 
-leverages symbolic execution to explore $\prog$'s state space systematically. Meanwhile, 
-it models speculative execution at conditional branches (cf. \circled{1}) and accumulates 
-cache side effects along with subsequent executions (cf. \circled{2}). Based on a cache 
-model, \textsc{SpecuSym} constructs leak predicates for memory visits and conducts a
-constraint-solving based cache behavior analysis (cf. \circled{3}) to generate the leak 
-witnesses (cf. \circled{4}). 
-
-
-\ignore{
-To be specific, the symbolic input reflects the leaks that 
-are relevant to secret, the speculative execution modeling supplies behavioral 
-simulation on program paths, the cache modeling forms leak exposure constraints 
-while the the cache analysis discloses divergent cache behaviors at an identified 
-execution flow. 
-}
+To this end, we propose a new method speculative symbolic execution 
+(\textsc{SpecuSym}), for detecting cache timing leaks caused by speculative 
+execution. Figure~\ref{fig:overall_flow} displays the overall flow of 
+\textsc{SpecuSym}. Given a program $\prog$, which is timing-leakage-free in 
+non-speculative execution, the sensitive input presented in symbol, and the 
+insensitive input, \textsc{SpecuSym} leverages symbolic execution to explore 
+$\prog$'s state space systematically. Meanwhile, it models speculative execution 
+at conditional branches (cf. \circled{1}) and accumulates cache side effects
+along with subsequent executions (cf. \circled{2}). Based on a cache model, 
+\textsc{SpecuSym} constructs leak predicates for memory visits and conducts a 
+constraint-solving based cache behavior analysis (cf. \circled{3}) to generate 
+the leak witnesses (cf. \circled{4}). 
 
 
 % Sixth, point out the challenges 
@@ -1099,7 +1091,7 @@ cause leaks.
 
 
 %\newpage\clearpage
-\section{Speculative Symbolic Execution}
+\section{Algorithm}
 \label{sec:specuSE}
 
 In this section, we present the core algorithm of \textsc{SpecuSym} and explain 
@@ -2496,11 +2488,25 @@ these methods primarily count on the fuzz heuristics while \SpecuSym
 systematically solves for precise inputs.
 
 
-To conclude, existing program analysis approaches either fail to generate 
-inputs or ignore cache affects from speculative execution. In contrast, 
-\SpecuSym models speculative execution through stateful symbolic execution 
-to produce precise inputs that can study the cache timing side-channel leaks 
-in depth. 
+Among the existing works, KLEESPECTRE~\cite{WangCBMR19}, Spectector
+\cite{GuarnieriKMRS19}, and~\cite{ZhangCW12} are closely related to 
+\textsc{SpecuSym}. KLEESPECTRE~\cite{WangCBMR19} has a similar 
+understanding of modeling speculation in symbolic execution. However, 
+KLEESPECTRE~\cite{WangCBMR19} aims at Spectre-style vulnerability 
+thus it has different direction of constraint semantics. Spectector 
+\cite{WangCBMR19} also targets Spectre vulnerability. It employs 
+symbolic execution to prove speculative non-interference property or 
+detect violations. Speculative symbolic execution~\cite{ZhangCW12} 
+proposed a method to lazily reason branch feasibility until reaching 
+a threshold, which improves the efficiency of symbolic execution 
+technique.
+
+
+To conclude, existing works may fail to generate inputs, ignore cache 
+affects from speculative execution, or model speculation for different 
+purposes. In contrast, \SpecuSym models speculative execution through 
+stateful symbolic execution to produce precise inputs that can study 
+the cache timing side-channel leak in depth. 
 
 
 \section{Conclusions}
@@ -2510,14 +2516,16 @@ in depth.
 In this paper, we have presented a symbolic execution based method 
 \SpecuSym for detecting cache timing leaks on running a sensitive data 
 related program under speculative execution. \SpecuSym systematically 
-explores the program paths and models speculative execution at conditional 
-branches. By cache state modeling as well as cache behavior analysis, 
-\SpecuSym uses SMT-solving to search for divergent and opposite cache 
-behaviors at memory access events. Experimental results show that 
-\SpecuSym can detect timing leaks under various cache settings. Comparison 
-between \SpecuSym and state-of-the-art abstract interpretation based 
-leak detection method shows \SpecuSym not only successfully eliminates 
-false positives but also generates precise inputs for leak exposure.
+explores the program state space and models speculative execution at 
+conditional branches. By cache state modeling as well as cache behavior 
+analysis, \SpecuSym leverages constraint-solving to search for divergent 
+and opposite cache behaviors at memory access events. Experimental results
+show that \SpecuSym can detect timing leaks under different cache settings.
+The proposed optimizations help \SpecuSym save 69.3\% execution time to 
+detect 31.8\% more leaks. Comparison between \SpecuSym and state-of-the-art 
+abstract interpretation based method~\cite{WuW19} shows that \SpecuSym not 
+only successfully detects leaks in the reported programs but also eliminates 
+false positives for a more precise result.
 
 
 \section*{Acknowledgement}
