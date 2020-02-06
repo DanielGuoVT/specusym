@@ -2152,17 +2152,17 @@ setting of $C_4$ advances cache utilization and cache hit rate in these benchmar
 
 
 One drawback of \SpecuSym is the computation overhead. Table~\ref{tbl:cmp} shows 
-that the abstract interpretation based method~\cite{WuW19} finishes all benchmarks 
-in 35 seconds, whereas \SpecuSym needs 725.7 seconds to analyze an OpenSSL {\ttt{DES}}. 
-Worse, the analysis time under $C_3$ for the glibc \texttt{DES}~\cite{glibc} even 
-rises to about 6.6 hours (cf. Table~\ref{tbl:detection}). The cost mainly comes from 
-constraint solver since \SpecuSym reasons individual memory accesses on each program 
-path. However, sacrificing the performance for the precision achieves reasonable 
-paybacks. First, the increased overhead of most benchmarks is still tolerable. Next, 
-\SpecuSym finds false positives from~\cite{WuW19} and generates precise inputs. Moreover, 
-if~\cite{WuW19} provides assisting information, e.g., the suspicious locations on the 
+that \cite{WuW19} finishes all benchmarks in 35 seconds, whereas \SpecuSym needs 
+725.7 seconds to analyze an OpenSSL {\ttt{DES}}. Worse, the analysis time under 
+$C_3$ for the glibc \texttt{DES}~\cite{glibc} even rises to about 6.6 hours (cf.
+Table~\ref{tbl:detection}). The cost mainly comes from constraint solver since 
+\SpecuSym reasons individual memory accesses on each program path. However, 
+sacrificing the performance for the precision achieves reasonable paybacks. First, 
+the increased overhead of most benchmarks is still tolerable. Next, \SpecuSym finds 
+false positives from~\cite{WuW19} and generates precise inputs. Moreover, if
+\cite{WuW19} provides assisting information, e.g., the suspicious locations on the 
 control flow graph, \SpecuSym can purposly guide its analysis to the problematic 
-area earlier. 
+area at an earlier stage. 
 
 
 Now, we answer the second research question: \SpecuSym can complement the abstract 
