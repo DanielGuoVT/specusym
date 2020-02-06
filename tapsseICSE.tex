@@ -1,6 +1,6 @@
 \documentclass[sigconf]{acmart}
 \settopmatter{printfolios=true,printccs=true,printacmref=true}
-\linespread{0.98}
+\linespread{0.97}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setcopyright{acmcopyright}
@@ -1092,12 +1092,11 @@ cause leaks.
 \section{Algorithm}
 \label{sec:specuSE}
 
-In this section, we present the core algorithm of \textsc{SpecuSym} and explain 
-the technical contributions portrayed in Figure~\ref{fig:overall_flow}. Algorithm
-\ref{alg:specusym} shows the main algorithm of \textsc{SpecuSym}, where the major 
-changes from the baseline algorithm are at the state checkpoint (lines 3-5), the 
-branch point (line 9), and the memory access point (lines 14-15). We highlight 
-these changes in blue. 
+In this section, we explain the core technical contributions portrayed in Figure
+\ref{fig:overall_flow}. Algorithm~\ref{alg:specusym} shows the procedure of 
+\textsc{SpecuSym} built upon the baseline algorithm, where the main changes are 
+highlighted at the state checkpoint (lines 3-5), the branch point (line 9), and 
+the memory access point (lines 13-14). 
 
 
 \begin{algorithm}[t]
@@ -1158,25 +1157,21 @@ $\mathit{AnalyzeCache}$(SymbolicState $s$)\;
 \subsection{Speculative Modeling}
 \label{sec:spec_modeling}
 
-%In this section we show how \SpecuSym models branch mispredictions and
-%speculative execution by introducing auxiliary symbolic states and 
-%orchestrating them in proper orders.
+This section explains how \SpecuSym models branch misprediction and
+speculative execution by introducing an auxiliary speculative state and 
+orchestrating it with the normal symbolic state properly.
 
-On entering the \SpecuSym procedure in Algorithm~\ref{alg:specusym}, our new 
-algorithm first checks if current state $s$ is a \textit{speculative state}
-and whether $s$ has reached the predefined threshold (line 3). If both 
-conditions are met, \SpecuSym stops the recursive symbolic execution on $s$ 
-and returns immediately (line 4). Note that a state becomes a 
-\textit{speculative} state if it is duplicated from a normal symbolic state 
-(line 21) by invoking \textit{SpeculativeExplore} at a branch event (line 9). 
-
-
-%At the high level, subroutine $\mathit{SpeculativeExplore}$ models 
-%branch mispredictions with extra symbolic states, and updates the
-%cache on exploring these auxiliary states.
+\subsubsection{Modeling Process}
+On entering the \SpecuSym procedure in Algorithm~\ref{alg:specusym}, we
+first check if current state $s$ is a \textit{speculative state} and 
+whether $s$ has reached the predefined threshold (line 3). If both 
+conditions meet, the recursive symbolic execution on $s$ stops and returns 
+immediately (line 4). Note that a state becomes a \textit{speculative} 
+state if it is duplicated from a normal symbolic state (line 21) by invoking 
+\textit{SpeculativeExplore} at a branch event (line 9). 
 
 
-Lines 19-28 in Algorithm~\ref{alg:specusym} present the modeling procedure 
+Lines 18-27 in Algorithm~\ref{alg:specusym} present the modeling procedure 
 \textit{SpeculativeExplore}. Generally, at a conditional branch (line 8), 
 we call \textit{SpeculativeExplore} (line 9) to start the speculative probe. 
 That is, if the branch predicate closely relates to memory visit (line 20), 
@@ -1208,9 +1203,11 @@ models the speculative behavior but also precisely transfers the cache informati
 between symbolic states with controllable flexibility. 
 
 
+
+\subsubsection{Motivating Example Revisit}
 Figure~\ref{fig:specu_modeling} shows the speculative modeling of motivating 
-program $\prog$. Figure~\ref{fig:3a} displays the control flow graph on 
-which we annotate the memory access related variables. E.g., \texttt{S[0]} 
+program $\prog$. Figure~\ref{fig:3a} displays the simplified control flow graph 
+on which we annotate the memory access related variables. E.g., \texttt{S[0]} 
 indicates the first array read in the $\mathit{while}$ loop, and \texttt{v1} 
 means the memory \emph{write} in the $\mathit{if}$ branch. The solid arrow 
 line denotes the execution flow of state $s$, which takes the $\mathit{else}$ 
@@ -1238,8 +1235,6 @@ three-phase analysis designed in Section~\ref{sec:specu}. Note that Figure
 \ref{fig:3a} only shows the modeling of the \emph{if} branch while \SpecuSym 
 considers both branches and misses no potential cases. 
 
-%Also, we can use different bounds of the speculative state for more practical 
-%cache analysis.
 
 \ignore{
 In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
@@ -1251,16 +1246,12 @@ cache state to state $s$ before its termination, as formally stated in Algorithm
 
 In this example, updating the cache state is straightforward. By checking the 
 in-cache addresses to find a proper cache line upon a cache miss, or update the 
-most recently used line in case of a hit. For the undecided address, i.e., 
-\texttt{S[x]}, we can, at worst, try 254 possiblities to test the differences. 
+most recently used line in case of a hit. For the non-deterministic address, i.e., 
+\texttt{S[x]}, we can, at worst, try 254 possibilities to test the differences. 
 However, eagerly enumerating all potentials is impractical for real-world programs 
 due to the unbearable overhead. Furthermore, a great many cache mappings are
-indeed redundant in terms of leak exposure. For instance, only 1 mapping can 
-reveal a leak in the motivating example. 
-
-
-% Abstract interpretation based analysis~\cite{WuW19} approximates concrete 
-%possibilities, whereas this approach is ineffective in symbolic execution. 
+redundant in terms of leak exposure. For instance, only 1 specific cache layout 
+can reveal the leak in the motivating example. 
 
 
 Instead, \SpecuSym models branch mispredictions along with a path exploration
@@ -1269,7 +1260,17 @@ Then it analyzes the event trace to build the leak constraint and lazily
 searches for feasible solutions. We detail this approach in Section
 \ref{sec:modeling} and Section~\ref{sec:analysis}. 
 
-As mentioned before, speculative execution terminates when meeting a threshold such as the size of the ROB, the pipeline stage number, the branch depth, etc. Since these thresholds vary across architectures and hardware configurations, we use a single bound to represent them all and set it as configurable in our modeling. The bound restricts the maximum number of instructions that can be executed in a speculative state. When reaching the bound, the speculative state as well as those forked from it are all killed.  
+
+As discussed before, the processor stops speculative execution once it has computed
+the branch destination. Since speculation may end at an arbitrary point, we model 
+the speculative window with a configurable three-dimensional threshold. That is,
+if the number of interpreted events in a \textit{speculative} state reaches the
+ROB size or the speculatively executed branch events meets the specified bound, 
+we stop speculation immediately. And, if a memory event in speculative execution 
+causes a cache miss, we also stop the speculation after its execution. Otherwise, 
+we continue the execution.
+
+
 
 \begin{figure}
 \subfigure[Interaction between $s$ and $s'$]{
@@ -1919,6 +1920,7 @@ Branches (Brs).}
 %\bottomrule
 \end{tabular}
 }
+\vspace{-2ex}
 \end{table}
 
 
@@ -1962,7 +1964,7 @@ most 12 hours.
 \label{sec:leak_detect}
 
 \begin{table}%[htb!]
-\caption{Detection results on Set-associative Caches}
+\caption{Detection results on set-associative caches}
 \label{tbl:detection}
 \centering
 \resizebox{\linewidth}{!}{
@@ -2004,6 +2006,7 @@ most 12 hours.
 %\hline
 \end{tabular}
 }
+\vspace{-2ex}
 \end{table}
 
 
@@ -2157,7 +2160,8 @@ path. However, sacrificing the performance for the precision achieves reasonable
 paybacks. First, the increased overhead of most benchmarks is still tolerable. Next, 
 \SpecuSym finds false positives from~\cite{WuW19} and generates precise inputs. Moreover, 
 if~\cite{WuW19} provides assisting information, e.g., the suspicious locations on the 
-control flow graph, \SpecuSym can guide its analysis to the problematic area earlier. 
+control flow graph, \SpecuSym can purposly guide its analysis to the problematic 
+area earlier. 
 
 
 Now, we answer the second research question: \SpecuSym can complement the abstract 
@@ -2306,7 +2310,7 @@ interpretation based analysis on false positive elimination and leak witness gen
 		}
 	\end{minipage}\hfill
 }
-\caption{Breakdown of Optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}
+\caption{Breakdown of optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}
 \label{fig:InsampleOutsample}
 \label{fig:opt}
 \end{figure}
