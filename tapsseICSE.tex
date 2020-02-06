@@ -250,7 +250,7 @@
 \setlength{\abovedisplayskip}{3pt}
 \setlength{\belowdisplayskip}{3pt}
 
-\title[]{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
+\title{\textsc{SpecuSym}: Speculative Symbolic Execution for Cache Timing Leak Detection}
 
 
 \author{Shengjian Guo}
@@ -370,6 +370,7 @@
 \keywords{Speculative execution, cache, timing, side-channel leak, symbolic execution} 
 
 \maketitle
+
 \renewcommand{\shortauthors}{S. Guo et al.}
 
 
@@ -1161,7 +1162,7 @@ This section explains how \SpecuSym models branch misprediction and
 speculative execution by introducing an auxiliary speculative state and 
 orchestrating it with the normal symbolic state properly.
 
-\subsubsection{Modeling Process}
+\subsubsection{Modeling Overview}
 On entering the \SpecuSym procedure in Algorithm~\ref{alg:specusym}, we
 first check if current state $s$ is a \textit{speculative state} and 
 whether $s$ has reached the predefined threshold (line 3). If both 
