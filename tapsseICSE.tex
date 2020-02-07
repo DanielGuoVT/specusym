@@ -332,16 +332,16 @@
 	Given a program (leakage-free in non-speculative execution), \textsc{SpecuSym} 
 	systematically explores the program state space, models speculative behavior at 
 	conditional branches, and accumulates the	cache side effects along with subsequent 
-	explorations. 
+	path explorations. 
 	%
 	During the dynamic execution, \textsc{SpecuSym} constructs leak predicates for 
-	memory visits based on the specified cache model and conducts a 
-	constraint-solving based cache behavior analysis to generate leak witnesses.
+	memory visits according to the specified cache model and conducts a 
+	constraint-solving based cache behavior analysis to inspect the new cache behaviors.
   %
   We have implemented \textsc{SpecuSym} atop KLEE and evaluated it against 15 
 	open-source benchmarks. Experimental results show that \SpecuSym successfully 
-	detected leaks in 6 programs upon 4 different cache settings and identified 
-	false positives in 2 programs reported by	recent work.
+	detected from 2 to 61 leaks in 6 programs under 4 different cache settings and 
+	identified false positives in 2 programs reported by	recent work.
 \end{abstract}
 
 \begin{CCSXML}
@@ -400,12 +400,13 @@ instruction-level parallelism like \textit{speculative execution}~\cite{kimuraKT
 
 
 % Third, briefly explain SE and its hazard
-\textit{Speculative execution}~\cite{kimuraKT1996} is an essential microarchitectural
-optimization in modern processors. It primarily increases the CPU instruction pipeline 
-throughput by beforehand scheduling instructions under predicted branches, which prevents 
-control hazards from stalling the pipeline. Despite its essential importance, the cache 
-side effects caused by prediction errors could engender severe detriment through the cache 
-timing side-channel~\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
+\textit{Speculative execution}~\cite{kimuraKT1996} is a microarchitectural 
+optimization in modern processors. It primarily increases the CPU instruction 
+pipeline throughput by beforehand scheduling instructions under predicted 
+branches, which prevents control hazards from stalling the pipeline. Despite 
+its essential importance, the cache side effects caused by prediction errors 
+could engender severe detriment through the cache timing side-channel
+\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
 
 
 % Fourth, reivew the program analysis for SE
@@ -988,7 +989,7 @@ speculative execution only changes the cache state.
 The CPU instruction pipeline~\cite{RamamoorthyL77} allows overlapped executions 
 of proper instructions where each instruction execution consists of a series of 
 micro-stages. This instruction-level parallelism benefits hardware utilization 
-since instruction can start its stage before the time its prior instructions 
+since instruction can start execution before the time its prior instructions 
 have completed all their stages. However, a pipelined processor may get stalled 
 once the program control flow needs to divert, but the destination remains 
 unknown (e.g., at a conditional branch). Accordingly, the pipeline has to wait 
@@ -998,15 +999,15 @@ until the flow decision gets computed.
 To alleviate the cost of such control hazard, processors leverage 
 \textit{speculative execution}~\cite{kimuraKT1996} and \textit{branch prediction}
 \cite{Mittal19} to reduce the delay that could incur on conditional branch 
-instructions. Generally, they predict the execution flow upon the history of 
-recently executed branches, and schedule instructions under predicted branches
-ahead of jumping into these branches. Specifically, on approaching a control 
-hazard, the processors first predicts a branch to take. Then, they execute the 
-instructions under the selected branch and maintain the temporary path state 
-in a dedicated buffer. Finally, they commit the buffered state to continue the 
-program flow if they achieved a correct prediction. Otherwise, upon an incorrect 
-prediction, they have to discard the temporary state to revert the effects of the 
-executed instructions hence avoiding functional errors. 
+instructions. Generally, they predict the execution flow based on the history 
+of recently executed branches, and schedule instructions under predicted 
+branches ahead of jumping into these branches. Specifically, on approaching a 
+control hazard, the processors first predicts a branch to take. Then, they 
+execute the instructions under the selected branch and maintain the temporary 
+path state in a dedicated buffer. Finally, they commit the buffered state to 
+continue the program flow if they achieved a correct prediction. Otherwise, 
+upon an incorrect prediction, they have to discard the temporary state to 
+revert the effects of the executed instructions hence avoiding functional errors. 
 
 
 This rollback mechanism, unfortunately, withdraws no affected cache state, which 
@@ -1038,10 +1039,7 @@ over input and cannot be inferred as a \textit{true} or a \textit{false} value i
 advance. In contrast, if the condition is determined to be \textit{true} or 
 \textit{false} at the branch point, e.g., the \textit{while} loop head in Figure
 \ref{fig:fig2-a}, then the branch decision is deterministic.
-}
 
-
-\ignore{
 However, different program inputs might go through various program paths to reach 
 a same branch point but trigger divergent decisions. Thus, in practice speculative 
 executions at these points do exist and our method complies with the fact.
@@ -1049,42 +1047,61 @@ executions at these points do exist and our method complies with the fact.
 
 
 \subsubsection{Speculative State Execution.}
-Each duplicated state in \textit{misprediction modeling} has the same snapshot to 
-its parent state. For clarity, we use \textit{speculative} state to alias this newly
-forked state. A \textit{speculative} state would be prioritized to the front of the 
-state container in symbolic executor, and uninterruptedly executes until it meets a 
-predefined threshold, like the size of the Reorder Buffer (ROB), the pipeline stage 
-number, the branch depth, etc. Also, a \textit{speculative} state runs independently 
-from its parent state; thus, any memory updates in the \textit{speculative} state 
-won't taint its parent state who is waiting for the \textit{speculative} state returns. 
-For the sake of cache analysis, we also maintain the cache data in each symbolic state. 
-A \textit{speculative} state inherits such data from the parent state and keeps updating 
-the cache during its execution.
+Each duplicated state in \textit{misprediction modeling} has the same snapshot 
+to its parent state. For clarity, we use \textit{speculative} state to alias 
+this newly forked state. A \textit{speculative} state would be prioritized to 
+the front of the state container in symbolic executor, and uninterruptedly 
+executes until it meets a predefined threshold, like the size of the Reorder 
+Buffer (ROB), the pipeline stage number, the branch depth, etc. Also, a 
+\textit{speculative} state runs independently from its parent state; thus, any 
+memory updates in the \textit{speculative} state won't taint its parent state 
+who is waiting for the \textit{speculative} state returns. For the sake of cache 
+analysis, we also maintain the cache data in each symbolic state. A 
+\textit{speculative} state inherits such data from the parent state and keeps 
+updating the cache during its execution.
 
 
 \subsubsection{Rollback and Cache Merging.}
-Once the \textit{speculative} state reaches the threshold, it has to stop and exit the 
-state stack. Right before the termination, it notifies the awaiting parent state the 
-finish of the speculation and transfers the latest cache data back to its parent. Upon 
-accepting the notification, the parent symbolic state merges the received cache information
-into its cache data, to form the latest cache state. After that, the parent state aborts 
-waiting and resumes the regular execution. This step models the processor rollback in 
-high fidelity and retains the cache status changes from speculation. Since the cache 
-changes have already merged into the parent state, terminating the \textit{speculative} 
-state causes no further affects.  
-
-
-Our approach is natural to symbolic execution, while state-of-the-art simulation 
-method~\cite{OleksenkoTSF19} requires sophisticated instrumentations and special 
-instructions to enforce CPU behaviors. More modeling details would appear in 
-Section~\ref{sec:spec_modeling}.
+Once the \textit{speculative} state reaches the threshold, it has to stop and 
+exit the state stack. Right before the termination, it notifies the awaiting 
+parent state the finish of the speculation and transfers the latest cache data 
+back to its parent. Upon accepting the notification, the parent symbolic state 
+merges the received cache information into its cache data, to form the latest 
+cache state. After that, the parent state aborts waiting and resumes the regular 
+execution. This step models the processor rollback in high fidelity and retains 
+the cache status changes from speculation. Since the cache changes have already 
+merged into the parent state, terminating the \textit{speculative} state causes 
+no further affects.  
 
 
 \ignore{
-Our modeling approach is sound and elegant. Focusing on the worst 
-case predication, we avoid missing any speculated branch that may 
-cause leaks. 
+Our approach is natural to symbolic execution, while state-of-the-art simulation 
+method~\cite{OleksenkoTSF19} requires sophisticated instrumentations and special 
+instructions to enforce CPU behaviors. More modeling details of our approach would 
+appear in Section~\ref{sec:spec_modeling}.
 }
+
+\ignore{ % feedback from Meng's PLDI paper review
+For the record, speculative execution is *not* just branch prediction. Branch 
+prediction is just one type of speculative execution; processors also speculate 
+on memory dependencies and reorder loads and stores (called memory disambiguation). 
+Branch prediction is *not* inherently out-of-order, since early processors (and 
+even some simple ones today) that were pipelined only did in fact do branch 
+prediction but never reordered instructions. Superscalar execution, as the authors 
+point out Tomasulo's algorithm (btw the citation here is somehow corrupted--please 
+fix your bibtex) does in fact reorder instructions, but this is a whole new class 
+of reorderings that is not captured in this paper, which leads into (2).
+}
+
+
+It is worth noting that we constrain the customary scope of \textit{speculative
+execution} to \textit{branch prediction} and subsequent out-of-order instruction 
+execution in this work. In practice, modern processors may conduct other forms of 
+speculation, e.g., memory dependence speculation and disambiguation
+\cite{Nicolau89,MoshovosS97,ReinmanC98,OnderG99}. However, they are not the main 
+focus of this work. 
+
+
 
 
 %\newpage\clearpage
@@ -1355,7 +1372,6 @@ ROB size or the speculatively executed branch events meets the specified bound,
 we stop speculation immediately. And, if a memory event in speculative execution 
 causes a cache miss, we also stop the speculation after its execution. Otherwise, 
 we continue the execution.
-
 
 
 \subsection{Cache State Modeling}
@@ -2511,8 +2527,8 @@ Likewise, grey-box fuzz testing has been used in detecting program
 undefined behaviors~\cite{ChenLXGZZWL19}, Spectre-type vulnerabilities
 \cite{OleksenkoTSF19}, exposing side channels~\cite{NilizadehNP19}, and 
 revealing timing leaks~\cite{HeEC19}. However, they are either unaware 
-of speculative execution or relying on costly instrumentations on the 
-control flow. Also, due to the fuzzing nature, these methods primarily 
+of speculative execution or relying on sohpisticated instrumentations on 
+the control flow. Also, due to the fuzzing nature, these methods primarily 
 count on various heuristics while \SpecuSym systematically solves for 
 precise inputs.
 
