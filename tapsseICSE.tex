@@ -806,8 +806,6 @@ the above event types to abstract away the internal implementation details like
 memory allocation, function return, etc., to center on the high-level flow of 
 symbolic execution.
 
-
-
 \begin{algorithm}
 \caption{Baseline Symbolic Execution.}
 \label{alg:baseline}
@@ -819,8 +817,8 @@ symbolic execution.
 \nonl Start \textbf{\SymExec}($\mathit{s_{ini}}$) on an initial state $\mathit{s_{ini}}$ with $\mathit{in:=\{\lambda,t\}}$.\\
 \textbf{\SymExec}(SymbolicState $s$)\\
 \Begin{
-	$\textsc{Stack}$.push($s$);\;
-	\uIf{$\mathit{s.e}$ is branch event}{
+     $\textsc{Stack}$.push($s$);\;
+	 \uIf{$\mathit{s.e}$ is branch event}{
 		\For{$\mathit{c \in s.brs}$ {\bf and} $\mathit{s.pc\wedge c}$ is satisfiable} {
 				$\mathit{s.pc\leftarrow s.pc\wedge c}$;\\
 				\textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~ \textcolor{dkgreen}{// The $\psi$ event}
@@ -1199,9 +1197,9 @@ its parent symbolic state.
 Next, after $\mathit{SpeculativeExplore}$ returns, we resume the normal symbolic
 execution of $s$ (line 10), who now has an updated cache. In this way, we have 
 constructed a speculative scenario and retained the latest cache changes. Our
-modeling method leverages the stateful nature of symbolic execution. It not only 
-models the speculative behavior but also precisely transfers the cache information 
-between symbolic states with controllable flexibility. 
+modeling method leverages the stateful mechanism of symbolic execution. It not 
+only models the speculative behavior but also precisely transfers the cache 
+information between symbolic states with controllable flexibility. 
 
 
 
@@ -2154,12 +2152,12 @@ and they are indeed false positives.
 
 For the remaining programs, \texttt{chacha20}, \texttt{encoder}, and \texttt{DES}, 
 both \SpecuSym and~\cite{WuW19} have detected leaks. However, \cite{WuW19} only 
-claims the leaky results whereas \SpecuSym generates richer information than
-\cite{WuW19}. For example, \SpecuSym pinpoints 9, 5, and 8 leaky memory operations 
-in these benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory 
-event trace for leak diagnosis. Note that \SpecuSym generally performs faster on $C_4$ 
-than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache setting 
-type of $C_4$ advances both cache utilization and cache hit rate for these benchmarks. 
+claims the leaky results whereas \SpecuSym generates richer information. For example, 
+\SpecuSym pinpoints 9, 5, and 8 leaky memory operations in these benchmarks, respectively. 
+Moreover, \SpecuSym can provide inputs and memory event trace for leak diagnosis. Note 
+that \SpecuSym generally performs faster on $C_4$ than on other three set-associative 
+cachess since the extreme cache setting of $C_4$ advances both cache utilization and 
+cache hit rate for these benchmarks. 
 
 
 Compared to~\cite{WuW19}, \SpecuSym may have false negatives because of two reasons. 
@@ -2196,31 +2194,37 @@ inputs, the speculation flows, and the leak locations for detailed diagnosis.
 
 
 
-This section studies the performance of the optimization strategies 
-proposed in Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares 
-the overall performance between the \texttt{Baseline} \SpecuSym with
-no optimizations, and the \texttt{Optimized} \SpecuSym version with 
-all optimizations enabled, as listed in column 1. The second and the 
-third columns compare the execution time and the size of involved 
-constraints. The fourth column and the last column disclose the 
-identified new divergent leaks and new opposite leaks, respectively. 
-As stated earlier, the cache setting for this experiment is $C_3$.
+This section studies the performance of the optimizing strategies discussed in 
+Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares the overall performance 
+between the baseline \SpecuSym \texttt{Base} without any optimizations, and the
+optimized \SpecuSym \texttt{Opt} with all optimizations enabled, as listed in 
+column 1. Column 2 and column 3 compare the analysis time and the size of involved 
+constraints between these two \SpecuSym versions. Column 4 and column 5 disclose 
+the number of identified new divergent leaks (\#.\textbf{Div}) and new opposite 
+leaks (\#.\textbf{Opp}), respectively. As stated earlier, the cache setting for 
+this experiment is $C_3$.
 
 
-As shown in column 2, after optimizations, the analysis time of the 
-\texttt{Optimized} \SpecuSym significantly decreases, falling to only 
-$30.7\%$ of the \texttt{Baseline} \textsc{SpecuSym} execution time, 
-which proves the effectiveness of the optimizations in accelerating 
-the analysis. 
+As shown in column 2, after optimizations, the analysis time of the \texttt{Opt} 
+\SpecuSym significantly decreases, falling to only $30.7\%$ of the \texttt{Base} 
+analysis time, which confirms the effectiveness of the optimizations in 
+accelerating the analyses. 
 
 
-Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces
-the size of the involved constraint by more than $20\%$, compared 
-to the \texttt{Baseline} version, as shown in column 3. Though the 
-constraint size reduction looks not as impressive as the time reduction, 
-the proposed strategies greatly ease the solver burden by constraint 
-transformation and formula reduction. Undoubtedly, constraint optimization 
-is the primary reason for the time decrease.
+Apart from the time drop, the \texttt{Opt} \SpecuSym reduces the size of the 
+involved constraint by more than $20\%$, compared to the \texttt{Base} version, 
+as shown in column 3. Though the reduction to constraint sizes looks not as 
+impressive as the time reduction, the proposed strategies greatly ease the solver 
+burden by constraint transformation and formula reduction. Undoubtedly, constraint 
+optimization is the primary reason for the time decrease.
+
+
+Moreover, column 4 and column 5 disclose that the \texttt{Opt} \SpecuSym 
+detects 31.8\% more leaks in total than the \texttt{Base} version, in a 
+12-hour threshold. In particular, \texttt{Opt} identifies 3 times more 
+divergent leaks than the \texttt{Base} version, which highlights the utmost 
+importance of our proposed optimizations. 
+
 
 
 
@@ -2379,10 +2383,10 @@ is the primary reason for the time decrease.
 \hline
 \textbf{~~Version~~} &\textbf{~~Time~~}&\textbf{~~Constraints Size~~}&~~\#\textbf{.Div}~~&~~\#\textbf{.Opp}~~ \\ 
 \hline
-\texttt{Baseline} &~~~100\%~~~ &100\%    &12  &76\\ 
+\texttt{Base} &~~~100\%~~~ &100\%    &12  &76\\ 
 %\texttt{+S\&C} &~~~2400~~~ &2.13k  &8  &7\\ %2
 %\texttt{+SCR} &~~~1200~~~ &1.24  &9  &10\\ %2
-\texttt{Optimized} &~~~30.7\%~~~ &78.9\%  &50 &79\\ %2
+\texttt{Opt} &~~~30.7\%~~~ &78.9\%  &50 &79\\ %2
 \hline
 %\bottomrule
 \end{tabular}
@@ -2395,23 +2399,17 @@ is the primary reason for the time decrease.
 
 
 
-Moreover, column 4 and column 5 disclose that the \texttt{Optimized} 
-\SpecuSym detects 31.8\% more leaks in total than the \texttt{Baseline} 
-version, in a 12-hour threshold. This result highlights the utmost 
-importance of optimizations because it energizes \SpecuSym to detect more 
-leaks within a given resource budget. 
-
 
 We also examine how the optimizations impact each benchmark in terms of 
 the analysis time in Figure~\ref{fig:4a} and the constraint size in Figure
 \ref{fig:4b}. Programs in these two figures are arranged using their orders 
-in Table~\ref{tbl:benchs}. Tags \texttt{Base} and \texttt{Opt} stand for the 
-\SpecuSym versions without and with optimizations, respectively. 
+in Table~\ref{tbl:benchs}. Tags \texttt{Base} and \texttt{Opt} also stand 
+for the \SpecuSym versions without and with optimizations, respectively. 
 
 
 Clearly, Figure~\ref{fig:4a} shows that optimizations drastically reduce 
 time cost for $6$ out of $15$ cases from hundreds of minutes to less than 
-an hour. On the one hand, \texttt{Base} has more redundant computations 
+an hour. On the one hand, \texttt{Base} has more repeated computations 
 while \texttt{Opt} reuses cached intermediate results. On the other hand, 
 formula reduction lowers the cost of solving. Figure~\ref{fig:4b} shows 
 how optimizations reduce the constraint size where AES~\cite{LibTomCrypt}, 
@@ -2474,7 +2472,7 @@ design of \textsc{SpecuSym}.
 
 
 Symbolic execution~\cite{King76} has been applying to side-channel analysis 
-because of the inherent natures of precise reasoning and input generation
+because of the inherent designs of precise reasoning and input generation
 \cite{PasareanuPM16,BangAPPB16,PhanBPMB17,BrennanSB18,BangRB18}.
 To quantify the information leakage through a cache timing side-channel, 
 Chattopadhyay et al.~\cite{ChattopadhyayBRZ17,Chattopadhyay17} and Basu et al.
