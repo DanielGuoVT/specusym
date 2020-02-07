@@ -1,6 +1,6 @@
 \documentclass[sigconf]{acmart}
 \settopmatter{printfolios=true,printccs=true,printacmref=true}
-\linespread{0.96}
+\linespread{0.958}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setcopyright{acmcopyright}
@@ -1197,8 +1197,8 @@ its parent symbolic state.
 
 
 Next, after $\mathit{SpeculativeExplore}$ returns, we resume the normal symbolic
-execution of $s$ (line 10), who now has an updated cache. In this way, we   have 
-constructed a speculative scenario and retain the latest cache changes. Our
+execution of $s$ (line 10), who now has an updated cache. In this way, we have 
+constructed a speculative scenario and retained the latest cache changes. Our
 modeling method leverages the stateful nature of symbolic execution. It not only 
 models the speculative behavior but also precisely transfers the cache information 
 between symbolic states with controllable flexibility. 
@@ -1307,8 +1307,8 @@ In Figure~\ref{fig:3a}, on reaching the branch point, \SpecuSym duplicates a
 execution of $s'$, e.g., one memory access inside the \textit{if} branch, as 
 shown by the dashed arrow curve. Once meeting the speculation threshold, 
 \SpecuSym stops the exploration and turns back to find state $s$ who is awaiting 
-the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporate the cache 
-state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminate $s'$. Right now, 
+the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporates the cache 
+state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminates $s'$. Right now, 
 the entire cache has been filled since the memory write in $s'$ mapped \texttt{v1} 
 into line \#256. 
 
@@ -1367,11 +1367,11 @@ we continue the execution.
 %cache lines after executing every memory-related instruction, e.g., the 
 %cache snapshot shown in Figure~\ref{fig:3b}.
 
-This section addresses how \SpecuSym models the cache state. We extend the 
-definition of a symbolic state $s$ (cf. Section~\ref{sec:se}) to be a new 
-tuple $\langle \pcon, \mathit{e}, \mathit{brs},\Omega,\pi\rangle$. The new 
-symbol $\pi$ denotes the memory event trace in $s$. Then we establish the 
-following notions:
+This section addresses how \SpecuSym models the cache state during dynamic
+symbolic execution. We extend the definition of a symbolic state $s$ (cf.
+Section~\ref{sec:se}) to form a new tuple $\langle \pcon, \mathit{e},
+\mathit{brs},\Omega,\pi\rangle$. The newly introduced symbol $\pi$ denotes 
+the memory event trace in state $s$. Then we establish the following notions:
 %
 %
 \begin{itemize*}
@@ -1396,11 +1396,11 @@ accesses upon concrete cache models. To better coordinate the speculative
 modeling component, \SpecuSym adopts an on-the-fly analysis.
 }
 
-To be specific, after interpreting an event $m_i$ in a \textit{symbolic} 
-state $s$, \SpecuSym analyzes if $\mathit{m_i}$ can cause timing leak 
-under two scenarios, namely the new \textit{divergent} behavior and the 
-new \textit{opposite} behavior. To explain these scenarios, we define 
-more notions as follows.
+To be specific, before interpreting a memory event $m_i$ in a \textit{symbolic} 
+state $s$, \SpecuSym analyzes if $\mathit{m_i}$ can cause timing leak under two 
+scenarios, namely the new \textit{divergent} behavior and the new \textit{opposite} 
+behavior. Note that \SpecuSym won't perform the analyses in any \textit{speculative} 
+state. To explain these scenarios, we define four necessary notions as follows.
 %
 %
 \begin{itemize*}
@@ -1416,11 +1416,11 @@ more notions as follows.
 %
 \subsubsection{New Opposite Behavior}
 \label{sec:new_opp}
-It means executing $\mathit{m_i}$ under non-speculative execution causes an 
+It means that executing $\mathit{m_i}$ under non-speculative execution causes an 
 always-miss, while the result under speculative execution is an always-hit, 
 and vice versa. Recall that we only target new leaks introduced by speculative 
 execution, and this scene depicts the exact opposite situation. To build the 
-formal definition, we define new notions: 
+formal definition, we define three new notions: 
 %
 %
 \begin{itemize*}
@@ -1728,7 +1728,7 @@ as our future work.
 
 \subsubsection{Constraint Transformation.}
 In Section~\ref{sec:analysis}, constraints $\mathit{opp_i}$ and $\mathit{div_i}$
-captures the complete set of leak-related cache behaviors. However, based on the
+capture the complete set of leak-related cache behaviors. However, based on the
 timing-leakage-free assumption of a target program under non-speculative execution,
 we observe a property which helps \SpecuSym accelerate the cache analysis:
 %
@@ -1797,21 +1797,21 @@ Recall that in Algorithm~\ref{alg:specusym}, \SpecuSym duplicates a new state
 $s'$ from symbolic state $s$ (line 21) if the branch predicate closely relates 
 to a memory value rather than a cache value. As mentioned earlier in Section
 \ref{sec:modeling}, this strategy filters transient speculations that are unlikely 
-to affect the cache. Wu et al.~\cite{WuW19} over-approximately treat all memory 
-events as actual memory visits though predicate relevant values may have been 
+to affect the cache. Wu et al.~\cite{WuW19} over-approximately treated all memory 
+events as actual memory visits, though predicate-related values may have been 
 loaded to the cache. \SpecuSym proposes an alternative for symbolic execution to 
 deal with this issue. Ideally, to address the problem, we have to perform a 
-burdensome cache analysis starting from the current branch to the first memory 
+burdensome backward cache analysis from the current branch to the first memory 
 access, examining whether the value involved in the branch predicate is in cache 
-or not. However, we also observe that the memory accesses from the current branch 
+or not. However, we observe that the memory accesses from the current branch 
 to the last branch typically have a critical influence on the cache state before 
-current branch. Therefore, to balance the precision and efficiency, \SpecuSym 
+the current branch. Therefore, to balance the precision and efficiency, \SpecuSym 
 backwardly examines the memory accesses in this range. If the predicate-related 
-values have been fetched to cache beforehand and still exists in the cache, we 
+values have been fetched to cache beforehand and still exist in the cache, we 
 regard the speculative modeling at this branch as unnecessary. Otherwise, we still 
-conduct all modeling and analysis, as usual, to avoid missing leaks. Although this 
+conduct all analyses as usual, as usual, to avoid missing leaks. Although this 
 optimization introduces extra computation overhead, it still benefits overall 
-performance since the targted cases commonly exist in programs because of the time 
+performance since the targeted cases commonly exist in programs because of the time 
 and spatial locality purposes.
 
 
@@ -2159,7 +2159,7 @@ claims the leaky results whereas \SpecuSym generates richer information than
 in these benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory 
 event trace for leak diagnosis. Note that \SpecuSym generally performs faster on $C_4$ 
 than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache setting 
-of $C_4$ advances both cache utilization and cache hit rate in these benchmarks. 
+type of $C_4$ advances both cache utilization and cache hit rate for these benchmarks. 
 
 
 Compared to~\cite{WuW19}, \SpecuSym may have false negatives because of two reasons. 
@@ -2204,7 +2204,7 @@ all optimizations enabled, as listed in column 1. The second and the
 third columns compare the execution time and the size of involved 
 constraints. The fourth column and the last column disclose the 
 identified new divergent leaks and new opposite leaks, respectively. 
-The used cache setting for this experiment is $C_3$.
+As stated earlier, the cache setting for this experiment is $C_3$.
 
 
 As shown in column 2, after optimizations, the analysis time of the 
