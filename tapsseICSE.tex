@@ -14,8 +14,6 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %\usepackage{algorithm}        % for algorithm (float) environment
@@ -27,11 +25,6 @@
 \usepackage{algpseudocode}    % for algorithmic
 \usepackage{amsmath}
 \usepackage{amssymb}
-
-%\usepackage{authblk}
-%\usepackage[utf8]{inputenc}
-%\usepackage[T1]{fontenc}
-
 \usepackage{balance}
 \usepackage{bbding}
 \usepackage{booktabs}
@@ -73,7 +66,6 @@
 \newcommand\ignore[1]{}
 \newcommand{\highlight}[1]{\vspace{.15cm}\noindent\textcolor{blue}{\textbf{#1}}}
 \newcommand{\textcode}[1]{\texttt{#1}}
-%\newtheorem{definition}{Definition}
 
 \newcommand*\circled[1]{\tikz[baseline=(char.base)]{
 				\node[shape=circle,draw,inner sep=1pt] (char) {\scriptsize{#1}};}}
@@ -328,14 +320,14 @@
   CPU cache is a limited but crucial storage component in modern processors, 
 	whereas	the	cache timing side-channel may inadvertently leak information 
 	through the physically measurable timing variance. Speculative execution, 
-	a vital processor optimization, and a source of such variance, can cause 
+	an essential processor optimization, and a source of such variance, can cause 
 	severe detriment on deliberate branch mispredictions.
   %
   Despite static analysis could qualitatively verify the timing-leakage-free 
 	property under speculative execution, it is incapable of producing endorsements 
 	including inputs and speculated flows to diagnose leaks in depth. 
   %
-  This work proposes a new speculative symbolic execution method, \textsc{SpecuSym}, 
+  This work proposes a new symbolic execution based method, \textsc{SpecuSym}, 
 	for precisely detecting cache timing leaks introduced by speculative execution. 
 	Given a program (leakage-free in non-speculative execution), \textsc{SpecuSym} 
 	systematically explores the program state space, models speculative behavior at 
@@ -397,8 +389,8 @@ the kernel data
 
 % Second, explain timing sc, cache timing sc, and repair; introduce SE 
 A timing side-channel generally serves as the intermediate carrier through
-which private data could inadvertently disclose to observers who can 
-elaborately measure the timing information of certain operations. One particular instance 
+which private data could inadvertently disclose to observers who can elaborately 
+measure the timing information of certain operations. One particular instance 
 is the cache timing side-channel, which leaks data by the variance of the 
 cache visiting latency. State-of-the-art program repair method~\cite{WuGSW18} 
 mitigates cache timing leaks by enforcing constant execution time for all 
@@ -408,13 +400,12 @@ instruction-level parallelism like \textit{speculative execution}~\cite{kimuraKT
 
 
 % Third, briefly explain SE and its hazard
-\textit{Speculative execution}~\cite{kimuraKT1996} is a vital microarchitectural
-optimization in modern processors. It primarily increases the CPU instruction 
-pipeline throughput by beforehand scheduling instructions under predicted branches, 
-which prevents control hazards from stalling the pipeline. Despite its essential 
-importance, the cache side effects caused by prediction errors could engender 
-severe detriment through the cache timing side-channel
-\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
+\textit{Speculative execution}~\cite{kimuraKT1996} is an essential microarchitectural
+optimization in modern processors. It primarily increases the CPU instruction pipeline 
+throughput by beforehand scheduling instructions under predicted branches, which prevents 
+control hazards from stalling the pipeline. Despite its essential importance, the cache 
+side effects caused by prediction errors could engender severe detriment through the cache 
+timing side-channel~\cite{KocherGGHHLMPSY19,BulckMWGKPSWYS18,WeisseVMGKPSSWY18,IslamMBKGES19}. 
 
 
 % Fourth, reivew the program analysis for SE
@@ -422,13 +413,13 @@ Program analysis for speculative execution is by no means a new research domain.
 Previous efforts mainly researched safe and efficient execution
 \cite{ChenLDHY04,PrabhuRV10,GuarnieriKMRS19}, worst-case execution time estimation
 \cite{LiMR03,LiMR05}, concurrency bug prediction~\cite{ChenWYS09,LiELS05}, and 
-Spectre vulnerability detection~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}, 
-while Wu et al.~\cite{WuW19} recently proposed static verification of timing-leakage-free 
-property under speculative execution. However, such an abstract interpretation based 
-method~\cite{WuW19} qualitatively answers the \textit{yes} or \textit{no} question 
---- it is incapable of generating input and speculative flows to diagnose leaks in 
-depth. Moreover, the over-approximation nature inevitably leads to false positives, 
-which desires a more precise method.
+Spectre vulnerability detection~\cite{GuarnieriKMRS19,OleksenkoTSF19,WangCBMR19}. 
+Wu et al.~\cite{WuW19} recently proposed a dedicated static  analysis of 
+timing-leakage-free property under speculative execution. However, this abstract 
+interpretation based method~\cite{WuW19} qualitatively answers the \textit{yes} or 
+\textit{no} question --- it is incapable of generating input and speculative flows 
+to diagnose leaks in depth. Moreover, the over-approximation nature inevitably 
+leads to false positives, which desires a more precise method.
 
 
 \begin{figure}[htb]
@@ -441,8 +432,8 @@ which desires a more precise method.
 
 
 % Fifth, introduce our method 
-To this end, we propose a new method speculative symbolic execution 
-(\textsc{SpecuSym}), for detecting cache timing leaks caused by speculative 
+To this end, we propose a new symbolic execution based method, \textsc{SpecuSym}, 
+for detecting cache timing leaks caused by speculative 
 execution. Figure~\ref{fig:overall_flow} displays the overall flow of 
 \textsc{SpecuSym}. Given a program $\prog$, which is timing-leakage-free in 
 non-speculative execution, the sensitive input presented in symbol, and the 
@@ -469,8 +460,8 @@ Updating the cache status after each memory operation unquestionably leads to an
 explosive number of different cache states. 
 %
 The last challenge stems from the analysis cost. Processors may trigger multiple 
-branch mispredictions during a program execution. Indiscriminately covering all 
-possibilities introduces not only tremendous constraint solving overhead but also 
+branch mispredictions during program execution. Indiscriminately covering all 
+possibilities not only introduces tremendous constraint solving overhead but also 
 counts many redundant cases. 
 
 
@@ -550,12 +541,11 @@ of the sensitive input when running under speculative execution.
 
 
 Listed at line 2, ${\prog}$ has 4 local variables as \texttt{S}, \texttt{x}, 
-\texttt{v1}, and \texttt{v2}. Operating these variables leads to memory 
-access. E.g., the implicit memory read of \texttt{x} (line 6) and the 
-explicit \emph{store} to \texttt{v1} (line 7). The remaining variable 
-\texttt{i} (line 3) is a register variable that incurs no memory access. 
-Also, variable \texttt{x} is the sensitive input, and any form of revealing 
-its value turns to be a leak. 
+\texttt{v1}, and \texttt{v2}. Operating these variables, e.g., the implicit 
+memory read of \texttt{x} (line 6) and the explicit \emph{store} to \texttt{v1} 
+(line 7), may lead to memory access. The remaining variable \texttt{i} (line 3) 
+is a register variable that incurs no memory access. Also, variable \texttt{x} 
+is the sensitive input, and any form of revealing its value turns to be a leak. 
 
 
 
@@ -571,7 +561,7 @@ $\mathcal{C}$ has been entirely occupied.
 
 Cache $\mathcal{C}$ consists of 256 cache lines, and each line has exactly 
 1-byte size. Local variables are mapped to $\mathcal{C}$ according to the 
-program execution order and their sizes. E.g., in Figure~\ref{fig:2b} array 
+program execution order and their sizes; e.g., in Figure~\ref{fig:2b} array 
 \texttt{S} maps from cache lines \#1 to \#254 because of the array traverse 
 in the \emph{while} loop (lines 4-5), and each 1-byte array item successively 
 occupies a full cache line. Then variable \texttt{x} associates with line 
@@ -745,25 +735,25 @@ to the external users, and we ignore it safely for analysis purposes.
 \subsection{What \SpecuSym Should Provide}
 \label{sec:app-scenarios}
 
-The example shows that, though a program is carefully crafted to avoid cache 
-timing leaks, running it under speculative execution may still exhibit new 
-leaks. Since speculative execution is one of the fundamental optimizations 
-in modern processors, a systematic analysis that detects the subtle leaks 
-would be of prominent importance. Specifically, we emphasize two requisite
-abilities in our proposed new method.
+The motivating example shows that, though a program is carefully crafted to 
+avoid cache timing leaks, running it under speculative execution may still 
+exhibit new leaks. Since speculative execution is one of the fundamental 
+optimizations in modern processors, a systematic analysis that detects the 
+subtle leaks would be of vital importance. Specifically, we emphasize two 
+requisite abilities in our proposed new method.
 
 
 First, \SpecuSym should be able to systematically explore the program state 
-space to identify execution paths and speculative flows that may cause leaks. 
-E.g., $\mathit{p_2}$ and the speculative execution of the \textit{if} branch. 
+space to identify execution paths and speculative flows that may cause leaks, 
+e.g., $\mathit{p_2}$ and the speculative execution of the \textit{if} branch. 
 By contrast, speculation of the \textit{else} branch won't cause any leak along 
 with $\mathit{p_1}$.
 
 
 Second, \SpecuSym should be able to pinpoint the leak sites by a precise cache 
 analysis and generate concrete inputs that witness new cache behavior at the 
-identified memory visit sites. E.g., the memory \textit{store} instructions to 
-\texttt{v2} and the value \textit{zero} of \texttt{x}.
+identified memory visit sites, e.g., the memory \textit{store} instructions to 
+\texttt{v2} and the value \textit{zero} of input \texttt{x}.
 
 
 \section{Preliminaries}
@@ -813,40 +803,38 @@ three categories in terms of the type of \textit{inst} that $e$ contains.
 
 Although symbolic executors always support a rich set of instructions, we use 
 the above event types to abstract away the internal implementation details like 
-memory allocation, function return, etc. to center on the high-level flow of 
+memory allocation, function return, etc., to center on the high-level flow of 
 symbolic execution.
 
 
-\begin{algorithm}[hpt]
+
+\begin{algorithm}
 \caption{Baseline Symbolic Execution.}
 \label{alg:baseline}
 {\footnotesize
 \SetAlgoLined
-\setstretch{0.5}
+\setstretch{0.6}
 \DontPrintSemicolon
-				\nonl \textbf{Initially}: The global state container \textsc{Stack} is empty (\textsc{Stack}$\Leftarrow$$\emptyset$).\\
-				\nonl Start \textbf{\SymExec}($\mathit{s_{ini}}$) on an initial state $\mathit{s_{ini}}$ with $\mathit{in:=\{\lambda,t\}}$.\\
+\nonl \textbf{Initially}: The global state container \textsc{Stack} is empty (\textsc{Stack}$\Leftarrow$$\emptyset$).\\
+\nonl Start \textbf{\SymExec}($\mathit{s_{ini}}$) on an initial state $\mathit{s_{ini}}$ with $\mathit{in:=\{\lambda,t\}}$.\\
 \textbf{\SymExec}(SymbolicState $s$)\\
 \Begin{
-  $\textsc{Stack}$.push($s$);\;
-
-  \uIf{$\mathit{s.e}$ is branch event}{
-    \For{$\mathit{c \in s.brs}$ {\bf and} $\mathit{s.pc\wedge c}$ is satisfiable} {
-      $\mathit{s.pc\leftarrow s.pc\wedge c}$;\\
-      \textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~ \textcolor{dkgreen}{// The $\psi$ event}
-    }
-  }\uElseIf{$\mathit{s.e}$ is memory access event}{
-    \textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~ \textcolor{dkgreen}{~~~~~~~// The $\chi$ event}
-  }\uElseIf{$\mathit{s.e}$ is other interpretable event}{
-    \textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~~~~~~~~ \textcolor{dkgreen}{// The $\varphi$ event}
-  }\Else{
-    Terminate state $s$ and report error;\;
-  }
-  $\textsc{Stack}$.pop();\;
+	$\textsc{Stack}$.push($s$);\;
+	\uIf{$\mathit{s.e}$ is branch event}{
+		\For{$\mathit{c \in s.brs}$ {\bf and} $\mathit{s.pc\wedge c}$ is satisfiable} {
+				$\mathit{s.pc\leftarrow s.pc\wedge c}$;\\
+				\textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~ \textcolor{dkgreen}{// The $\psi$ event}
+		}
+	}\uElseIf{$\mathit{s.e}$ is memory access event}{
+		\textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~ \textcolor{dkgreen}{~~~~~~~// The $\chi$ event}
+	}\uElseIf{$\mathit{s.e}$ is other interpretable event}{
+		\textbf{\SymExec}($\mathit{SubsequentState}$($\mathit{s}$));~~~~~~~~~ \textcolor{dkgreen}{// The $\varphi$ event}
+	}\Else{
+		Terminate state $s$ and report error;\;
+	}
+	$\textsc{Stack}$.pop();\;
 }
-
 \BlankLine
-
 \textit{SubsequentState} (SymbolicState \textit{s})\;
 \Begin{
   $\mathit{s'} \leftarrow$ symbolically execute $\mathit{e.inst}$ in $\mathit{s}$;\;
@@ -874,6 +862,9 @@ to $\mathit{s}$ where $\mathit{e}$ is the event to execute at $\mathit{s}$.
 $\mathit{brs}$ contains the set of branch predicates if $\mathit{e}$ is a 
 $\psi$ event. And $\Omega$ is the symbolic memory which maintains the mappings 
 from the program variables to their memory values at $\mathit{s}$.
+
+
+
 
 
 Initially, the state container \textsc{Stack} is empty, and we start the main 
@@ -928,14 +919,15 @@ we believe it is a reasonable model for analysis purposes.
 
 Formally, we abstract a sensitive data related program $\prog$ to be a function 
 $\mathit{F_{\prog}(in)\Rightarrow out}$. $\mathit{F_{\prog}}$ processes the data 
-input $\mathit{in}:=\{\lambda,t\}$ (cf. Section~\ref{sec:se}) and returns the 
-output $\mathit{out}$. E.g., assuming $\prog$ is an encryption process, $\lambda$ 
-is the private key, and $t$ is the content to encrypt; then, $out$ is the ciphertext. 
-Let $T(F_{\prog}(in))$ denotes the execution time of $\prog$ with input $\mathit{in}$ 
-under non-speculative execution. Different inputs may explore various program paths. 
-However, since we aim at timing leaks introduced by speculative execution, here we 
-assume the time of those non-speculative program executions remain similar or the 
-same, no matter what the sensitive inputs are, which is, 
+input $\mathit{in}:=\{\lambda,t\}$ (cf. Section~\ref{sec:se}), and returns the 
+output $\mathit{out}$. For example, assuming $\prog$ is an encryption process, 
+$\lambda$ is the private key, and $t$ is the content to encrypt; then, $out$ is 
+the ciphertext. Let $T(F_{\prog}(in))$ denotes the execution time of $\prog$ with 
+input $\mathit{in}$ under non-speculative execution. Different inputs may explore 
+various program paths. However, since we focus on timing leaks introduced by 
+speculative execution, here we assume the time of those non-speculative program 
+executions remain similar or the same, no matter what the sensitive inputs are, 
+which is, 
 %
 \begin{multline} 
   \label{lb:no_leak_event}
@@ -1113,7 +1105,7 @@ the memory access point (lines 13-14).
 \label{alg:specusym}
 {\footnotesize
 \SetAlgoLined
-\setstretch{0.5}
+\setstretch{0.6}
 \DontPrintSemicolon
 \nonl \textbf{Initially}: The global state container \textsc{Stack} is empty (\textsc{Stack}$\Leftarrow$$\emptyset$).;\\
 \nonl Start \textbf{\SpecuSym}($\mathit{s_{ini}}$) on an initial symbolic state $\mathit{s_{ini}}$ with $\mathit{in:=\{\lambda,t\}}$.\\
@@ -1214,70 +1206,6 @@ between symbolic states with controllable flexibility.
 
 
 \subsubsection{Motivating Example Revisit}
-Figure~\ref{fig:specu_modeling} shows the speculative modeling of motivating 
-program $\prog$. Figure~\ref{fig:3a} displays the simplified control flow graph 
-on which we annotate the memory access related variables. E.g., \texttt{S[0]} 
-indicates the first array read in the $\mathit{while}$ loop, and \texttt{v1} 
-means the memory \emph{write} in the $\mathit{if}$ branch. The solid arrow 
-line denotes the execution flow of state $s$, which takes the $\mathit{else}$ 
-branch in regular symbolic execution. 
-
-
-In Figure~\ref{fig:3a}, on reaching the branch point, \SpecuSym duplicates a 
-\textit{speculative} state $s'$ from $s$. Then, it enforces a bounded symbolic 
-execution of $s'$, e.g., one memory access inside the \textit{if} branch, as 
-shown by the dashed arrow curve. Once meeting the speculation threshold, 
-\SpecuSym stops the exploration and turns back to find state $s$ who is awaiting 
-the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporate the cache 
-state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminate $s'$. Right now, 
-the entire cache has been filled since the memory write in $s'$ mapped \texttt{v1} 
-into line \#256. 
-
-
-Subsequently, executing the memory \emph{store} to \texttt{v2} in state $s$ has
-to evict \texttt{S[0]} from cache line \#1 following the LRU policy, as shown in 
-Figure~\ref{fig:3b}. Then, the last memory \emph{load} of \texttt{S[x]} might 
-result in a cache miss or a hit, counting on the value of \texttt{x}, which is 
-consistent with the situation explained in Section~\ref{sec:specu_leak}. Hence, 
-\SpecuSym succeeds in modeling speculative execution and conforms to the 
-three-phase analysis designed in Section~\ref{sec:specu}. Note that Figure
-\ref{fig:3a} only shows the modeling of the \emph{if} branch while \SpecuSym 
-considers both branches and misses no potential cases. 
-
-
-\ignore{
-In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
-state from $s$, maps \texttt{v2} into a cache line, and merges back the updated 
-cache state to state $s$ before its termination, as formally stated in Algorithm
-\ref{alg:specusym} (lines 23-25). 
-}
-
-
-In this example, updating the cache state is straightforward. By checking the 
-in-cache addresses to find a proper cache line upon a cache miss, or update the 
-most recently used line in case of a hit. For the non-deterministic address, i.e., 
-\texttt{S[x]}, we can, at worst, try 254 possibilities to test the differences. 
-However, eagerly enumerating all potentials is impractical for real-world programs 
-due to the unbearable overhead. Furthermore, a great many cache mappings are
-redundant in terms of leak exposure. For instance, only 1 specific cache layout 
-can reveal the leak in the motivating example. 
-
-
-Instead, \SpecuSym models branch mispredictions along with a path exploration
-and maintains a trace of memory events as the alternative of the cache state. 
-Then it analyzes the event trace to build the leak constraint and lazily 
-searches for feasible solutions. We detail this approach in Section
-\ref{sec:modeling} and Section~\ref{sec:analysis}. 
-
-
-As discussed before, the processor stops speculative execution once it has computed
-the branch destination. Since speculation may end at an arbitrary point, we model 
-the speculative window with a configurable three-dimensional threshold. That is,
-if the number of interpreted events in a \textit{speculative} state reaches the
-ROB size or the speculatively executed branch events meets the specified bound, 
-we stop speculation immediately. And, if a memory event in speculative execution 
-causes a cache miss, we also stop the speculation after its execution. Otherwise, 
-we continue the execution.
 
 
 
@@ -1361,6 +1289,74 @@ we continue the execution.
 \vspace{-3ex}
 \label{fig:specu_modeling}
 \end{figure}
+
+
+
+
+Figure~\ref{fig:specu_modeling} shows the speculative modeling of motivating 
+program $\prog$. Figure~\ref{fig:3a} displays the simplified control flow graph 
+on which we annotate the memory access related variables. That is, \texttt{S[0]} 
+indicates the first array read in the $\mathit{while}$ loop, and \texttt{v1} 
+means the memory \emph{write} in the $\mathit{if}$ branch. The solid arrow 
+line denotes the execution flow of state $s$, which takes the $\mathit{else}$ 
+branch in regular symbolic execution. 
+
+
+In Figure~\ref{fig:3a}, on reaching the branch point, \SpecuSym duplicates a 
+\textit{speculative} state $s'$ from $s$. Then, it enforces a bounded symbolic 
+execution of $s'$, e.g., one memory access inside the \textit{if} branch, as 
+shown by the dashed arrow curve. Once meeting the speculation threshold, 
+\SpecuSym stops the exploration and turns back to find state $s$ who is awaiting 
+the finish of $s'$. Also, before resuming $s$, \SpecuSym incorporate the cache 
+state of $s'$ (cf. Figure~\ref{fig:3b}) into $s$ and terminate $s'$. Right now, 
+the entire cache has been filled since the memory write in $s'$ mapped \texttt{v1} 
+into line \#256. 
+
+
+Subsequently, executing the memory \emph{store} to \texttt{v2} in state $s$ has
+to evict \texttt{S[0]} from cache line \#1 following the LRU policy, as shown in 
+Figure~\ref{fig:3b}. Then, the last memory \emph{load} of \texttt{S[x]} might 
+result in a cache miss or a hit, counting on the value of \texttt{x}, which is 
+consistent with the situation explained in Section~\ref{sec:specu_leak}. Hence, 
+\SpecuSym succeeds in modeling speculative execution and conforms to the 
+three-phase analysis designed in Section~\ref{sec:specu}. Note that Figure
+\ref{fig:3a} only shows the modeling of the \emph{if} branch while \SpecuSym 
+considers both branches and misses no potential cases. 
+
+
+\ignore{
+In Figure~\ref{fig:3a}, the speculative state $s'$ inherits the cache 
+state from $s$, maps \texttt{v2} into a cache line, and merges back the updated 
+cache state to state $s$ before its termination, as formally stated in Algorithm
+\ref{alg:specusym} (lines 23-25). 
+}
+
+
+In this example, updating the cache state is straightforward. By checking the 
+in-cache addresses to find a proper cache line upon a cache miss, or update the 
+most recently used line in case of a hit. For the non-deterministic address, i.e., 
+\texttt{S[x]}, we can, at worst, try 254 possibilities to test the differences. 
+However, eagerly enumerating all potentials is impractical for real-world programs 
+due to the unbearable overhead. Furthermore, a great many cache mappings are
+redundant in terms of leak exposure. For instance, only 1 specific cache layout 
+can reveal the leak in the motivating example. 
+
+
+Instead, \SpecuSym models branch mispredictions along with a path exploration
+and maintains a trace of memory events as the alternative of the cache state. 
+Then it analyzes the event trace to build the leak constraint and lazily 
+searches for feasible solutions. We detail this approach in Section
+\ref{sec:modeling} and Section~\ref{sec:analysis}. 
+
+
+As discussed before, the processor stops speculative execution once it has computed
+the branch destination. Since speculation may end at an arbitrary point, we model 
+the speculative window with a configurable three-dimensional threshold. That is,
+if the number of interpreted events in a \textit{speculative} state reaches the
+ROB size or the speculatively executed branch events meets the specified bound, 
+we stop speculation immediately. And, if a memory event in speculative execution 
+causes a cache miss, we also stop the speculation after its execution. Otherwise, 
+we continue the execution.
 
 
 
@@ -1496,7 +1492,7 @@ events from \textit{speculative} states.
 \label{sec:new_div}
 It means executing $\mathit{m_i}$ under speculative execution with two different
 inputs $\mathit{in}$ and $\mathit{in'}$ can cause a miss and a hit, respectively. 
-E.g., reading \texttt{S[x]} exposes this symptom (cf. Section~\ref{sec:specu_leak}). 
+For instance, reading \texttt{S[x]} exposes this symptom (cf. Section~\ref{sec:specu_leak}). 
 To analyze the behavior, we build $\mathit{\mu_{in}(m_i)}$ which returns the cache
 hit condition of $\mathit{m_i}$ in trace $\pi$:
 %
@@ -1773,24 +1769,26 @@ satisfies.
 
 
 \subsubsection{Formula Reduction.}
+
 However, the size of $\theta'$ still intensely increases along with the 
 increment of $i$, which pressures the constraint solver. By inspecting 
-the constraint structure, we separate lengthy formulas into smaller pieces 
-by following strategies. First, if a subformula of a Conjunctive Normal 
-Form (CNF) formula evaluates as \textit{false}, we directly return \textit{false}. 
-E.g., in equation (\ref{eqn:hc}), if \circled{4} is \textit{false}, we skip 
-querying solver for \circled{5} and \circled{6}. Second, if a subformula 
-in a Disjunction Normal Form (DNF) formula is determined as \textit{true}, 
-we discard all other subformulas. As in equation (\ref{eqn:hc}), once we 
-find the nearest $\mathit{a_j}$ by \circled{5}, we discard subformulas 
-for indices before $j$. Third, if two subformulas are in negated forms, 
-we avoid an extra solver query. E.g., in equation~\ref{eqn:hc}, constraint 
-\circled{5} of $\mathit{m_j}$ is the negation of constraint \circled{4} 
-of $\mathit{m}_{\mathit{j}+1}$, which implies we can save one constraint 
-solving time. Fourth, since we repeatedly traverse memory access trace in 
-constraint construction, caching the intermediate results avoids repeated 
-computation. We bank the computed address-comparing formulas into a hash 
-map so that \SpecuSym can quickly retrieve them with tolerable storage overhead. 
+the constraint structure, we separate lengthy formulas into smaller 
+pieces by following strategies. First, if a subformula of a Conjunctive 
+Normal Form (CNF) formula evaluates as \textit{false}, we directly return 
+\textit{false}. For example, in equation (\ref{eqn:hc}), if \circled{4} 
+is \textit{false}, we skip querying solver for \circled{5} and \circled{6}. 
+Second, if a subformula in a Disjunction Normal Form (DNF) formula is 
+determined as \textit{true}, we discard all other subformulas. As in 
+equation (\ref{eqn:hc}), once we find the nearest $\mathit{a_j}$ by 
+\circled{5}, we discard subformulas for indices before $j$. Third, if 
+two subformulas are in negated forms, we avoid an extra solver query. For 
+example, in equation~\ref{eqn:hc}, constraint \circled{5} of $\mathit{m_j}$ 
+is the negation of constraint \circled{4} of $\mathit{m}_{\mathit{j}+1}$, 
+which implies we can save one constraint solving time. Fourth, since we 
+repeatedly traverse memory event trace in constraint construction, caching 
+the intermediate results avoids repeated computation. We bank the computed 
+formulas into a hash map so that \SpecuSym can quickly retrieve them with 
+tolerable storage overhead. 
 
 
 
@@ -1893,7 +1891,7 @@ by providing more accurate results?
 \label{sec:benchs}
 
 \begin{table}%[htb!]
-\caption{\fontsize{8}{11}\selectfont Benchmark Statistics: Name, Lines 
+\caption{\fontsize{8}{11}\selectfont Benchmark statistics: Name, Lines 
 of C code (LoC), Source, Sensitive Input Size in Bytes (S-In), and Number of 
 Branches (Brs).}
 \label{tbl:benchs}
@@ -1931,7 +1929,6 @@ Branches (Brs).}
 %\bottomrule
 \end{tabular}
 }
-\vspace{-2ex}
 \end{table}
 
 
@@ -1974,7 +1971,8 @@ most 12 hours.
 \subsubsection{Timing Leak Detection}
 \label{sec:leak_detect}
 
-\begin{table}%[htb!]
+
+\begin{table}
 \caption{Detection results on set-associative caches}
 \label{tbl:detection}
 \centering
@@ -2022,7 +2020,6 @@ most 12 hours.
 
 
 
-
 In this section, we conduct experiments for the first research question. Table
 \ref{tbl:detection} shows the leak detection results under the 3 set-associative 
 cache settings. Let's name these caches as {$C_1$}, $C_2$, and $C_3$. $C_1$ has 
@@ -2042,6 +2039,9 @@ the other 5 programs have leaks under all 3 caches. Among these 5 programs,
 both D/O leaks in $C_1$, but only opposite leaks in $C_2$ and $C_3$; and the 
 rest three programs (\texttt{chacha20}, \texttt{encoder}, and \texttt{DES}
 \cite{OpenSSL111c}) have only opposite leaks under all the 3 caches.
+
+
+
 
 
 Next, we compare the results under $C_1$ and $C_2$ to research how the cache 
@@ -2070,14 +2070,14 @@ on $C_2$ but no leaks on $C_3$. Though this unique case indicates that smaller
 cache might incur more leaks, it is not the majority situation. 
 
 
-Besides, we also observe drastically varying results from different versions 
-of the same algorithm. E.g., in three DES implementations from OpenSSL
+Besides, we observe drastically varying results from different versions of the 
+same algorithm. For example, in three DES implementations from OpenSSL
 \cite{OpenSSL111c}, glibc~\cite{glibc}, and Libgcrpt~\cite{Libgcrypt}, 
 \SpecuSym detected only opposite leaks in OpenSSL \texttt{DES}, both D/O 
 leaks in glibc \texttt{DES}, and no leaks in Libgcrypt \texttt{DES}. Meanwhile, 
 OpenSSL \texttt{DES} needs about 11 minutes of analysis time upon all caches. 
-The glibc \texttt{DES} uses 52 minutes for $C_1$ but around 6.5 hours on both 
-$C_2$ and $C_3$. By contrast, Libgcrypt \texttt{DES} costs merely 1 minute under 
+The glibc \texttt{DES} uses 52 minutes for $C_1$ but around 6.5 hours in both 
+$C_2$ and $C_3$. By contrast, Libgcrypt \texttt{DES} uses merely 1 minute upon 
 all 3 caches. 
 
 
@@ -2088,6 +2088,17 @@ various caches for comparative analysis.
 
 \subsubsection{Existing Method Comparison}
 \label{sec:comparison}
+
+We compare \SpecuSym with \cite{WuW19} in Table~\ref{tbl:cmp}, to answer the 
+second research question. Column 1 of Table~\ref{tbl:cmp} lists all the used
+benchmarks in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the 
+detection result and the computation time of this abstract interpretation 
+based method~\cite{WuW19}. Columns 4-6 depict the result of \textsc{SpecuSym}, 
+while column 5 lists the total amount of detected leaks. To ensure a fair 
+comparison, we configure a 512-line fully-associative cache with LRU policy, 
+which equals the cache setting used in~\cite{WuW19}. Let's name it as $C_4$.
+
+
 
 \begin{table}
 \caption{Comparison betwee Wu et al.~\cite{WuW19} and \SpecuSym}
@@ -2123,19 +2134,9 @@ various caches for comparative analysis.
 %\hline
 \end{tabular}
 }
-\vspace{-2ex}
 \end{table}
 
 
-
-We compare \SpecuSym with \cite{WuW19} in Table~\ref{tbl:cmp}, to answer the 
-second research question. Column 1 of Table~\ref{tbl:cmp} lists all the used
-benchmarks in~\cite{WuW19} for timing leak evaluation. Columns 2-3 show the 
-detection result and the computation time of this abstract interpretation 
-based method~\cite{WuW19}. Columns 4-6 depict the result of \textsc{SpecuSym}, 
-while column 5 lists the total amount of detected leaks. To ensure a fair 
-comparison, we configure a 512-line fully-associative cache with LRU policy, 
-which equals the cache setting used in~\cite{WuW19}. Let's name it as $C_4$.
 
 
 Overall, \cite{WuW19} reported that 5 of the 10 benchmarks are leaky, as marked 
@@ -2154,11 +2155,11 @@ and they are indeed false positives.
 For the remaining programs, \texttt{chacha20}, \texttt{encoder}, and \texttt{DES}, 
 both \SpecuSym and~\cite{WuW19} have detected leaks. However, \cite{WuW19} only 
 claims the leaky results whereas \SpecuSym generates richer information than
-\cite{WuW19}. E.g., \SpecuSym pinpoints 9, 5, and 8 leaky memory operations in 
-these benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory 
-event trace for leak diagnosis. Note that \SpecuSym generally performs faster on 
-$C_4$ than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache 
-setting of $C_4$ advances both cache utilization and cache hit rate in these benchmarks. 
+\cite{WuW19}. For example, \SpecuSym pinpoints 9, 5, and 8 leaky memory operations 
+in these benchmarks, respectively. Moreover, \SpecuSym can provide inputs and memory 
+event trace for leak diagnosis. Note that \SpecuSym generally performs faster on $C_4$ 
+than on set-associative caches $C_1$, $C_2$, and $C_3$ since the extreme cache setting 
+of $C_4$ advances both cache utilization and cache hit rate in these benchmarks. 
 
 
 Compared to~\cite{WuW19}, \SpecuSym may have false negatives because of two reasons. 
@@ -2184,18 +2185,50 @@ control flow graph, \SpecuSym can purposely guide its analysis to the problemati
 area at an earlier stage. 
 
 
-Now, we answer the second research question: \SpecuSym can complement the abstract 
-interpretation based analysis on false positive elimination and leak witness generation.
+Now, we answer the second research question: \SpecuSym can complement the latest 
+abstract interpretation based analysis~\cite{WuW19}. It introduces no false negetives 
+and identifies two false positives reported in~\cite{WuW19}. Further, it can provide
+inputs, the speculation flows, and the leak locations for detailed diagnosis.
 
 
 \subsubsection{Optimization Performance}
 \label{sec:opt_perform}
 
+
+
+This section studies the performance of the optimization strategies 
+proposed in Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares 
+the overall performance between the \texttt{Baseline} \SpecuSym with
+no optimizations, and the \texttt{Optimized} \SpecuSym version with 
+all optimizations enabled, as listed in column 1. The second and the 
+third columns compare the execution time and the size of involved 
+constraints. The fourth column and the last column disclose the 
+identified new divergent leaks and new opposite leaks, respectively. 
+The used cache setting for this experiment is $C_3$.
+
+
+As shown in column 2, after optimizations, the analysis time of the 
+\texttt{Optimized} \SpecuSym significantly decreases, falling to only 
+$30.7\%$ of the \texttt{Baseline} \textsc{SpecuSym} execution time, 
+which proves the effectiveness of the optimizations in accelerating 
+the analysis. 
+
+
+Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces
+the size of the involved constraint by more than $20\%$, compared 
+to the \texttt{Baseline} version, as shown in column 3. Though the 
+constraint size reduction looks not as impressive as the time reduction, 
+the proposed strategies greatly ease the solver burden by constraint 
+transformation and formula reduction. Undoubtedly, constraint optimization 
+is the primary reason for the time decrease.
+
+
+
 \tikzset{align at top/.style={baseline=(current bounding box.north)}}
 \begin{figure}
 \subfigure[The benchmark analysis time]{
 	\label{fig:4a}
-	\begin{minipage}{0.485\linewidth}
+	\begin{minipage}{0.486\linewidth}
 	\centering
 		\resizebox{1.0\linewidth}{!}
 		{
@@ -2264,7 +2297,7 @@ interpretation based analysis on false positive elimination and leak witness gen
 }
 \subfigure[The SMT constraint size]{
 	\label{fig:4b}
-	\begin{minipage}{0.485\linewidth}
+	\begin{minipage}{0.486\linewidth}
 	\centering
 		\resizebox{1.0\linewidth}{!}{
 			\begin{tikzpicture}
@@ -2360,31 +2393,6 @@ interpretation based analysis on false positive elimination and leak witness gen
 
 
 
-This section studies the performance of the optimization strategies 
-proposed in Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares 
-the overall performance between the \texttt{Baseline} \SpecuSym with
-no optimizations, and the \texttt{Optimized} \SpecuSym version with 
-all optimizations enabled, as listed in column 1. The second and the 
-third columns compare the execution time and the size of involved 
-constraints. The fourth column and the last column disclose the 
-identified new divergent leaks and new opposite leaks, respectively. 
-The used cache setting for this experiment is $C_3$.
-
-
-As shown in column 2, after optimizations, the analysis time of the 
-\texttt{Optimized} \SpecuSym significantly decreases, falling to only 
-$30.7\%$ of the \texttt{Baseline} \textsc{SpecuSym} execution time, 
-which proves the effectiveness of the optimizations in accelerating 
-the analysis. 
-
-
-Apart from the time drop, the \texttt{Optimized} \SpecuSym reduces
-the size of the involved constraint by more than $20\%$, compared 
-to the \texttt{Baseline} version, as shown in column 3. Though the 
-constraint size reduction looks not as impressive as the time reduction, 
-the proposed strategies greatly ease the solver burden by constraint 
-transformation and formula reduction. Undoubtedly, constraint optimization 
-is the primary reason for the time decrease.
 
 
 Moreover, column 4 and column 5 disclose that the \texttt{Optimized} 
@@ -2408,8 +2416,8 @@ while \texttt{Opt} reuses cached intermediate results. On the other hand,
 formula reduction lowers the cost of solving. Figure~\ref{fig:4b} shows 
 how optimizations reduce the constraint size where AES~\cite{LibTomCrypt}, 
 glibc DES~\cite{glibc}, and seed~\cite{Tegra} have significant improvements. 
-For the other cases, the memory trace length is typically short. Thus, our 
-optimizations have no apparent impacts upon them.
+For the other cases, the memory trace length is commonly short. Thus, our 
+optimizations have no apparent improvements upon them.
 
 
 Finally, we answer the last research question: our optimizations significantly 
@@ -2429,7 +2437,7 @@ low-level details can further facilitate \SpecuSym to improve the analysis.
 \SpecuSym considers nested speculative execution because branch instruction 
 may also exist in speculated paths. As the speculative window is usually 
 transient, we treat the nested depth as configurable and set it to 2 in 
-evaluation. However, experiments shows the effectiveness of this 
+evaluation. However, experiments show the effectiveness of this 
 under-approximation approach.
 	
 
@@ -2460,9 +2468,9 @@ by Intel and AMD through Indirect Branch Prediction Barrier (IBPB) settings.
 
 Regarding the security impact of processor speculative execution
 \cite{kimuraKT1996}, Kocher et al.~\cite{KocherGGHHLMPSY19} demonstrated 
-that speculative execution can influence the processor cache state, thus 
-giving rise to cache timing attacks, which motivates the design of 
-\textsc{SpecuSym}. 
+that speculative execution could silently influence the processor cache 
+state, thus giving rise to cache timing attacks, which motivates the 
+design of \textsc{SpecuSym}. 
 
 
 Symbolic execution~\cite{King76} has been applying to side-channel analysis 
@@ -2572,7 +2580,9 @@ false positives for a more precise result.
 
 
 \section*{Acknowledgement}
-We thank xxx for xxx.
+This work was partially supported by the National Science Foundation of China
+under grants 61802168 and 61972290, and the Natural science Foundation of
+Jiangsu Province under grant BK20191247.
 
 
 \ignore{
