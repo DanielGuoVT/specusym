@@ -360,8 +360,8 @@
   %
   We have implemented \textsc{SpecuSym} atop KLEE and evaluated it against 15 
 	open-source benchmarks. Experimental results show that \SpecuSym successfully 
-	detected from 2 to 61 leaks in 6 programs under four different cache settings and 
-	identified false positives in 2 programs reported by	recent work.
+	detected from 2 to 61 leaks in 6 programs under three different cache settings 
+	and identified false positives in 2 programs reported by	recent work.
 \end{abstract}
 
 \begin{CCSXML}
@@ -519,8 +519,8 @@ are visible and cache timing leaks from speculative execution detectable now.
 We have implemented \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04} 
 and evaluated it on 15 benchmarks, which have 8,791 lines of C code in total. Results 
 demonstrate that \SpecuSym successfully detects from 2 to 61 leaks in 6 programs under
-4 set-associative caches and identifies false positives in 2 programs reported by recent 
-work. To summarize, we have made the following contributions:
+three set-associative caches and identifies false positives in 2 programs reported by 
+recent work. To summarize, we have made the following contributions:
 
 
 \begin{itemize*}
@@ -2553,18 +2553,18 @@ count on various heuristics while \SpecuSym systematically solves for
 precise inputs.
 
 
-Among the existing works, KLEESPECTRE~\cite{WangCBMR19}, Spectector
-\cite{GuarnieriKMRS19}, and~\cite{ZhangCW12} are closely related to 
-\textsc{SpecuSym}. KLEESPECTRE~\cite{WangCBMR19} has an analogous 
-understanding of modeling speculation in symbolic execution. However, 
-KLEESPECTRE~\cite{WangCBMR19} aims at Spectre-style vulnerability; 
-thus, it has a crucial difference in constraint semantics. Spectector 
-\cite{WangCBMR19} also targets Spectre-type vulnerability. It employs 
-symbolic execution to prove speculative non-interference property or 
-detect violations. Speculative symbolic execution~\cite{ZhangCW12} 
-proposed a method to lazily reason branch feasibility until reaching 
-a threshold, which improves the efficiency of the symbolic execution 
-technique.
+Among the existing works, \textsc{KLEESpectre}~\cite{WangCBMR19}, 
+\textsc{Spectector}~\cite{GuarnieriKMRS19}, and~\cite{ZhangCW12} are 
+closely related to \textsc{SpecuSym}. \textsc{KLEESpectre}
+\cite{WangCBMR19} has an analogous understanding of modeling speculation 
+in symbolic execution. However, \textsc{KLEESpectre}~\cite{WangCBMR19} 
+aims at Spectre-style vulnerability; thus, it has a crucial difference 
+in constraint semantics. \textsc{Spectector}~\cite{WangCBMR19} also 
+targets Spectre-type vulnerability. It employs symbolic execution to 
+prove speculative non-interference property or detect violations. 
+Speculative symbolic execution~\cite{ZhangCW12} proposed a method to 
+lazily reason branch feasibility until reaching a threshold, which 
+improves the efficiency of the symbolic execution technique.
 
 
 
@@ -2605,12 +2605,12 @@ explores the program state space and models speculative execution at
 conditional branches. By cache state modeling as well as cache behavior 
 analysis, \SpecuSym leverages constraint-solving to search for divergent 
 and opposite cache behaviors at memory access events. Experimental results
-show that \SpecuSym can detect timing leaks under different cache settings.
-The proposed optimizations help \SpecuSym save 69.3\% execution time to 
-detect 31.8\% more leaks. Comparison between \SpecuSym and state-of-the-art 
-abstract interpretation based method~\cite{WuW19} shows that \SpecuSym not 
-only successfully detects leaks in the reported programs but also eliminates 
-false positives for a more precise result.
+show that \SpecuSym successfully detects timing leaks under different cache 
+settings. The proposed optimizations help \SpecuSym save 69.3\% execution 
+time to detect 31.8\% more leaks. Comparison between \SpecuSym 
+and state-of-the-art abstract interpretation based method~\cite{WuW19} shows 
+that \SpecuSym not only successfully detects leaks in the reported programs 
+but also eliminates false positives for a more precise result.
 
 
 \section*{Acknowledgement}
@@ -2704,8 +2704,6 @@ a, No-opt, Simplify and Caching, Solving Reduction, All
      \label{fig:opt}
 \end{figure}
 }
-
-
 
 
 \clearpage\newpage

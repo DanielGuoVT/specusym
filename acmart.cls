@@ -455,7 +455,8 @@ Computing Machinery]
 \def\@makefnmark{\hbox{\@textsuperscript{\normalfont\@thefnmark}}}
 \let\@footnotemark@nolink\@footnotemark
 \let\@footnotetext@nolink\@footnotetext
-\RequirePackage[bookmarksnumbered,unicode]{hyperref}
+%\RequirePackage[bookmarks,unicode]{hyperref}
+\RequirePackage[bookmarks=false,unicode]{hyperref}
 \pdfstringdefDisableCommands{%
   \def\unskip{}%
   \def\textbullet{- }%
