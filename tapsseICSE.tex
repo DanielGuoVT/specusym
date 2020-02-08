@@ -1985,18 +1985,17 @@ is initialized to a symbol whose size shows in column \textbf{S-In}. Also,
 each program has 1 to 133 conditional branches.
 
 
-We evaluate the benchmarks on the N-way set-associative cache and LRU 
-policy with different cache settings. To be specific, we design four 
-caches as (1) 32KB cache size with N=4; (2) 32KB cache size with N=8; (3) 
-64KB cache size with N=8; and (4) 32KB cache size with N=512. Each cache 
-line has 64 bytes for all caches. The first three settings are close to 
-the L1 data cache classes in modern processors like~\cite{Skylake,Kabylake}. 
-The last setting forms a fully-associative cache on which we compare 
-\SpecuSym with \cite{WuW19}. Besides, we evaluate the effectiveness of 
-optimizations using the third setting. All the evaluations are conducted 
-on a machine running Ubuntu 16.04 64-bit Server Linux with Intel(R) Xeon(R) 
-2.20GHz CPUs 24 cores and 256GB RAM. Each benchmark is allowed to run at 
-most 12 hours.
+We evaluate the benchmarks on the N-way set-associative cache and LRU policy 
+with different cache settings. To be specific, we design four caches as (1) 
+32KB cache size with N=4; (2) 32KB cache size with N=8; (3) 64KB cache size 
+with N=8; and (4) 32KB cache size with N=512. Each cache line has 64 bytes 
+for all caches. The first three settings are close to the L1 data cache 
+classes in modern processors. The last setting forms a fully-associative 
+cache on which we compare \SpecuSym with \cite{WuW19}. Besides, we evaluate 
+the effectiveness of optimizations using setting (3). All the evaluations 
+are conducted on a machine running Ubuntu 16.04 64-bit Server Linux with 
+Intel(R) Xeon(R) 2.20GHz CPUs 24 cores and 256GB RAM. Each benchmark is 
+allowed to run at most 12 hours.
 
 
 \subsection{Experimental Results}
@@ -2232,18 +2231,19 @@ inputs, the speculation flows, and the leak locations for detailed diagnosis.
 
 This section studies the performance of the optimizing strategies discussed in 
 Section~\ref{sec:optimize}. Table~\ref{tbl:opt} compares the overall performance 
-between the baseline \SpecuSym \texttt{Base} without any optimizations, and the
-optimized \SpecuSym \texttt{Opt} with all optimizations enabled, as listed in 
+between the baseline \SpecuSym without any optimizations (\texttt{Base}), and the
+optimized \SpecuSym with all optimizations enabled (\texttt{Opt}), as listed in 
 column 1. Column 2 and column 3 compare the analysis time and the size of involved 
 constraints between these two \SpecuSym versions. Column 4 and column 5 disclose 
 the number of identified new divergent leaks (\#.\textbf{Div}) and new opposite 
-leaks (\#.\textbf{Opp}), respectively. As stated earlier, the cache setting for 
-this experiment is $C_3$.
+leaks (\#.\textbf{Opp}), respectively. The cache setting for this experiment is
+$C_3$, under which \texttt{Base} and \texttt{Opt} have a minimum performance gap, 
+forming a lower-bound result. 
 
 
 As shown in column 2, after optimizations, the analysis time of the \texttt{Opt} 
-\SpecuSym significantly decreases, falling to only $30.7\%$ of the \texttt{Base} 
-analysis time, which confirms the effectiveness of the optimizations in 
+\SpecuSym significantly decreases, falling to only $30.7\%$ of the analysis time
+in \texttt{Base}, which confirms the effectiveness of the optimizations in 
 accelerating the analyses. 
 
 
@@ -2252,7 +2252,7 @@ involved constraint by more than $20\%$, compared to the \texttt{Base} version,
 as shown in column 3. Though the reduction to constraint sizes looks not as 
 impressive as the time reduction, the proposed strategies greatly ease the solver 
 burden by constraint transformation and formula reduction. Undoubtedly, constraint 
-optimization is the primary reason for the time decrease.
+size reduction is the primary reason for the time decrease.
 
 
 Moreover, column 4 and column 5 disclose that the \texttt{Opt} \SpecuSym 
@@ -2403,15 +2403,16 @@ importance of our proposed optimizations.
 		}
 	\end{minipage}\hfill
 }
-\caption{Breakdown of optimization Performance. Benchmarks are represented using their orders in table~\ref{tbl:benchs}.}
+\caption{Performance comparison of the individual program. Benchmarks are listed by their orders in Table~\ref{tbl:benchs}.}
 \label{fig:InsampleOutsample}
 \label{fig:opt}
+%\vspace{-1ex}
 \end{figure}
 
 
 \begin{table}%[!tb]
-\caption{Overall performance Increases from Optimization. }
-%\vspace{-1em}
+\caption{The performance boost due to optimizations. }
+\vspace{-0.5em}
 \label{tbl:opt}
 \centering
 \resizebox{\linewidth}{!}{
