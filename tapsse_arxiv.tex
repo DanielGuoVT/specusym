@@ -1,6 +1,6 @@
-\documentclass[sigconf,screen]{acmart}
-\settopmatter{printfolios=true,printccs=true,printacmref=true}
-\linespread{0.958}
+\documentclass[sigconf]{acmart}
+\settopmatter{printfolios=false,printccs=false,printacmref=false}
+\linespread{0.97}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%% For ICSE '20 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \setcopyright{acmcopyright}
@@ -32,7 +32,6 @@
 \usepackage{circuitikz}
 \usepackage{color}            % for note colors
 \usepackage{etex}
-\usepackage{etoolbox}
 %\usepackage{enumitem}
 \usepackage{filecontents}
 \usepackage{graphicx}
@@ -227,18 +226,11 @@
   },
 }
 % End tikz shapes
-%
-%\makeatletter
-%\newcommand{\setalglineno}[1]{%
-%  \setcounter{ALG@line}{\numexpr#1-1}}
-%\makeatother
-%
 
 \makeatletter
-\patchcmd\algocf@Vline{\vrule}{\vrule \kern-0.4pt}{}{}
-\patchcmd\algocf@Vsline{\vrule}{\vrule \kern-0.4pt}{}{}
+\newcommand{\setalglineno}[1]{%
+  \setcounter{ALG@line}{\numexpr#1-1}}
 \makeatother
-
 
 
 \begin{document}
@@ -367,24 +359,24 @@
 	and identified false positives in 2 programs reported by	recent work.
 \end{abstract}
 
-\begin{CCSXML}
-<ccs2012>
-<concept>
-<concept_id>10002978.10002979.10002983</concept_id>
-<concept_desc>Security and privacy~Cryptanalysis and other attacks</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-<concept>
-<concept_id>10011007.10011074.10011099</concept_id>
-<concept_desc>Software and its engineering~Software verification and validation</concept_desc>
-<concept_significance>500</concept_significance>
-</concept>
-</ccs2012>
-\end{CCSXML}
-\ccsdesc[500]{Security and privacy~Cryptanalysis and other attacks}
-\ccsdesc[500]{Software and its engineering~Software verification and validation}
+%\begin{CCSXML}
+%<ccs2012>
+%<concept>
+%<concept_id>10002978.10002979.10002983</concept_id>
+%<concept_desc>Security and privacy~Cryptanalysis and other attacks</concept_desc>
+%<concept_significance>500</concept_significance>
+%</concept>
+%<concept>
+%<concept_id>10011007.10011074.10011099</concept_id>
+%<concept_desc>Software and its engineering~Software verification and validation</concept_desc>
+%<concept_significance>500</concept_significance>
+%</concept>
+%</ccs2012>
+%\end{CCSXML}
+%\ccsdesc[500]{Security and privacy~Cryptanalysis and other attacks}
+%\ccsdesc[500]{Software and its engineering~Software verification and validation}
 
-\keywords{Speculative execution, cache, timing, side-channel leak, symbolic execution} 
+%\keywords{Speculative execution, cache, timing, side-channel leak, symbolic execution} 
 
 \maketitle
 
@@ -444,15 +436,6 @@ interpretation based method~\cite{WuW19} qualitatively answers the \textit{yes} 
 \textit{no} question --- it is incapable of generating input and speculative flows 
 to diagnose leaks in depth. Moreover, the over-approximation nature inevitably 
 results in false positives, which desires a more precise method.
-
-
-\begin{figure}
-  \centering
-  \scalebox{1.0}{\input{fig_flow.tex}}
-  \caption{Overall flow of \textsc{SpecuSym}.}
-  \label{fig:overall_flow}
-	\vspace{-2ex}
-\end{figure}
 
 
 % Fifth, introduce our method 
@@ -517,6 +500,17 @@ under standard symbolic execution. To overcome this problem, we introduce the
 $\mathit{speculative~modeling}$ into symbolic execution. Thus, cache side effects 
 are visible and cache timing leaks from speculative execution detectable now. 
 }
+
+
+
+\begin{figure}
+  \centering
+  \scalebox{1.0}{\input{fig_flow.tex}}
+  \caption{Overall flow of \textsc{SpecuSym}.}
+  \label{fig:overall_flow}
+	\vspace{-2ex}
+\end{figure}
+
 
 
 We have implemented \SpecuSym atop KLEE~\cite{CadarDE08} and LLVM~\cite{LattnerA04} 
@@ -597,14 +591,7 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 
 
 
-
-
-
-\subsection{Leakage-free in Non-speculative Execution}
-\label{sec:no_leak}
-
-
-\begin{figure}%[htb]
+\begin{figure}[htb]
 \subfigure[The program snippet $\prog$]{
 \label{fig:fig2-a}
 \framebox[0.53\linewidth]{     
@@ -673,6 +660,10 @@ and writes \texttt{v2}, mapping \texttt{v2} to line $\#256$.
 \end{figure}
 
 
+
+
+\subsection{Leakage-free in Non-speculative Execution}
+\label{sec:no_leak}
 
 
 Running $\prog$ without speculative execution won't leak any information 
@@ -2614,12 +2605,12 @@ and state-of-the-art abstract interpretation based method~\cite{WuW19} shows
 that \SpecuSym not only successfully detects leaks in the reported programs 
 but also eliminates false positives for a more precise result.
 
-
-\section*{Acknowledgement}
-This work was partially supported by the National Science Foundation of China
-under grants 61802168 and 61972290, and the Natural science Foundation of
-Jiangsu Province under grant BK20191247.
-
+%
+%\section*{Acknowledgement}
+%This work was partially supported by the National Science Foundation of China
+%under grants 61802168 and 61972290, and the Natural science Foundation of
+%Jiangsu Province under grant BK20191247.
+%
 
 
 \clearpage\newpage

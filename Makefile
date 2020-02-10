@@ -1,4 +1,4 @@
-project=tapsse
+project=tapsseICSE
 
 all:
 	pdflatex $(project)
