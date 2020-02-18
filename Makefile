@@ -8,6 +8,7 @@ full:
 	pdflatex $(project)
 	bibtex $(project)
 	pdflatex $(project)
+	pdflatex $(project)
 #	latex $(project)
 #	latex $(project)
 #	dvipdf $(project)

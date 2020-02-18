@@ -417,7 +417,7 @@ measure the timing information of certain operations. One particular instance
 is the cache timing side-channel, which leaks data by the variance of the 
 cache visiting latency. State-of-the-art program repair method~\cite{WuGSW18} 
 mitigates cache timing leaks by enforcing constant execution time for all 
-secret relevant operations. However, this strong mitigation may still get 
+secret-relevant operations. However, this strong mitigation may still get 
 compromised by the thread-level concurrency~\cite{GuoWW18} or the 
 instruction-level parallelism like \textit{speculative execution}~\cite{kimuraKT1996}.
 
@@ -528,14 +528,14 @@ recent work. To summarize, we have made the following contributions:
 
 \begin{itemize}
   \item 
-    A novel approach for modeling microarchitectural speculative execution and 
+    A novel technique for modeling microarchitectural speculative execution and	
 		analyzing the affected cache behaviors in symbolic execution.
   \item 
 		The implementation of \textsc{SpecuSym}, which addresses three major challenges
 		and supports cache timing leak detection under speculative execution. 
   \item 
     The evaluation of \SpecuSym on 15 open-source benchmarks to demonstrate its 
-    effectiveness through revealing from 2 to 61 leaks upon 3 different cache 
+    effectiveness through revealing from 2 to 61 leaks under 3 different cache 
 		settings.
 \end{itemize}
 
@@ -574,11 +574,11 @@ is the sensitive input, and any form of revealing its value turns to be a leak.
 
 
 
-We leverage a fully associative cache $\mathcal{C}$ for the analysis purpose 
-of $\prog$, as shown in Figure~\ref{fig:2b}. It is an extreme case of the 
-N-way associative cache where the memory address of a variable in $\prog$ may 
-map to any cache line of $\mathcal{C}$, subjecting to the line availability 
-and the replacement policy. Here we assume $\mathcal{C}$ adopts the \emph{Least
+We use a fully associative cache $\mathcal{C}$ for the analysis purpose of 
+$\prog$, as shown in Figure~\ref{fig:2b}. It is an extreme case of the N-way 
+associative cache where the memory address of a variable in $\prog$ may map 
+to any cache line of $\mathcal{C}$, subjecting to the line availability and 
+the replacement policy. Here we assume $\mathcal{C}$ adopts the \emph{Least
 Recently Used} (LRU) policy, which always evicts the least used line once 
 $\mathcal{C}$ has been entirely occupied.
 
@@ -1180,7 +1180,7 @@ $\mathit{SpeculativeExplore}$(SymbolicState $s$, Predicate $c$)\;
 \BlankLine
 $\mathit{AnalyzeCache}$(SymbolicState $s$)\;
 \Begin{
-    \If{$\mathit{s}$ is a regular symbolic state {\bf{and}} s.e relates to secret input}{
+    \If{$\mathit{s}$ is a regular symbolic state {\bf{and}} s.e relates to sensitive input}{
     $\theta\leftarrow$ build the leak constraint for $\mathit{s.e}$;\;
     \If{$\mathit{s.pc}\wedge\theta~\mathit{is~satisfiable}$}{
       Generate witness;\;
@@ -1375,7 +1375,7 @@ most recently used line in case of a hit. For the non-deterministic address, i.e
 \texttt{S[x]}, we can, at worst, try 254 possibilities to test the differences. 
 However, eagerly enumerating all potentials is impractical for real-world programs 
 due to the unbearable overhead. Furthermore, a great many cache mappings are
-redundant in terms of leak exposure. For instance, only 1 specific cache layout 
+redundant in terms of leak exposure. For instance, only one specific cache layout 
 can reveal the leak in the motivating example. 
 
 
@@ -1388,12 +1388,11 @@ searches for feasible solutions. We detail this approach in Section
 
 As discussed before, the processor stops speculative execution once it has computed
 the branch destination. Since speculation may end at an arbitrary point, we model 
-the speculative window with a configurable three-dimensional threshold. That is,
-if the number of interpreted events in a \textit{speculative} state reaches the
-ROB size or the speculatively executed branch events meet the specified bound, 
-we stop speculation immediately. And, if a memory event in speculative execution 
-causes a cache miss, we also stop the speculation after its execution. Otherwise, 
-we continue the execution.
+the speculative window with a configurable three-dimensional threshold. That is, if 
+the number of interpreted events in a \textit{speculative} state or the speculatively 
+executed branch events meet the predefined bound, we stop speculation; and, if a 
+sensitive input related memory event in speculative execution causes a cache miss, 
+we also stop the speculation after its execution. Otherwise, we continue the execution.
 
 
 \subsection{Cache State Modeling}
@@ -1584,33 +1583,33 @@ finding a candidate $\mathit{m_j}$ for $\mathit{m_i}$, the executed events
 between $\mathit{m_j}$ and $\mathit{m_i}$ should not evict $\mathit{m_j}$ 
 from the cache, to promise a cache hit for $\mathit{m_i}$. Under the LRU 
 policy, we observe that if satisfying property~\ref{pro:p1}, can this 
-non-evict requirement be met.
+non-evicting requirement be met.
 %
 \begin{pro}
   \label{pro:p1}
   To avoid evicting the most recently used cache line from a cache set 
-  \textsc{Set}, the total number of subsequent unique cache mappings to 
-  \textsc{Set} must be less than the set associativity.
+  $\Theta$, the total number of subsequent new cache mappings to 
+	$\Theta$ must be less than the set associativity.
 \end{pro}
 %
 Sub-formula \circled{6} checks whether an event $\mathit{m_y}$ between 
-$\mathit{m_j}$ and $\mathit{m_i}$ can form a uniquely new mapping to the 
-set that $\mathit{a_i}$ maps to. We perform the check by first comparing 
-the \textit{set} values of $\mathit{a_y}$ and $\mathit{a_i}$. If the 
-comparison satisfies, we further analyze if address $\mathit{a_y}$ has 
-never been accessed by an event $\mathit{m_z}$ --- by confirming that the 
-\emph{tag} values of $\mathit{a_z}$ and $\mathit{a_y}$ always differ. If 
-this check also satisfies, then $\mathit{a_y}$ must form a uniquely new 
-cache mapping. We count the new mappings and model \textsc{Property}
-\ref{pro:p1} in equation (\ref{eqn:hc}).
+$\mathit{m_j}$ and $\mathit{m_i}$ can form a new mapping to the cache 
+set that address $\mathit{a_j}$ maps to. We perform the check by first 
+comparing the \textit{set} values of $\mathit{a_y}$ and $\mathit{a_j}$. 
+If the comparison satisfies, we further analyze if address $\mathit{a_y}$ 
+has never been accessed by an event $\mathit{m_z}$ before --- by confirming 
+that the \emph{tag} values of $\mathit{a_z}$ and $\mathit{a_y}$ always
+differ. If this check also satisfies, then $\mathit{a_y}$ must form a new 
+cache mapping. We count the amount of new mappings and model 
+\textsc{Property}~\ref{pro:p1} in equation (\ref{eqn:hc}).
 
 
 Take a 9-event trace $\pi$:=
 \{$\mathit{m_1,m_2,\underline{m_1,m_3,m_3,m_4,m_5,m_4,m_1}}$\} as the 
 example. For brevity, we assume all the memory addresses associate with 
 the same cache set, and each address corresponds to one cache line. And, 
-the cache set associativity is \textit{4}. The question is, whether the 
-last event, $\mathit{m_1}$, can lead to a cache hit. Here we use 
+the cache set associativity is \textit{four}. The question is, whether 
+the last event, $\mathit{m_1}$, can lead to a cache hit. Here we use 
 \#$n$ to index these events where $n\in$[1,9].
 
 
@@ -1620,17 +1619,17 @@ Then, according to \circled{5}, we select the nearest event \#3, to form a
 sub-trace $\rho$ as underlined in $\pi$. Note that after $\rho$'s head event 
 $\mathit{m_1}$, the cache line used by this $\mathit{m_1}$ becomes the most 
 recently used line. Let's name the line as \emph{l}. Then, following \circled{6}, 
-along with $\rho$ we can identify \emph{3} unique new cache mappings incurred 
-by events \#4 ($\mathit{m_3}$), \#6 ($\mathit{m_4}$), and \#7 ($\mathit{m_5}$), 
+along with $\rho$ we can identify \emph{3} new cache mappings incurred by events 
+\#4 ($\mathit{m_3}$), \#6 ($\mathit{m_4}$), and \#7 ($\mathit{m_5}$), 
 respectively. Other events, i.e., \#5 ($\mathit{m_3}$) and \#8 ($\mathit{m_4}$),
-cannot form unique mappings since they do not satisfy \circled{6}.
+cannot form new mappings since they do not satisfy \circled{6}.
 
 
-Therefore, we conclude that the target event, $\mathit{m_1}$, must lead to a 
-cache hit because the identified \emph{3} unique cache mappings at most evict 
-the other 3 lines rather than the line \emph{l}. In other words, the number of 
-uniquely new mappings is less than the cache set associativity, which conforms 
-to \textsc{Property}~\ref{pro:p1}.
+Therefore, we conclude that the target event, $\mathit{m_1}$, must lead to 
+a cache hit because the identified \textit{three} new cache mappings at most 
+evict the other three lines rather than the line \emph{l}. In other words, 
+the number of new mappings is less than the set associativity of the given 
+cache, which conforms to \textsc{Property}~\ref{pro:p1}.
 
 
 \subsection{Cache Behavior Analysis}
@@ -1652,7 +1651,7 @@ before interpreting a memory event (line 13). In this procedure, \SpecuSym first
 examines whether the current state $s$ is a $\mathit{symbolic}$ state, and the 
 event $s.e$ relates to sensitive input (line 30). It is because the timing effect 
 inside speculative execution is externally invisible, and we are interested in the 
-sensitive data relevant memory accesses. Next, \SpecuSym builds the leak constraint 
+sensitive data related memory accesses. Next, \SpecuSym builds the leak constraint 
 $\theta$ for event $s.e$ and solves for a solution (lines 31-33). If the solution
 does not exist, \SpecuSym claims leakage-free at $s.e$ in current state $s$.
 
@@ -1718,30 +1717,30 @@ And we construct the final leak constraint $\theta$ on this observation:
 %
 Constraint $\mathit{opp_i}$ checks the existence of \textit{New Opposite Behavior}
 and $\mathit{div_i}$ reasons \textit{New Divergent Behavior}, respectively. We 
-define $\theta:=\mathit{opp_i}\vee\mathit{div_i}$ as the leak constraint at 
-$\mathit{m_i}$. \SpecuSym first computes $\mathit{\eta_{in'}^\prime(m_i)}$ 
-because of the lower cost of a \textit{must-be} solving. Then, it uses the 
-concretized value to substitute $\mathit{\eta_{in'}^\prime(m_i)}$ in 
-$\mathit{opp_i}$ for the further solving of $\mathit{in}$. If this targeted 
-$\mathit{in}$ exists, then $opp_i$ must be satisfiable, and \SpecuSym can 
-safely skip the rest analysis of $\mathit{div_i}$. Otherwise, it has to 
-continue reasoning $\mathit{div_i}$. Finally, if the solver successfully 
-returns a concrete solution of $\theta$, \SpecuSym generates a test case 
-including two inputs, the trace $\pi$, and event $\mathit{m_i}$ as the leak 
-witness.
+define $\theta:=\mathit{opp_i}\vee\mathit{div_i}$ as the leak 
+constraint at $\mathit{m_i}$. \SpecuSym first computes 
+$\mathit{\eta_{in'}^\prime(m_i)}$ because of the lower cost of a \textit{must-be} 
+solving. Then, it uses the concretized value to substitute 
+$\mathit{\eta_{in'}^\prime(m_i)}$ in $\mathit{opp_i}$ for the further solving of 
+$\mathit{in}$. If this targeted $\mathit{in}$ under the path condition $\pcon$
+exists, then $opp_i$ must be satisfiable, and \SpecuSym can safely skip the rest 
+analysis of $\mathit{div_i}$. Otherwise, it has to continue reasoning 
+$\mathit{div_i}$. Finally, if the solver successfully returns a concrete solution 
+of $\theta$, \SpecuSym generates a test case including two inputs, the trace $\pi$, 
+and event $\mathit{m_i}$ as the leak witness.
 
 
 For instance, in Figure~\ref{fig:3a}, before interpreting the \texttt{load} 
 event of \texttt{S[x]}, \SpecuSym analyzes the cache since the sensitive 
-data relevant address {\texttt{S[x]}} is from a \textit{symbolic} state 
-$s$. At this point, trace $\pi$ in $s$ is {\small \{\texttt{S[0]},...,
-\texttt{S[254]},\texttt{x},\texttt{v2},\texttt{v1},\texttt{S[x]}\}}. Also,
-in non-speculative execution reading {\small\texttt{S[x]}} must get a cache 
-hit (cf. Section~\ref{sec:no_leak}). 
-Substituting $\mathit{\eta_{in'}^\prime(m_i)}$ with value 1 in $\mathit{opp_i}$, 
-\SpecuSym tries to solve $\forall\mathit{in}.(\mathit{\eta_{in}(m_i)\neq}$1). 
+data related address {\texttt{S[x]}} is from a \textit{symbolic} state $s$. 
+At this point, trace $\pi$ in $s$ is {\{\texttt{S[0]},...,\texttt{S[254]},
+\texttt{x},\texttt{v2},\texttt{v1},\texttt{S[x]}\}}. Also, in non-speculative 
+execution reading {\small\texttt{S[x]}} must get a cache hit (cf. Section
+\ref{sec:no_leak}). Substituting $\mathit{\eta_{in'}^\prime(m_i)}$ with value 
+1 in $\mathit{opp_i}$, \SpecuSym tries to solve 
+$\forall\mathit{in}.\mathit{\eta_{in}(m_i)\neq}$1. 
 Unfortunately, this simplified $\mathit{opp_i}$ is still unsatisfiable since 
-$\mathit{\eta_{in}(m_i)}$ evaluates to 1 if $\mathit{in}$$\neq$0. Therefore, 
+$\mathit{\eta_{in}(m_i)}$ evaluates to 1 if $\mathit{in}\neq0$. Therefore, 
 \SpecuSym moves forward to $\mathit{div_i}$. This time, it successfully returns 
 two values 0 and 1, which expose a cache miss and a hit, respectively. Finally, 
 \SpecuSym outputs the solved values, the trace $s.\pi$, and the \textit{read} 
@@ -1788,6 +1787,7 @@ $\theta'$:
   \label{eqn:leak}
   ~~~~~~~~~~~~~~~
   \theta':=
+	\pcon\wedge
   \exists\mathit{in}.
   \mathit{
     \mu_{in}(m_i)~\neq~\eta_{in}^\prime(m_i)
