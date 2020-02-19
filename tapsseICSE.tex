@@ -2470,11 +2470,12 @@ false positives to \textsc{SpecuSym}. More low-level details can further
 facilitate \SpecuSym to improve the analysis.
 
 
-\SpecuSym considers nested speculative execution because branch instruction 
-may also exist in speculated paths. As the speculative window is usually 
-transient, we treat the nested depth as configurable and set it to 2 in 
-evaluation. However, experiments show the effectiveness of this 
-under-approximation approach.
+\SpecuSym considers nested speculative execution since branches may also 
+exist on speculated paths. As the speculative window is usually transient, 
+we treat the nested depth as configurable and set it to \textit{two} in 
+evaluation. Also, \SpecuSym executes at most the reorder buffer size of 
+instructions on a speculative path. However, experiments show the 
+effectiveness of this approximation.
 	
 
 So far, \SpecuSym cannot support the analysis of multithreaded programs. Though 
