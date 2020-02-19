@@ -1391,7 +1391,7 @@ the branch destination. Since speculation may end at an arbitrary point, we mode
 the speculative window with a configurable three-dimensional threshold. That is, if 
 the number of interpreted events in a \textit{speculative} state or the speculatively 
 executed branch events meet the predefined bound, we stop speculation; and, if a 
-sensitive input related memory event in speculative execution causes a cache miss, 
+sensitive input related memory event in speculative execution must cause a cache miss, 
 we also stop the speculation after its execution. Otherwise, we continue the execution.
 
 
@@ -2197,11 +2197,11 @@ utilization and cache hit rate for these benchmarks.
 
 
 Compared to~\cite{WuW19}, \SpecuSym may have false negatives because of two reasons. 
-First, bounded speculative modeling might miss certain speculation cases. Second, \SpecuSym 
-stops speculation once it confirms that a memory event must cause a cache miss, which 
-skips the execution of the following events. However, \SpecuSym won't have false 
-positives because of high-fidelity behavior modeling and fine-grained per-event 
-reasoning approaches. 
+First, the bounded speculative modeling might miss certain speculation cases. Second, 
+\SpecuSym stops speculation once it finds that an event on the speculative path 
+must cause a cache miss; thus, it skips executing following events on that path. 
+Nevertheless, \SpecuSym provides more precise results because of the high-fidelity 
+modeling and fine-grained per-event reasoning. 
 
 
 
@@ -2464,9 +2464,10 @@ boost the overall performance by saving 69.3\% execution time and detecting
 \subsection{Threat to Validity}
 \label{sec:threat_validity}
 
-\SpecuSym works on the LLVM IR. The program runtime behavior might differ due 
-to compiler backend optimization and address space layout randomization. More 
-low-level details can further facilitate \SpecuSym to improve the analysis.
+\SpecuSym works on the LLVM IR. The actual program behavior may differ due 
+to the compiler optimizations and hardware features, which could introduce
+false positives to \textsc{SpecuSym}. More low-level details can further 
+facilitate \SpecuSym to improve the analysis.
 
 
 \SpecuSym considers nested speculative execution because branch instruction 
@@ -2599,19 +2600,19 @@ speculative execution in depth.
 \label{sec:conclusion}
 
 
-In this paper, we have presented a symbolic execution based method 
-\SpecuSym for detecting cache timing leaks on running a sensitive data 
-related program under speculative execution. \SpecuSym systematically 
-explores the program state space and models speculative execution at 
-conditional branches. By cache state modeling as well as cache behavior 
-analysis, \SpecuSym leverages constraint-solving to search for divergent 
-and opposite cache behaviors at memory access events. Experimental results
-show that \SpecuSym successfully detects timing leaks under different cache 
-settings. The proposed optimizations help \SpecuSym save 69.3\% execution 
-time to detect 31.8\% more leaks. Comparison between \SpecuSym 
-and state-of-the-art abstract interpretation based method~\cite{WuW19} shows 
-that \SpecuSym not only successfully detects leaks in the reported programs 
-but also eliminates false positives for a more precise result.
+In this paper, we have presented a symbolic execution based method \SpecuSym 
+for detecting cache timing leaks on running a sensitive data related program 
+under speculative execution. \SpecuSym systematically explores the program 
+state space and models speculative execution at conditional branches. By 
+cache state modeling as well as cache behavior analysis, \SpecuSym leverages 
+constraint-solving to search for divergent and opposite cache behaviors at 
+memory access events. Experimental results show that \SpecuSym successfully 
+detects timing leaks under different cache settings. The proposed optimizations 
+help \SpecuSym save 69.3\% execution time to detect 31.8\% more leaks. 
+Comparison between \SpecuSym and state-of-the-art abstract interpretation 
+based method~\cite{WuW19} shows that \SpecuSym not only successfully detects 
+leaks in the reported programs but also eliminates false positives for a more 
+precise result.
 
 
 \section*{Acknowledgement}
